@@ -323,7 +323,7 @@ fi
 
 AM_CONDITIONAL(BUILD_PYTHON, test $ac_cv_enable_python = yes)
 
-# *** harp-matlab ***
+# *** harp-matlab ****
 
 # check whether we should build the MATLAB interface
 AC_ARG_ENABLE([matlab],
