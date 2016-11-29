@@ -29,6 +29,8 @@ AH_BOTTOM([
 #   include <sys/types.h>
 #  endif
 # endif
+
+
 #endif
 
 #ifndef HAVE_STRDUP
@@ -295,11 +297,15 @@ AC_REPLACE_FUNCS([strdup strcasecmp strncasecmp vsnprintf])
 
 # *** directories ***
 
+examplesdir="\${pkgdatadir}/examples"
+
 # Directories for optional components start empty and will be set later.
 harppythondir=
 matlabmexexecdir=
 codamatlabexamplesdir=
 harpmatlabexamplesdir=
+
+AC_SUBST(examplesdir)
 
 AC_SUBST(harppythondir)
 AC_SUBST(matlabmexexecdir)
@@ -339,7 +345,6 @@ Try setting the MATLAB environment variable to the root of your MATLAB
 installation if you have MATLAB installed.]))
   fi
   matlabmexexecdir="\${pkglibdir}/matlab"
-  codamatlabexamplesdir="\${examplesdir}/coda_matlab"
   harpmatlabexamplesdir="\${examplesdir}/harp_matlab"
 fi
 

@@ -35,6 +35,10 @@ noinst_PROGRAMS = findtypedef
 lib_LTLIBRARIES = libharp.la
 noinst_LTLIBRARIES = libnetcdf.la libudunits2.la
 
+if BUILD_MATLAB
+matlabmexexec_LTLIBRARIES = harp_matlab.la
+endif
+
 if BUILD_PYTHON
 harppython_PYTHON = \
 	$(srcdir)/python/__init__.py \
@@ -298,6 +302,34 @@ EXTRA_DIST += \
 	udunits2/tsearch.h \
 	udunits2/LICENSE \
 	udunits2/README
+
+# harp-matlab
+
+harp_MATLAB_SOURCE_FILES = \
+	harp_matlab/harp-matlab.h \
+	harp_matlab/harp-matlab-product.c \
+	harp_matlab/harp_matlab.c
+INDENTFILES += $(HARP_MATLAB_SOURCE_FILES)
+
+if BUILD_MATLAB
+harp_matlab_la_SOURCES = $(HARP_MATLAB_SOURCE_FILES)
+harp_matlab_la_CPPFLAGS = -DMATLAB_MEX_FILE $(AM_CPPFLAGS)
+harp_matlab_la_LDFLAGS = -module -shared -avoid-version -export-symbols-regex mexFunction -shrext @MEXEXT@
+harp_matlab_la_LIBADD = libharp.la
+harp_matlab_la_DEPENDENCIES = libharp.la
+endif
+
+# *** matlab data ***
+
+HARP_MATLAB_MFILES = \
+	harp_matlab/harp_import.m \
+	harp_matlab/harp_version.m
+
+EXTRA_DIST += $(HARP_MATLAB_MFILES)
+
+if BUILD_MATLAB
+matlabmexexec_DATA = $(HARP_MATLAB_MFILES)
+endif
 
 # *** product definition files ***
 
@@ -606,6 +638,29 @@ harpdoc_include:
 	else \
 	  mv $(srcdir)/harpdoc.mk2 $(srcdir)/harpdoc.mk ; \
 	fi
+
+# *** examples ***
+
+# matlab
+
+HARP_MATLAB_EXAMPLES = \
+	examples/harp_matlab/gom_lim_1p.m \
+	examples/harp_matlab/gome_l1.m \
+	examples/harp_matlab/gome_l2.m \
+	examples/harp_matlab/gome_l4.m \
+	examples/harp_matlab/gosat_fts_l1b.m \
+	examples/harp_matlab/gosat_fts_l2_ch4.m \
+	examples/harp_matlab/gosat_fts_l2_co2.m \
+	examples/harp_matlab/mip_nl__2p.m \
+	examples/harp_matlab/plot_geo_pixel.m \
+	examples/harp_matlab/sci_nl__2p.m \
+	examples/harp_matlab/sci_ol__2p.m
+
+EXTRA_DIST += $(HARP_MATLAB_EXAMPLES)
+
+if BUILD_MATLAB
+harpmatlabexamples_DATA = $(HARP_MATLAB_EXAMPLES)
+endif
 
 # *** indent ***
 
