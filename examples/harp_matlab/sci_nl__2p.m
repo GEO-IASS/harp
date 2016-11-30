@@ -1,8 +1,8 @@
 function sci_nl__2p(directory)
-% SCI_NL__2P Show SCIAMACHY Level-2 data with BEAT-II.
+% SCI_NL__2P Show SCIAMACHY Level-2 data with HARP.
 %
 %    SCI_NL__2P(directory) shows O3 vcd data from one or more
-%    'SCI_NL__2P' product files with BEAT-II.
+%    'SCI_NL__2P' product files with HARP.
 %
 
 netherlands = [  -5   15  50  60];
@@ -26,7 +26,7 @@ for i=1:num_files
 end
 filenames = strvcat(files.name);
 filter = sprintf('data=doas_0,convert_to_DU,latitude_min=%d,latitude_max=%d,longitude_min=%d,longitude_max=%d,scan_direction=forward mixed', frame(3), frame(4), frame(1), frame(2));
-data = beatl2_ingest(filenames,filter);
+data = harp_ingest(filenames,filter);
 
 figure;
 plot_geo_pixel(data, 'o3_column');

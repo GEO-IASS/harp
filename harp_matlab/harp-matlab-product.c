@@ -1,20 +1,20 @@
 /*
  * Copyright (C) 2002-2016 S[&]T, The Netherlands.
  *
- * This file is part of BEAT.
+ * This file is part of HARP.
  *
- * BEAT is free software; you can redistribute it and/or modify
+ * HARP is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * BEAT is distributed in the hope that it will be useful,
+ * HARP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BEAT; if not, write to the Free Software
+ * along with HARP; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
@@ -159,7 +159,7 @@ static int has_num_dims_extension(const char *field_name)
 //     mxSetField(mx_struct, 0, field_name, mx_data);
 // }
 
-mxArray *harp_matlab_get_record(harp_product *product)
+mxArray *harp_matlab_get_product(harp_product *product)
 {
     mxArray *mx_data = NULL;
     int num_fields;
@@ -224,224 +224,224 @@ static char *get_matlab_string_value(mxArray *mx_data)
 }
 
 
-// static void harp_matlab_add_matlab_record_field(harp_product **product, const char *field_name, mxArray *mx_field,
-//                                                   int req_num_dims)
-// {
-//     mxClassID class;
-//     harp_DataType field_data;
-//     char *string_data;
-//     long dim[harp_MAX_NUM_DIMS];
-//     int num_dims;
-//     long num_elements;
-//     int index;
-//     long i;
+static void harp_matlab_add_matlab_product_field(harp_product **product, const char *field_name, mxArray *mx_field,
+                                                  int req_num_dims)
+{
+    mxClassID class;
+    harp_DataType field_data;
+    char *string_data;
+    long dim[harp_MAX_NUM_DIMS];
+    int num_dims;
+    long num_elements;
+    int index;
+    long i;
 
-//     class = mxGetClassID(mx_field);
-//     num_dims = mxGetNumberOfDimensions(mx_field);
-//     if (num_dims > harp_MAX_NUM_DIMS)
-//     {
-//         mexErrMsgTxt("Number of dimensions for record field is too high.");
-//     }
-//     for (i = 0; i < num_dims; i++)
-//     {
-//         dim[i] = (long)mxGetDimensions(mx_field)[i];
-//     }
-//     num_elements = mxGetNumberOfElements(mx_field);
-//     if (num_elements == 0)
-//     {
-//         if (class == mxCHAR_CLASS)
-//         {
-//             index = harp_product_add_string_field(*product, field_name, "");
-//             if (index < 0)
-//             {
-//                 harp_matlab_harp_error();
-//             }
-//             return;
-//         }
-//         else
-//         {
-//             mexErrMsgTxt("Empty arrays are not allowed for a record field.");
-//         }
-//     }
+    class = mxGetClassID(mx_field);
+    num_dims = mxGetNumberOfDimensions(mx_field);
+    if (num_dims > harp_MAX_NUM_DIMS)
+    {
+        mexErrMsgTxt("Number of dimensions for record field is too high.");
+    }
+    for (i = 0; i < num_dims; i++)
+    {
+        dim[i] = (long)mxGetDimensions(mx_field)[i];
+    }
+    num_elements = mxGetNumberOfElements(mx_field);
+    if (num_elements == 0)
+    {
+        if (class == mxCHAR_CLASS)
+        {
+            index = harp_product_add_string_field(*product, field_name, "");
+            if (index < 0)
+            {
+                harp_matlab_harp_error();
+            }
+            return;
+        }
+        else
+        {
+            mexErrMsgTxt("Empty arrays are not allowed for a record field.");
+        }
+    }
 
-//     /* descrease number of dimensions to the lowest value possible */
-//     while (num_dims > 0 && dim[num_dims - 1] == 1)
-//     {
-//         num_dims--;
-//     }
+    /* descrease number of dimensions to the lowest value possible */
+    while (num_dims > 0 && dim[num_dims - 1] == 1)
+    {
+        num_dims--;
+    }
 
-//     /* check if we need to increase the number of dimensions to a requested number of dimensions */
-//     if (req_num_dims >= 0 && req_num_dims <= harp_MAX_NUM_DIMS)
-//     {
-//         if (req_num_dims < num_dims)
-//         {
-//             mexWarnMsgTxt("num_dims field ignored. Its value was lower than the actual number of dimensions.");
-//         }
-//         else
-//         {
-//             while (num_dims < req_num_dims)
-//             {
-//                 dim[num_dims++] = 1;
-//             }
-//         }
-//     }
+    /* check if we need to increase the number of dimensions to a requested number of dimensions */
+    if (req_num_dims >= 0 && req_num_dims <= harp_MAX_NUM_DIMS)
+    {
+        if (req_num_dims < num_dims)
+        {
+            mexWarnMsgTxt("num_dims field ignored. Its value was lower than the actual number of dimensions.");
+        }
+        else
+        {
+            while (num_dims < req_num_dims)
+            {
+                dim[num_dims++] = 1;
+            }
+        }
+    }
 
-//     mxAssert(num_dims >= 0, "Number of dimensions is invalid");
-//     mxAssert(num_dims <= harp_MAX_NUM_DIMS, "Number of dimensions is too high");
+    mxAssert(num_dims >= 0, "Number of dimensions is invalid");
+    mxAssert(num_dims <= harp_MAX_NUM_DIMS, "Number of dimensions is too high");
 
-//     switch (class)
-//     {
-//         case mxUINT8_CLASS:
-//             {
-//                 uint8_t *data;
+    switch (class)
+    {
+        case mxUINT8_CLASS:
+            {
+                uint8_t *data;
 
-//                 index = harp_product_add_field(*product, field_name, harp_uint8, num_dims, dim);
-//                 if (index < 0)
-//                 {
-//                     harp_matlab_harp_error();
-//                 }
-//                 if (harp_product_get_field_data(*product, index, &field_data) != 0)
-//                 {
-//                     harp_matlab_harp_error();
-//                 }
-//                 data = mxGetData(mx_field);
-//                 harp_fortran_array_to_c_array_uint8(data, field_data.uint8_data, num_dims, dim);
-//             }
-//             break;
-//         case mxINT32_CLASS:
-//             {
-//                 int32_t *data;
+                index = harp_product_add_field(*product, field_name, harp_uint8, num_dims, dim);
+                if (index < 0)
+                {
+                    harp_matlab_harp_error();
+                }
+                if (harp_product_get_field_data(*product, index, &field_data) != 0)
+                {
+                    harp_matlab_harp_error();
+                }
+                data = mxGetData(mx_field);
+                harp_fortran_array_to_c_array_uint8(data, field_data.uint8_data, num_dims, dim);
+            }
+            break;
+        case mxINT32_CLASS:
+            {
+                int32_t *data;
 
-//                 index = harp_product_add_field(*product, field_name, harp_int32, num_dims, dim);
-//                 if (index < 0)
-//                 {
-//                     harp_matlab_harp_error();
-//                 }
-//                 if (harp_product_get_field_data(*product, index, &field_data) != 0)
-//                 {
-//                     harp_matlab_harp_error();
-//                 }
-//                 data = mxGetData(mx_field);
-//                 harp_fortran_array_to_c_array_int32(data, field_data.int32_data, num_dims, dim);
-//             }
-//             break;
-//         case mxDOUBLE_CLASS:
-//             {
-//                 double *data;
+                index = harp_product_add_field(*product, field_name, harp_int32, num_dims, dim);
+                if (index < 0)
+                {
+                    harp_matlab_harp_error();
+                }
+                if (harp_product_get_field_data(*product, index, &field_data) != 0)
+                {
+                    harp_matlab_harp_error();
+                }
+                data = mxGetData(mx_field);
+                harp_fortran_array_to_c_array_int32(data, field_data.int32_data, num_dims, dim);
+            }
+            break;
+        case mxDOUBLE_CLASS:
+            {
+                double *data;
 
-//                 index = harp_product_add_field(*product, field_name, harp_double, num_dims, dim);
-//                 if (index < 0)
-//                 {
-//                     harp_matlab_harp_error();
-//                 }
-//                 if (harp_product_get_field_data(*product, index, &field_data) != 0)
-//                 {
-//                     harp_matlab_harp_error();
-//                 }
-//                 data = mxGetData(mx_field);
-//                 harp_fortran_array_to_c_array_double(data, field_data.double_data, num_dims, dim);
-//             }
-//             break;
-//         case mxCHAR_CLASS:
-//             if (mxGetNumberOfDimensions(mx_field) != 2 || mxGetDimensions(mx_field)[0] != 1)
-//             {
-//                 mexErrMsgTxt("Multi-dimensional string arrays are not allowed. Use a cell array of strings instead.");
-//             }
-//             string_data = get_matlab_string_value(mx_field);
-//             index = harp_product_add_string_field(*product, field_name, string_data);
-//             if (index < 0)
-//             {
-//                 harp_matlab_harp_error();
-//             }
-//             mxFree(string_data);
-//             break;
-//         case mxCELL_CLASS:
-//             {
-//                 mxArray *mx_cell;
+                index = harp_product_add_field(*product, field_name, harp_double, num_dims, dim);
+                if (index < 0)
+                {
+                    harp_matlab_harp_error();
+                }
+                if (harp_product_get_field_data(*product, index, &field_data) != 0)
+                {
+                    harp_matlab_harp_error();
+                }
+                data = mxGetData(mx_field);
+                harp_fortran_array_to_c_array_double(data, field_data.double_data, num_dims, dim);
+            }
+            break;
+        case mxCHAR_CLASS:
+            if (mxGetNumberOfDimensions(mx_field) != 2 || mxGetDimensions(mx_field)[0] != 1)
+            {
+                mexErrMsgTxt("Multi-dimensional string arrays are not allowed. Use a cell array of strings instead.");
+            }
+            string_data = get_matlab_string_value(mx_field);
+            index = harp_product_add_string_field(*product, field_name, string_data);
+            if (index < 0)
+            {
+                harp_matlab_harp_error();
+            }
+            mxFree(string_data);
+            break;
+        case mxCELL_CLASS:
+            {
+                mxArray *mx_cell;
 
-//                 for (i = 0; i < num_elements; i++)
-//                 {
-//                     mx_cell = mxGetCell(mx_field, i);
-//                     if (mxGetClassID(mx_cell) != mxCHAR_CLASS || mxGetNumberOfDimensions(mx_cell) != 2 ||
-//                         mxGetDimensions(mx_cell)[0] > 1)
-//                     {
-//                         mexErrMsgTxt("Cell arrays are only allowed for one dimensional string data.");
-//                     }
-//                 }
-//                 index = harp_product_add_field(*product, field_name, harp_string_ptr, num_dims, dim);
-//                 if (index < 0)
-//                 {
-//                     harp_matlab_harp_error();
-//                 }
-//                 if (harp_product_get_field_data(*product, index, &field_data) != 0)
-//                 {
-//                     harp_matlab_harp_error();
-//                 }
-//                 for (i = 0; i < num_elements; i++)
-//                 {
-//                     mx_cell = mxGetCell(mx_field, coda_c_index_to_fortran_index(num_dims, dim, i));
-//                     string_data = get_matlab_string_value(mx_cell);
-//                     if (harp_product_set_string_data_element(field_data, i, string_data) != 0)
-//                     {
-//                         mxFree(string_data);
-//                         harp_matlab_harp_error();
-//                     }
-//                     mxFree(string_data);
-//                 }
-//             }
-//             break;
-//         default:
-//             mexErrMsgTxt("Unsupported class for fielddata.");
-//             return;
-//     }
-// }
+                for (i = 0; i < num_elements; i++)
+                {
+                    mx_cell = mxGetCell(mx_field, i);
+                    if (mxGetClassID(mx_cell) != mxCHAR_CLASS || mxGetNumberOfDimensions(mx_cell) != 2 ||
+                        mxGetDimensions(mx_cell)[0] > 1)
+                    {
+                        mexErrMsgTxt("Cell arrays are only allowed for one dimensional string data.");
+                    }
+                }
+                index = harp_product_add_field(*product, field_name, harp_string_ptr, num_dims, dim);
+                if (index < 0)
+                {
+                    harp_matlab_harp_error();
+                }
+                if (harp_product_get_field_data(*product, index, &field_data) != 0)
+                {
+                    harp_matlab_harp_error();
+                }
+                for (i = 0; i < num_elements; i++)
+                {
+                    mx_cell = mxGetCell(mx_field, coda_c_index_to_fortran_index(num_dims, dim, i));
+                    string_data = get_matlab_string_value(mx_cell);
+                    if (harp_product_set_string_data_element(field_data, i, string_data) != 0)
+                    {
+                        mxFree(string_data);
+                        harp_matlab_harp_error();
+                    }
+                    mxFree(string_data);
+                }
+            }
+            break;
+        default:
+            mexErrMsgTxt("Unsupported class for fielddata.");
+            return;
+    }
+}
 
-// harp_product *harp_matlab_set_record(const mxArray *mx_struct)
-// {
-//     harp_product *product;
-//     int num_fields;
-//     int index;
+harp_product *harp_matlab_set_product(const mxArray *mx_struct)
+{
+    harp_product *product;
+    int num_fields;
+    int index;
 
-//     if (!mxIsStruct(mx_struct))
-//     {
-//         mexErrMsgTxt("Not a struct.");
-//     }
-//     num_fields = mxGetNumberOfFields(mx_struct);
+    if (!mxIsStruct(mx_struct))
+    {
+        mexErrMsgTxt("Not a struct.");
+    }
+    num_fields = mxGetNumberOfFields(mx_struct);
 
-//     record = harp_product_create();
-//     if (record == NULL)
-//     {
-//         harp_matlab_harp_error();
-//     }
+    product = harp_product_create();
+    if (product == NULL)
+    {
+        harp_matlab_harp_error();
+    }
 
-//     for (index = 0; index < num_fields; index++)
-//     {
-//         const char *field_name;
+    for (index = 0; index < num_fields; index++)
+    {
+        const char *field_name;
 
-//         field_name = mxGetFieldNameByNumber(mx_struct, index);
-//         if (!has_num_dims_extension(field_name))
-//         {
-//             char *dim_field_name;
-//             mxArray *mx_field;
-//             mxArray *mx_dim_field;
-//             int dim_field_index;
+        field_name = mxGetFieldNameByNumber(mx_struct, index);
+        if (!has_num_dims_extension(field_name))
+        {
+            char *dim_field_name;
+            mxArray *mx_field;
+            mxArray *mx_dim_field;
+            int dim_field_index;
 
-//             /* find and retrieve dimension field if it exists */
-//             mx_dim_field = NULL;
-//             dim_field_name = create_num_dims_field(field_name);
-//             dim_field_index = mxGetFieldNumber(mx_struct, dim_field_name);
-//             mxFree(dim_field_name);
-//             if (dim_field_index >= 0)
-//             {
-//                 mx_dim_field = mxGetFieldByNumber(mx_struct, 0, dim_field_index);
-//             }
+            /* find and retrieve dimension field if it exists */
+            mx_dim_field = NULL;
+            dim_field_name = create_num_dims_field(field_name);
+            dim_field_index = mxGetFieldNumber(mx_struct, dim_field_name);
+            mxFree(dim_field_name);
+            if (dim_field_index >= 0)
+            {
+                mx_dim_field = mxGetFieldByNumber(mx_struct, 0, dim_field_index);
+            }
 
-//             mx_field = mxGetFieldByNumber(mx_struct, 0, index);
+            mx_field = mxGetFieldByNumber(mx_struct, 0, index);
 
-//             harp_matlab_add_matlab_record_field(&record, mxGetFieldNameByNumber(mx_struct, index), mx_field,
-//                                                   get_mx_dim_field_value(mx_dim_field));
-//         }
-//     }
+            harp_matlab_add_matlab_product_field(&record, mxGetFieldNameByNumber(mx_struct, index), mx_field,
+                                                  get_mx_dim_field_value(mx_dim_field));
+        }
+    }
 
-//     return record;
-// }
+    return product;
+}

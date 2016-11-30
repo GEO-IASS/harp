@@ -1,5 +1,5 @@
 function gom_lim_1p(filename)
-% GOM_LIM_1P Show GOMOS Level-1 Background spectra with BEAT-II
+% GOM_LIM_1P Show GOMOS Level-1 Background spectra with HARP
 %
 %    GOM_LIM_1P(filename) shows the four types of background spectra in
 %    a GOMOS Limb product for the first measurement in the GOM_LIM_1P file.

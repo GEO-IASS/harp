@@ -26,7 +26,7 @@ for i=1:num_files
 end
 filenames = strvcat(files.name);
 filter = sprintf('latitude_min=%d,latitude_max=%d,longitude_min=%d,longitude_max=%d', frame(3), frame(4), frame(1), frame(2));
-data = beatl2_ingest(filenames,filter);
+data = harp_ingest(filenames,filter);
 
 figure;
 plot_geo_pixel(data, 'co2_column');

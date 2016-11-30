@@ -1,5 +1,5 @@
 function mip_nl__2p(directory)
-% MIP_NL__2P Show MIPAS level 2 data with BEAT-II.
+% MIP_NL__2P Show MIPAS level 2 data with HARP.
 %
 %    MIP_NL__2P(directory) shows O3 profiles for one or more
 %    MIPAS level 2 products.
@@ -18,7 +18,7 @@ for i=1:num_files
   files(i).name = strcat(directory,'/',files(i).name);
 end
 filenames = strvcat(files.name);
-data = beatl2_ingest(filenames);
+data = harp_ingest(filenames);
 
 scatter3(data.longitude, data.latitude, data.altitude, 4, log10(data.o3_vmr));
 xlabel('longitude [ deg ]');
