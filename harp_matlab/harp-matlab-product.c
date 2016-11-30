@@ -295,7 +295,7 @@ static void harp_matlab_add_matlab_product_field(harp_product **product, const c
             {
                 uint8_t *data;
 
-                index = harp_product_add_field(*product, field_name, harp_uint8, num_dims, dim);
+                index = harp_product_add_field(*product, field_name, harp_int8, num_dims, dim);
                 if (index < 0)
                 {
                     harp_matlab_harp_error();

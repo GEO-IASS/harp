@@ -141,6 +141,7 @@ libharp_la_SOURCES = \
 	libharp/harp-sea-surface.c \
 	libharp/harp-units.c \
 	libharp/harp-utils.c \
+	libharp/harp-utils.h \
 	libharp/harp-variable.c \
 	libharp/harp-vertical-profiles.h \
 	libharp/harp-vertical-profiles.c \
@@ -305,7 +306,7 @@ EXTRA_DIST += \
 
 # harp-matlab
 
-harp_MATLAB_SOURCE_FILES = \
+HARP_MATLAB_SOURCE_FILES = \
 	harp_matlab/harp-matlab.h \
 	harp_matlab/harp-matlab-product.c \
 	harp_matlab/harp_matlab.c
