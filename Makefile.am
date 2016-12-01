@@ -141,7 +141,6 @@ libharp_la_SOURCES = \
 	libharp/harp-sea-surface.c \
 	libharp/harp-units.c \
 	libharp/harp-utils.c \
-	libharp/harp-utils.h \
 	libharp/harp-variable.c \
 	libharp/harp-vertical-profiles.h \
 	libharp/harp-vertical-profiles.c \
