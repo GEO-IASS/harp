@@ -314,7 +314,7 @@ INDENTFILES += $(HARP_MATLAB_SOURCE_FILES)
 if BUILD_MATLAB
 harp_matlab_la_SOURCES = $(HARP_MATLAB_SOURCE_FILES)
 harp_matlab_la_CPPFLAGS = -DMATLAB_MEX_FILE $(AM_CPPFLAGS)
-harp_matlab_la_LDFLAGS = -module -shared -avoid-version -export-symbols-regex mexFunction -shrext @MEXEXT@
+harp_matlab_la_LDFLAGS = -module -Wno-uninitialized -shared -avoid-version -export-symbols-regex mexFunction -shrext @MEXEXT@
 harp_matlab_la_LIBADD = libharp.la
 harp_matlab_la_DEPENDENCIES = libharp.la
 endif

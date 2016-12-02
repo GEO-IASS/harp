@@ -350,11 +350,12 @@ static void harp_matlab_import(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
     harp_product *product;
-    char **filenames;
-    int num_files;
-    char *filter;
+    char *filename;
+    // int num_files;
+    char *script;
+    char *option;
     int buflen;
-    int i;
+    // int i;
 
     /* check parameters */
     if (nlhs > 1)
@@ -366,114 +367,99 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
         mexErrMsgTxt("Function takes either one or two arguments.");
     }
 
-    filenames = NULL;
-    num_files = 0;
+    filename = NULL;
+    // num_files = 0;
 
-    if (mxIsChar(prhs[0]))
+    if (!mxIsChar(prhs[0]))
     {
-        mxChar *str;
+        mexErrMsgTxt("First argument should be a string.");
+    }   
+        // mxChar *str;
 
-        if (mxGetNumberOfDimensions(prhs[0]) > 2)
-        {
-            mexErrMsgTxt("First argument should not be a char array with more then 2 dimensions.");
-        }
+        // if (mxGetNumberOfDimensions(prhs[0]) > 2)
+        // {
+        //     mexErrMsgTxt("First argument should not be a char array with more then 2 dimensions.");
+        // }
         buflen = mxGetN(prhs[0]) + 1;
-        num_files = mxGetM(prhs[0]);
-        if (num_files == 0 || buflen == 1)
-        {
-            mexErrMsgTxt("First argument contains an empty filelist.");
-        }
-        filenames = (char **)mxCalloc(num_files, sizeof(char *));
-        str = mxGetData(prhs[0]);
-        for (i = 0; i < num_files; i++)
-        {
-            int j;
+        filename = (char *)mxCalloc(buflen, sizeof(char));
+        // num_files = mxGetM(prhs[0]);
+        // if (num_files == 0 || buflen == 1)
+        // {
+        //     mexErrMsgTxt("First argument contains an empty filelist.");
+        // }
+        // filename = (char **)mxCalloc(num_files, sizeof(char *));
+        // str = mxGetData(prhs[0]);
+        // for (i = 0; i < num_files; i++)
+        // {
+        //     int j;
 
-            filenames[i] = (char *)mxCalloc(buflen, sizeof(char));
-            for (j = 0; j < buflen - 1; j++)
-            {
-                filenames[i][j] = (char)str[j * num_files + i];
-            }
-            j = buflen;
-            while (j > 0 && filenames[i][j - 1] == ' ')
-            {
-                j--;
-            }
-            filenames[i][j] = '\0';
-        }
-    }
-    else if (mxIsCell(prhs[0]))
-    {
-        num_files = mxGetNumberOfElements(prhs[0]);
-        if (num_files == 0)
-        {
-            mexErrMsgTxt("First argument contains an empty filelist.");
-        }
-        filenames = (char **)mxCalloc(num_files, sizeof(char *));
-        for (i = 0; i < num_files; i++)
-        {
-            mxArray *mx_filename;
+        //     filenames[i] = (char *)mxCalloc(buflen, sizeof(char));
+        //     for (j = 0; j < buflen - 1; j++)
+        //     {
+        //         filenames[i][j] = (char)str[j * num_files + i];
+        //     }
+        //     j = buflen;
+        //     while (j > 0 && filenames[i][j - 1] == ' ')
+        //     {
+        //         j--;
+        //     }
+        //     filenames[i][j] = '\0';
+        // }
+    // }
+    
 
-            mx_filename = mxGetCell(prhs[0], i);
-            if (!mxIsChar(mx_filename))
-            {
-                mexErrMsgTxt("Cell array elements of first argument should be strings.");
-            }
-            if (mxGetM(mx_filename) != 1)
-            {
-                mexErrMsgTxt("Cell array elements of first argument should be row vectors.");
-            }
-            buflen = mxGetN(mx_filename) + 1;
-            if (buflen == 1)
-            {
-                mexErrMsgTxt("Cell array elements of first argument should not be empty.");
-            }
-            filenames[i] = (char *)mxCalloc(buflen, sizeof(char));
-            if (mxGetString(mx_filename, filenames[i], buflen) != 0)
-            {
-                mexErrMsgTxt("Unable to copy filename string.");
-            }
-        }
-    }
-    else
+    script = NULL;
+    option = NULL;
+    // if (nrhs == 2)
+    // {
+    if (!mxIsChar(prhs[1]))
     {
-        mexErrMsgTxt("First argument should be either a string or an array of strings.");
-    }
-
-    filter = NULL;
-    if (nrhs == 2)
-    {
-        if (!mxIsChar(prhs[1]))
-        {
             mexErrMsgTxt("Second argument should be a string.");
-        }
-        if (mxGetM(prhs[1]) != 1)
-        {
-            mexErrMsgTxt("Second argument should be a row vector.");
-        }
+   }
+        // if (mxGetM(prhs[1]) != 1)
+        // {
+        //     mexErrMsgTxt("Second argument should be a row vector.");
+        // }
 
         buflen = mxGetN(prhs[1]) + 1;
-        filter = (char *)mxCalloc(buflen, sizeof(char));
-        if (mxGetString(prhs[1], filter, buflen) != 0)
+        script = (char *)mxCalloc(buflen, sizeof(char));
+        // option = (char *)mxCalloc(buflen, sizeof(char));
+        if (mxGetString(prhs[1], script, buflen) != 0)
         {
-            mexErrMsgTxt("Unable to copy filter string.");
+            mexErrMsgTxt("Unable to copy script string.");
         }
-    }
+    // }
+        if (!mxIsChar(prhs[2]))
+        {
+            mexErrMsgTxt("Third argument should be a string.");
+        }
+        buflen = mxGetN(prhs[2]) + 1;
+        option = (char *)mxCalloc(buflen, sizeof(char));
+        if (mxGetString(prhs[1], script, buflen) != 0)
+        {
+            mexErrMsgTxt("Unable to copy option string.");
+        }
 
-    if (harp_ingest(num_files, (const char **)filenames, filter, &product) != 0)
+
+    if (harp_ingest(filename, script, option, &product) != 0)
     {
         harp_matlab_harp_error();
     }
 
-    for (i = 0; i < num_files; i++)
+    // for (i = 0; i < num_files; i++)
+    // {
+    //     mxFree(filenames[i]);
+    // }
+    mxFree(filename);
+    if ( script!= NULL)
     {
-        mxFree(filenames[i]);
+        mxFree(script);
     }
-    mxFree(filenames);
-    if (filter != NULL)
+    if ( option!= NULL)
     {
-        mxFree(filter);
+        mxFree(option);
     }
+
 
     plhs[0] = harp_matlab_get_product(product);
     harp_product_delete(product);
@@ -556,19 +542,19 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 //     mxFree(dim_element_id);
 // }
 
-// static void harp_matlab_version(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-// {
-//     (void)prhs; /* prevents 'unused parameter' warning */
-// 
-//     /* check parameters */
-//     if (nlhs > 1)
-//     {
-//         mexErrMsgTxt("Too many output arguments.");
-//     }
-//     if (nrhs != 0)
-//     {
-//         mexErrMsgTxt("Function takes no arguments.");
-//     }
-// 
-//     plhs[0] = mxCreateString(VERSION);
-// }
+static void harp_matlab_version(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+{
+    (void)prhs; /* prevents 'unused parameter' warning */
+
+    /* check parameters */
+    if (nlhs > 1)
+    {
+        mexErrMsgTxt("Too many output arguments.");
+    }
+    if (nrhs != 0)
+    {
+        mexErrMsgTxt("Function takes no arguments.");
+    }
+
+    plhs[0] = mxCreateString(VERSION);
+}

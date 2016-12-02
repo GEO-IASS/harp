@@ -50,7 +50,7 @@ static int has_num_dims_extension(const char *variable_name)
     return 0;
 }
 
-static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_product *product, int index)
+static void harp_matlab_add_harp_product(mxArray *mx_struct, harp_product *product)
 {
     harp_data_type type;
     mxArray *mx_data = NULL;
@@ -72,10 +72,10 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     {
         harp_matlab_harp_error();
     }
-    if (harp_product_get_variable_id_by_name(product, variable_name, &index) != 0)
-    {
-        harp_matlab_harp_error();
-    }
+    // if (harp_product_get_variable_id_by_name(product, variable_name, &index) != 0)
+    // {
+    //     harp_matlab_harp_error();
+    // }
     
 
     mxAssert(num_dims >= 0, "Number of dimensions is invalid");
@@ -176,19 +176,22 @@ mxArray *harp_matlab_get_product(harp_product *product)
 {
     mxArray *mx_data = NULL;
     int num_variables;
-    int index;
+    // int index;
 
-    num_variables = harp_product_get_num_variables(product);
-    if (num_variables < 0)
+
+    num_variables = harp_product_is_empty(product);
+    if (num_variables == 1)
     {
         harp_matlab_harp_error();
     }
     mx_data = mxCreateStructMatrix(1, 1, 0, NULL);
 
-    for (index = 0; index < num_variables; index++)
-    {
-        harp_matlab_add_harp_product_variable(mx_data, product, index);
-    }
+    // for (index = 0; index < num_variables; index++)
+    // {
+    //     harp_matlab_add_harp_product_variable(mx_data, product, index);
+    // }
+
+    harp_matlab_add_harp_product(mx_data, product);
 
     return mx_data;
 }
@@ -237,7 +240,7 @@ static char *get_matlab_string_value(mxArray *mx_data)
 }
 
 
-static void harp_matlab_add_matlab_product_variable(harp_product **product, const char *variable_name, mxArray *mx_variable,
+static void harp_matlab_add_matlab_product_variable(harp_product **product, harp_variable *variable_name, mxArray *mx_variable,
                                                   int req_num_dims)
 {
     mxClassID class;
@@ -265,7 +268,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
     {
         if (class == mxCHAR_CLASS)
         {
-            index = harp_product_add_string_variable(*product, variable_name, "");
+            index = harp_product_add_variable(*product, variable_name);
             if (index < 0)
             {
                 harp_matlab_harp_error();
@@ -314,10 +317,10 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                 {
                     harp_matlab_harp_error();
                 }
-                if (harp_product_get_variable_data(*product, index, &variable_data) != 0)
-                {
-                    harp_matlab_harp_error();
-                }
+                // if (harp_product_get_variable_data(*product, index, &variable_data) != 0)
+                // {
+                //     harp_matlab_harp_error();
+                // }
                 data = mxGetData(mx_variable);
                 fill_int8(num_elements, data, fillvalue.int8_data);
             }
@@ -348,10 +351,10 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                 {
                     harp_matlab_harp_error();
                 }
-                if (harp_product_get_variable_data(*product, index, &variable_data) != 0)
-                {
-                    harp_matlab_harp_error();
-                }
+                // if (harp_product_get_variable_data(*product, index, &variable_data) != 0)
+                // {
+                //     harp_matlab_harp_error();
+                // }
                 data = mxGetData(mx_variable);
                 fill_double(num_elements, data, fillvalue.double_data);
             }
@@ -361,8 +364,8 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
             {
                 mexErrMsgTxt("Multi-dimensional string arrays are not allowed. Use a cell array of strings instead.");
             }
-            string_data = get_matlab_string_value(mx_variable);
-            index = harp_product_add_string_variable(*product, variable_name, string_data);
+            // string_data = get_matlab_string_value(mx_variable);
+            index = harp_product_add_variable(*product, variable_name);
             if (index < 0)
             {
                 harp_matlab_harp_error();
@@ -395,11 +398,11 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                 {
                     mx_cell = mxGetCell(mx_variable, coda_c_index_to_fortran_index(num_dims, dim, i));
                     string_data = get_matlab_string_value(mx_cell);
-                    if (harp_product_set_string_data_element(variable_data, i, string_data) != 0)
-                    {
-                        mxFree(string_data);
-                        harp_matlab_harp_error();
-                    }
+                    // if (harp_variable_set_string_data_element(variable_data, i, string_data) != 0)
+                    // {
+                    //     mxFree(string_data);
+                    //     harp_matlab_harp_error();
+                    // }
                     mxFree(string_data);
                 }
             }
@@ -452,7 +455,7 @@ harp_product *harp_matlab_set_product(const mxArray *mx_struct)
 
             mx_variable = mxGetFieldByNumber(mx_struct, 0, index);
 
-            harp_matlab_add_matlab_product_variable(&product, mxGetFieldNameByNumber(mx_struct, index), mx_variable,
+            harp_matlab_add_matlab_product_variable(product, mxGetFieldNameByNumber(mx_struct, index), mx_variable,
                                                   get_mx_dim_variable_value(mx_dim_variable));
         }
     }
