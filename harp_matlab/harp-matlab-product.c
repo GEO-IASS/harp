@@ -65,28 +65,39 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     long num_elements= (**variable).num_elements;
     long i;
     mxArray *mx_data = NULL;
+    
+    mexPrintf("---inside the add function-1-- \n");   
+    mexPrintf("num_dim is %d \n",  num_dims);  
+    mexPrintf("num_elements is %d \n",  num_elements);  
 
-    if (harp_product_has_variable(product, variable_name) != 0)
-    {
-        harp_matlab_harp_error();
-    }
+    // if (harp_product_has_variable(product, variable_name) != 0)
+    // {
+    //     mexPrintf("---inside the add function--1a- \n");  // it will be there.... so this will always be there
+    //     harp_matlab_harp_error();
+    // }
     if (harp_product_get_variable_by_name(product, variable_name, variable) != 0)
     {
+        mexPrintf("---inside the add function--1b- \n");  
         harp_matlab_harp_error();
     }
     if (harp_product_get_variable_id_by_name(product, variable_name, &index) != 0)
     {
+        mexPrintf("---inside the add function--1c- \n");  
         harp_matlab_harp_error();
     }
     
-
+    mexPrintf("---inside the add function--2- \n");  
     mxAssert(num_dims >= 0, "Number of dimensions is invalid");
     mxAssert(num_dims <= HARP_MAX_NUM_DIMS, "Number of dimensions is too high");
     mxAssert(num_elements > 0, "Number of elements in array is zero");
 
+    mexPrintf("---inside the add function--3- \n");  
+
     /* Add extra _num_dims element if the last dimensions equals 1 */
     if (num_dims > 0 && dim[num_dims - 1] == 1)
     {
+
+        mexPrintf("---inside the add function--4- \n");  
         char *dim_variable_name;
 
         dim_variable_name = create_num_dims_variable(variable_name);
@@ -98,12 +109,15 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     /* MATLAB does not allow creation of arrays with num_dims == 0 */
     if (num_dims == 0 && type != harp_type_string)
     {
+        mexPrintf("---inside the add function--5- \n");  
         dim[num_dims++] = 1;
     }
 
     for (i = 0; i < num_dims; i++)
     {
-        matlabdim[i] = (mwSize)dim[i];
+        mexPrintf("---inside the add function--6- %d \n", i);  
+        matlabdim[i] = (int) dim[i];
+        // matlabdim[i] = (mwSize)dim[i];
     }
 
     switch (type)
@@ -160,6 +174,7 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
             }
             else
             {
+                mexPrintf("---did i come to here?--- \n");   
                 mx_data = mxCreateCellArray(num_dims, matlabdim);
                 for (i = 0; i < num_elements; i++)
                 {
@@ -172,6 +187,7 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
 
     mxAddField(mx_struct, variable_name);
     mxSetField(mx_struct, 0, variable_name, mx_data);
+    mexPrintf("inside the add function -end-\n");   
 }
 
 mxArray *harp_matlab_get_product(harp_product *product)
@@ -180,6 +196,7 @@ mxArray *harp_matlab_get_product(harp_product *product)
     int num_variables;
     int index;
 
+    mexPrintf("inside harp matlab product.c \n");
 
     num_variables = product->num_variables;
     if (num_variables == 1)
@@ -190,8 +207,10 @@ mxArray *harp_matlab_get_product(harp_product *product)
 
     for (index = 0; index < num_variables; index++)
     {
+        mexPrintf("add harp product variable before\n");
         harp_matlab_add_harp_product_variable(mx_data, product, index);
     }
+     mexPrintf("add harp product variable after \n");
 
     return mx_data;
 }
