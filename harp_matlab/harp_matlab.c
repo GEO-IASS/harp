@@ -116,6 +116,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
     else if (strcmp(funcname, "INGEST") == 0)
     {
+        // harp_matlab_ingest(nlhs, plhs, nrhs - 1, &(prhs[1]));
         harp_matlab_ingest(nlhs, plhs, nrhs - 1, &(prhs[1]));
     }
     else if (strcmp(funcname, "EXPORT") == 0)
@@ -410,12 +411,11 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 
     script = NULL;
     option = NULL;
-    // if (nrhs == 2)
-    // {
-    if (!mxIsChar(prhs[1]))
-    {
+    if(nrhs == 3 ){
+        if (!mxIsChar(prhs[1]))
+       {
             mexErrMsgTxt("Second argument should be a string.");
-   }
+       }
         // if (mxGetM(prhs[1]) != 1)
         // {
         //     mexErrMsgTxt("Second argument should be a row vector.");
@@ -439,7 +439,13 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
         {
             mexErrMsgTxt("Unable to copy option string.");
         }
+     } 
 
+    // if (harp_ingest_test(filename, script, option, &product) != 0)
+    // {
+    //     harp_matlab_harp_error();
+    // }
+ 
 
     if (harp_ingest(filename, script, option, &product) != 0)
     {

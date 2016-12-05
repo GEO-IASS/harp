@@ -34,7 +34,7 @@ custom      = [  28   67  69  79];
 % axis(frame);
 % caxis([150 500]);
 
-data = harp_ingest(filename);
+data = beatl2_ingest(filename);
 display(data)
 
 
