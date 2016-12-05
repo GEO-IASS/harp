@@ -1,7 +1,7 @@
 function varargout = harp_ingest(varargin)
 % HARP_INGEST  Ingest data from a product file.
 %
-%   RECORD = BEATL2_INGEST(FILEPATH) reads data from the product file(s)
+%   PRODUCT = HARP_INGEST(FILEPATH) reads data from the product file(s)
 %   specified by filepath.
 %
 %   RECORD = BEATL2_INGEST(FILEPATH, FILTER) reads data matching the

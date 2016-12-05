@@ -1,8 +1,8 @@
-function varargout = beatl2_version(varargin)
-% BEATL2_VERSION  Get version number of BEAT.
+function varargout = harp_version(varargin)
+% HARP_VERSION  Get version number of HARP.
 %
-%   VERSION = BEATL2_VERSION returns the version number of BEAT.
+%   VERSION = HARP_VERSION returns the version number of HARP.
 %
 
-% Call BEATL2_MATLAB.MEX to do the actual work.
-[varargout{1:max(1,nargout)}] = beatl2_matlab('VERSION',varargin{:});
+% Call HARP_MATLAB.MEX to do the actual work.
+[varargout{1:max(1,nargout)}] = harp_matlab('VERSION',varargin{:});

@@ -242,8 +242,6 @@ static char *get_matlab_string_value(mxArray *mx_data)
 
 static void harp_matlab_add_matlab_product_variable(harp_product *product, const char *variable_name, mxArray *mx_variable,
                                                   int req_num_dims)
-// static void harp_matlab_add_matlab_product_variable(harp_product *product, mxArray *mx_variable,
-//                                                   int req_num_dims)
 {
     mxClassID class;
     harp_variable **variable = product->variable;

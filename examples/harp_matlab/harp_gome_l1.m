@@ -1,4 +1,4 @@
-function sci_ol__2p(filename)
+function harp_gome_l1(filename)
 % SCI_OL__2P Show SCIAMACHY Level-2 Offline data with BEAT-II.
 %
 %    SCI_OL__2P(directory) shows O3 vcd data from one or more
@@ -34,7 +34,7 @@ custom      = [  28   67  69  79];
 % axis(frame);
 % caxis([150 500]);
 
-data = beatl2_ingest(filename);
+data = harp_ingest(filename);
 display(data)
 
 
