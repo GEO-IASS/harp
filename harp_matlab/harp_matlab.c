@@ -132,53 +132,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
 }
 
-// static void harp_matlab_append(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-// {
-//     harp_product *product_1;
-//     harp_product *product_2;
-
-//     /* check parameters */
-//     if (nlhs > 1)
-//     {
-//         mexErrMsgTxt("Too many output arguments.");
-//     }
-//     if (nrhs != 2)
-//     {
-//         mexErrMsgTxt("Function takes exactly two arguments.");
-//     }
-
-//     product_1 = harp_matlab_set_product(prhs[0]);
-//     product_2 = harp_matlab_set_product(prhs[1]);
-
-//     if (harp_product_add_variable(product_1, product_2) != 0)
-//     {
-//         harp_product_delete(product_2);
-//         harp_product_delete(product_1);
-//         harp_matlab_harp_error();
-//     }
-//     harp_product_delete(product_2);
-
-//     plhs[0] = harp_matlab_get_product(product_1);
-//     harp_product_delete(product_1);
-// }
-
-// static void harp_matlab_clearall(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-// {
-//     (void)plhs; /* prevents 'unused parameter' warning */
-//     (void)prhs; /* prevents 'unused parameter' warning */
-
-//     /* check parameters */
-//     if (nlhs > 0)
-//     {
-//         mexErrMsgTxt("Too many output arguments.");
-//     }
-//     if (nrhs != 0)
-//     {
-//         mexErrMsgTxt("Function takes no arguments.");
-//     }
-
-//     harp_matlab_cleanup();
-// }
 
 static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
@@ -242,49 +195,6 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
     mxFree(filename);
 }
 
-// static void harp_matlab_find_colocated_data(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-// {
-//     harp_product *product_1;
-//     harp_product *product_2;
-
-//     /* check parameters */
-//     if (nlhs != 2)
-//     {
-//         mexErrMsgTxt("Functions needs exactly two output paramters.");
-//     }
-//     if (nrhs != 5)
-//     {
-//         mexErrMsgTxt("Function takes exactly five arguments.");
-//     }
-
-//     if (!mxIsDouble(prhs[2]))
-//     {
-//         mexErrMsgTxt("Third argument should be a double.");
-//     }
-//     if (!mxIsDouble(prhs[3]))
-//     {
-//         mexErrMsgTxt("Fourth argument should be a double.");
-//     }
-//     if (!mxIsDouble(prhs[4]))
-//     {
-//         mexErrMsgTxt("Fifth argument should be a double.");
-//     }
-//     product_1 = harp_matlab_set_product(prhs[0]);
-//     product_2 = harp_matlab_set_product(prhs[1]);
-
-//     if (harp_find_colocated_data(product_1, product_2, mxGetScalar(prhs[2]), mxGetScalar(prhs[3]), mxGetScalar(prhs[4]))
-//         != 0)
-//     {
-//         harp_product_delete(product_1);
-//         harp_product_delete(product_2);
-//         harp_matlab_harp_error();
-//     }
-
-//     plhs[0] = harp_matlab_get_product(product_1);
-//     plhs[1] = harp_matlab_get_product(product_2);
-//     harp_product_delete(product_1);
-//     harp_product_delete(product_2);
-// }
 
 static void harp_matlab_import(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
@@ -519,77 +429,6 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
     }
 }
 
-// static void harp_matlab_slice(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-// {
-//     harp_product *product;
-//     char *dimension;
-//     long num_dim_elements;
-//     long *dim_element_id;
-//     double *double_data;
-//     long i;
-
-//     /* check parameters */
-//     if (nlhs > 1)
-//     {
-//         mexErrMsgTxt("Too many output arguments.");
-//     }
-//     if (nrhs != 2 && nrhs != 3)
-//     {
-//         mexErrMsgTxt("Function takes either two or three arguments.");
-//     }
-
-//     dimension = NULL;
-//     if (nrhs == 3)
-//     {
-//         int buflen;
-
-//         if (!mxIsChar(prhs[1]))
-//         {
-//             mexErrMsgTxt("Second argument should be a string.");
-//         }
-//         if (mxGetM(prhs[1]) != 1)
-//         {
-//             mexErrMsgTxt("Second argument should be a row vector.");
-//         }
-//         buflen = mxGetN(prhs[1]) + 1;
-//         dimension = (char *)mxCalloc(buflen, sizeof(char));
-//         if (mxGetString(prhs[1], dimension, buflen) != 0)
-//         {
-//             mexErrMsgTxt("Unable to copy export dimension string.");
-//         }
-//     }
-
-//     if (!mxIsDouble(prhs[nrhs - 1]))
-//     {
-//         if (nrhs == 3)
-//         {
-//             mexErrMsgTxt("Third argument should be a numerical array with doubles.");
-//         }
-//         else
-//         {
-//             mexErrMsgTxt("Second argument should be a numerical array with doubles.");
-//         }
-//     }
-//     num_dim_elements = mxGetNumberOfElements(prhs[nrhs - 1]);
-//     dim_element_id = (long *)mxCalloc(num_dim_elements, sizeof(long));
-//     double_data = (double *)mxGetData(prhs[nrhs - 1]);
-//     for (i = 0; i < num_dim_elements; i++)
-//     {
-//         dim_element_id[i] = ((long)double_data[i]) - 1; /* go from 1 based to 0 based */
-//     }
-//     product = harp_matlab_set_product(prhs[0]);
-
-//     if (harp_slice(product, dimension, num_dim_elements, dim_element_id) != 0)
-//     {
-//         harp_product_delete(product);
-//         harp_matlab_harp_error();
-//     }
-
-//     plhs[0] = harp_matlab_get_product(product);
-//     harp_product_delete(product);
-
-//     mxFree(dim_element_id);
-// }
 
 static void harp_matlab_version(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
