@@ -17,7 +17,7 @@
 #include "harp.h"
 
 /* harp-matlab-record functions */
-mxArray *harp_matlab_get_product(harp_product *product);
+mxArray *harp_matlab_get_product(harp_product **product);
 harp_product *harp_matlab_set_product(const mxArray *array);
 
 /* harp-matlab functions */

@@ -50,9 +50,9 @@ static int has_num_dims_extension(const char *variable_name)
     return 0;
 }
 
-static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_product *product, int index)
+static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_product **product, int index)
 {
-    harp_variable **variable = product->variable;
+    harp_variable **variable = (**product).variable;
     harp_data_type type = (**variable).data_type;
     const char *variable_name = (**variable).name;
     
@@ -68,19 +68,20 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     
     mexPrintf("---inside the add function-1-- \n");   
     mexPrintf("num_dim is %d \n",  num_dims);  
-    mexPrintf("num_elements is %d \n",  num_elements);  
+    mexPrintf("num_elements is %d \n",  num_elements); 
+    mexPrintf("name is %s \n", variable_name); 
 
     // if (harp_product_has_variable(product, variable_name) != 0)
     // {
     //     mexPrintf("---inside the add function--1a- \n");  // it will be there.... so this will always be there
     //     harp_matlab_harp_error();
     // }
-    if (harp_product_get_variable_by_name(product, variable_name, variable) != 0)
+    if (harp_product_get_variable_by_name(*product, variable_name, variable) != 0)
     {
         mexPrintf("---inside the add function--1b- \n");  
         harp_matlab_harp_error();
     }
-    if (harp_product_get_variable_id_by_name(product, variable_name, &index) != 0)
+    if (harp_product_get_variable_id_by_name(*product, variable_name, &index) != 0)
     {
         mexPrintf("---inside the add function--1c- \n");  
         harp_matlab_harp_error();
@@ -190,7 +191,7 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     mexPrintf("inside the add function -end-\n");   
 }
 
-mxArray *harp_matlab_get_product(harp_product *product)
+mxArray *harp_matlab_get_product(harp_product **product)
 {
     mxArray *mx_data = NULL;
     int num_variables;
@@ -198,7 +199,7 @@ mxArray *harp_matlab_get_product(harp_product *product)
 
     mexPrintf("inside harp matlab product.c \n");
 
-    num_variables = product->num_variables;
+    num_variables = (**product).num_variables;
     if (num_variables == 1)
     {
         harp_matlab_harp_error();
@@ -447,8 +448,7 @@ harp_product *harp_matlab_set_product(const mxArray *mx_struct)
     }
     num_variables = mxGetNumberOfFields(mx_struct);
 
-    harp_product_new(&product);
-    if ((&product) == NULL)
+    if (harp_product_new(&product)!= 0)
     {
         harp_matlab_harp_error();
     }

@@ -250,7 +250,7 @@ static void harp_matlab_import(int nlhs, mxArray *plhs[], int nrhs, const mxArra
         harp_matlab_harp_error();
     }
 
-    plhs[0] = harp_matlab_get_product(product);
+    plhs[0] = harp_matlab_get_product(&product);
     harp_product_delete(product);
 
     mxFree(format);
@@ -420,7 +420,7 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
     mexPrintf("Print out here -3- \n");
         
 
-    plhs[0] = harp_matlab_get_product(product);
+    plhs[0] = harp_matlab_get_product(&product);
     harp_product_delete(product);
 
     if (plhs[0] == NULL)
