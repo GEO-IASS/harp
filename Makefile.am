@@ -16,10 +16,10 @@ EXTRA_DIST =
 INDENTFILES =
 MAINTAINERCLEANFILES =
 
-INSTALL_DATA_HOOK_TARGETS =
-UNINSTALL_HOOK_TARGETS =
-install-data-hook: $(INSTALL_DATA_HOOK_TARGETS)
-uninstall-hook: $(UNINSTALL_HOOK_TARGETS)
+#INSTALL_DATA_HOOK_TARGETS =
+#UNINSTALL_HOOK_TARGETS =
+#install-data-hook: $(INSTALL_DATA_HOOK_TARGETS)
+#uninstall-hook: $(UNINSTALL_HOOK_TARGETS)
 
 .PHONY: doc
 
@@ -575,6 +575,7 @@ RSTFILES = \
 	doc/libharp_product.rst \
 	doc/libharp_product_metadata.rst \
 	doc/libharp_variable.rst \
+	doc/html/codadef/codadef.css \
 	doc/operations.rst \
 	doc/python.rst \
 	doc/tools.rst
@@ -640,6 +641,16 @@ harpdoc_include:
 	else \
 	  mv $(srcdir)/harpdoc.mk2 $(srcdir)/harpdoc.mk ; \
 	fi
+
+# INSTALL_DATA_HOOK_TARGETS += install_codadef_doc
+# UNINSTALL_HOOK_TARGETS += uninstall_codadef_doc
+# install_codadef_doc:
+#	@echo "installing product format definition documentation"
+#	@$(MKDIR_P) $(DESTDIR)$(pkgdatadir)/doc/html/codadef
+#	@CODA_DEFINITION=$(DESTDIR)$(pkgdatadir)/definitions $(CODADD) doc $(DESTDIR)$(pkgdatadir)/doc/html/codadef
+# uninstall_codadef_doc:
+#	@echo "removing product format definition documentation"
+#	@rm -rf $(DESTDIR)$(pkgdatadir)/doc/html/codadef	
 
 # *** examples ***
 

@@ -113,18 +113,12 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     //     dim[num_dims++] = 1;
     // }
 
-    if(num_dims ==1){
-         matlabdim[0] = (mwSize) num_elements; 
-    }
-    if(num_dims ==2){
-        // for (i = 0; i < num_dims; i++)
-        // {
-            // mexPrintf("---dims is--- %d \n", i);  
-            // matlabdim[i] = (mwSize)dim[i];
-            matlabdim[0] = (mwSize) num_elements/num_dims; 
-            matlabdim[1] = num_dims;
-        // }
-        // mexPrintf("---matlab--- %d \n", sizeof(matlabdim[0]));  
+    dim[0] = num_elements/num_dims;
+    dim[1] = num_dims;
+
+    for (i = 0; i < num_dims; i++)
+    {
+            matlabdim[i] = (mwSize)dim[i];
     }
 
     switch (type)
