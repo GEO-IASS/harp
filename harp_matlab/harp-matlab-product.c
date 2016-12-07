@@ -129,7 +129,13 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
    
                 mx_data = mxCreateNumericArray(num_dims, matlabdim, mxINT32_CLASS, mxREAL);
                 data = mxGetData(mx_data);
+<<<<<<< HEAD
                 fill_int8(num_elements, data, (&fillvalue)->int8_data);
+=======
+                for(int j=0; j< num_elements;j++){
+                    data[j] = variable_data.int8_data[j];
+                }
+>>>>>>> 4ad2055... now values are also correct
             }
             break;
         case harp_type_int16:
@@ -138,7 +144,13 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
    
                 mx_data = mxCreateNumericArray(num_dims, matlabdim, mxINT32_CLASS, mxREAL);
                 data = mxGetData(mx_data);
+<<<<<<< HEAD
                 fill_int16(num_elements, data, (&fillvalue)->int16_data);
+=======
+                for(int j=0; j < num_elements;j++){
+                    data[j] = variable_data.int16_data[j];
+                }   
+>>>>>>> 4ad2055... now values are also correct
             }
             break;    
         case harp_type_int32:
@@ -146,17 +158,35 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
                 int32_t *data;    
               
                 mx_data = mxCreateNumericArray(num_dims, matlabdim, mxINT32_CLASS, mxREAL);
+<<<<<<< HEAD
                 data = mxGetData(mx_data);
                 fill_int32(num_elements, data, (&fillvalue)->int32_data );
+=======
+                data = mxGetData(mx_data); 
+                for(int j=0; j<num_elements;j++){
+                    data[j] = variable_data.int32_data[j];
+                }
+
+
+>>>>>>> 4ad2055... now values are also correct
             }
             break;
         case harp_type_double:
             {
                 double *data;
+<<<<<<< HEAD
 
                 mx_data = mxCreateNumericArray(num_dims, matlabdim, mxDOUBLE_CLASS, mxREAL);
                 data = mxGetData(mx_data);
                 fill_double(num_elements, data, (&fillvalue)->double_data);
+=======
+             
+                mx_data = mxCreateNumericArray(num_dims, matlabdim, mxDOUBLE_CLASS, mxREAL);
+                data = mxGetData(mx_data);
+                for(int j=0; j<num_elements;j++){
+                    data[j] = variable_data.double_data[j];
+                }          
+>>>>>>> 4ad2055... now values are also correct
             }
             break;
         case harp_type_float:
@@ -165,7 +195,13 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
 
                 mx_data = mxCreateNumericArray(num_dims, matlabdim, mxDOUBLE_CLASS, mxREAL);
                 data = mxGetData(mx_data);
+<<<<<<< HEAD
                 fill_float(num_elements, data, (&fillvalue)->float_data);
+=======
+                for(int j=0; j<num_elements;j++){
+                    data[j] = variable_data.float_data[j];
+                }
+>>>>>>> 4ad2055... now values are also correct
             }
             break; 
         case harp_type_string:
@@ -188,6 +224,10 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
 
     mxAddField(mx_struct, variable_name);
     mxSetField(mx_struct, 0, variable_name, mx_data);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4ad2055... now values are also correct
     mexPrintf("inside the add function -end-\n");   
 }
 
