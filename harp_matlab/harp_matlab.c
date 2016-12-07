@@ -18,13 +18,9 @@ static int harp_matlab_initialised = 0;
 
 static void harp_matlab_cleanup();
 
-// static void harp_matlab_append(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
-// static void harp_matlab_clearall(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
 static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
-// static void harp_matlab_find_colocated_data(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
 static void harp_matlab_import(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
 static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
-// static void harp_matlab_slice(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
 static void harp_matlab_version(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
 
 void harp_matlab_harp_error(void)
@@ -297,11 +293,8 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
             mexErrMsgTxt("First argument contains an empty filelist.");
         }
         filenames = (char **)mxCalloc(num_files, sizeof(char *));
-        // name = (char *)mxCalloc(buflen,sizeof(char));
         str = mxGetData(prhs[0]);
-        // name = str;
-        mexPrintf("Print out here -1- \n");
-
+      
         for (i = 0; i < num_files; i++)
         {
             int j;
@@ -318,8 +311,7 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
             }
             filenames[i][j] = '\0';
         }
-        mexPrintf("Print out here -1- end- \n");
-    
+       
     }
     else if (mxIsCell(prhs[0]))
     {
@@ -395,8 +387,7 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 
     for (i = 0; i < num_files; i++)
     {
-        mexPrintf("Print out here -2- \n");
-        
+           
         if (harp_ingest(filenames[i], script, option, &product) != 0)
          {
            harp_matlab_harp_error();
@@ -416,9 +407,7 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
     {
         mxFree(option);
     }
-
-    mexPrintf("Print out here -3- \n");
-        
+       
 
     plhs[0] = harp_matlab_get_product(&product);
     harp_product_delete(product);

@@ -59,6 +59,7 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     harp_array variable_data = (*variable).data;
    
     long dim[HARP_MAX_NUM_DIMS]; // now set the string would not be correct...
+
     mwSize matlabdim[HARP_MAX_NUM_DIMS];
     int num_dims = (*variable).num_dimensions;
     long num_elements= (*variable).num_elements;
@@ -93,28 +94,34 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
 
     mexPrintf("---inside the add function--3- \n");  
 
+    // dim[0] = num_elements/num_dims;
+    // dim[1] = num_dims;
+
+    for (i = 0; i < HARP_MAX_NUM_DIMS; i++){
+         dim[i] = (*variable).dimension[i];
+    }
+
     /* Add extra _num_dims element if the last dimensions equals 1 */
-    // if (num_dims > 0 && dim[num_dims - 1] == 1)
-    // {
+    if (num_dims > 0 && dim[num_dims - 1] == 1)
+    {
 
-    //     mexPrintf("---inside the add function--4- \n");  
-    //     char *dim_variable_name;
+        mexPrintf("---inside the add function--4- \n");  
+        char *dim_variable_name;
 
-    //     dim_variable_name = create_num_dims_variable(variable_name);
-    //     mxAddField(mx_struct, dim_variable_name);
-    //     mxSetField(mx_struct, 0, dim_variable_name, mxCreateDoubleScalar((double)num_dims));
-    //     mxFree(dim_variable_name);
-    // }
+        dim_variable_name = create_num_dims_variable(variable_name);
+        mxAddField(mx_struct, dim_variable_name);
+        mxSetField(mx_struct, 0, dim_variable_name, mxCreateDoubleScalar((double)num_dims));
+        mxFree(dim_variable_name);
+    }
 
     /* MATLAB does not allow creation of arrays with num_dims == 0 */
-    // if (num_dims == 0 && type != harp_type_string)
-    // {
-    //     mexPrintf("---inside the add function--5- \n");  
-    //     dim[num_dims++] = 1;
-    // }
+    if (num_dims == 0 && type != harp_type_string)
+    {
+        mexPrintf("---inside the add function--5- \n");  
+        dim[num_dims++] = 1;
+    }
 
-    dim[0] = num_elements/num_dims;
-    dim[1] = num_dims;
+    
 
     for (i = 0; i < num_dims; i++)
     {
