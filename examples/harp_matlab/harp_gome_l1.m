@@ -5,10 +5,10 @@ function harp_gome_l1(filename)
 %    'SCI_OL__2P' product files with BEAT-II.
 %
 
-netherlands = [  -5   15  50  60];
-europe      = [ -20   40  40  70];
-world       = [-180  180 -90  90];
-custom      = [  28   67  69  79];
+% netherlands = [  -5   15  50  60];
+% europe      = [ -20   40  40  70];
+% world       = [-180  180 -90  90];
+% custom      = [  28   67  69  79];
 
 % frame = world;
 % 
@@ -35,9 +35,10 @@ custom      = [  28   67  69  79];
 % caxis([150 500]);
 
 data = harp_ingest(filename);
-%longitude = data.longitude;
+longitude = data.longitude;
 %fraction = data.cloud_fraction;
-display(data);
+%display(data);
+display(longitude);
 %display(fraction);
 
 

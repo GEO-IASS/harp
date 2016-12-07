@@ -52,16 +52,16 @@ static int has_num_dims_extension(const char *variable_name)
 
 static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_product **product, int index)
 {
-    harp_variable **variable = (**product).variable;
-    harp_data_type type = (**variable).data_type;
-    const char *variable_name = (**variable).name;
+    harp_variable *variable = (**product).variable[index];
+    harp_data_type type = (*variable).data_type;
+    const char *variable_name = (*variable).name;
     
-    harp_array variable_data = (**variable).data;
+    harp_array variable_data = (*variable).data;
    
     long dim[HARP_MAX_NUM_DIMS];
     mwSize matlabdim[HARP_MAX_NUM_DIMS];
-    int num_dims = (**variable).num_dimensions;
-    long num_elements= (**variable).num_elements;
+    int num_dims = (*variable).num_dimensions;
+    long num_elements= (*variable).num_elements;
     long i;
     mxArray *mx_data = NULL;
     
@@ -75,7 +75,7 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     //     mexPrintf("---inside the add function--1a- \n");  // it will be there.... so this will always be there
     //     harp_matlab_harp_error();
     // }
-    if (harp_product_get_variable_by_name(*product, variable_name, variable) != 0)
+    if (harp_product_get_variable_by_name(*product, variable_name, &variable) != 0)
     {
         mexPrintf("---inside the add function--1b- \n");  
         harp_matlab_harp_error();
