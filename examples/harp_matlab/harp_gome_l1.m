@@ -35,14 +35,11 @@ custom      = [  28   67  69  79];
 % caxis([150 500]);
 
 data = harp_ingest(filename);
-<<<<<<< HEAD
-display(data)
-=======
-longitude = data.longitude;
-fraction = data.cloud_fraction;
-% display(data);
-display(fraction);
->>>>>>> 4ad2055... now values are also correct
+%longitude = data.longitude;
+%fraction = data.cloud_fraction;
+display(data);
+%display(fraction);
+
 
 
 
