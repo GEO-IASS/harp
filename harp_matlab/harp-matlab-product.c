@@ -58,7 +58,7 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     
     harp_array variable_data = (*variable).data;
    
-    long dim[HARP_MAX_NUM_DIMS];
+    long dim[HARP_MAX_NUM_DIMS]; // now set the string would not be correct...
     mwSize matlabdim[HARP_MAX_NUM_DIMS];
     int num_dims = (*variable).num_dimensions;
     long num_elements= (*variable).num_elements;
@@ -94,31 +94,37 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     mexPrintf("---inside the add function--3- \n");  
 
     /* Add extra _num_dims element if the last dimensions equals 1 */
-    if (num_dims > 0 && dim[num_dims - 1] == 1)
-    {
+    // if (num_dims > 0 && dim[num_dims - 1] == 1)
+    // {
 
-        mexPrintf("---inside the add function--4- \n");  
-        char *dim_variable_name;
+    //     mexPrintf("---inside the add function--4- \n");  
+    //     char *dim_variable_name;
 
-        dim_variable_name = create_num_dims_variable(variable_name);
-        mxAddField(mx_struct, dim_variable_name);
-        mxSetField(mx_struct, 0, dim_variable_name, mxCreateDoubleScalar((double)num_dims));
-        mxFree(dim_variable_name);
-    }
+    //     dim_variable_name = create_num_dims_variable(variable_name);
+    //     mxAddField(mx_struct, dim_variable_name);
+    //     mxSetField(mx_struct, 0, dim_variable_name, mxCreateDoubleScalar((double)num_dims));
+    //     mxFree(dim_variable_name);
+    // }
 
     /* MATLAB does not allow creation of arrays with num_dims == 0 */
-    if (num_dims == 0 && type != harp_type_string)
-    {
-        mexPrintf("---inside the add function--5- \n");  
-        dim[num_dims++] = 1;
-    }
+    // if (num_dims == 0 && type != harp_type_string)
+    // {
+    //     mexPrintf("---inside the add function--5- \n");  
+    //     dim[num_dims++] = 1;
+    // }
 
-    for (i = 0; i < num_dims; i++)
-    {
-        mexPrintf("---inside the add function--6- %d \n", i);  
-        // matlabdim[i] = (int) dim[i];
-        // matlabdim[i] = (mwSize)dim[i];
-        matlabdim[i] = (mwSize) num_elements; 
+    if(num_dims ==1){
+         matlabdim[0] = (mwSize) num_elements; 
+    }
+    if(num_dims ==2){
+        // for (i = 0; i < num_dims; i++)
+        // {
+            // mexPrintf("---dims is--- %d \n", i);  
+            // matlabdim[i] = (mwSize)dim[i];
+            matlabdim[0] = (mwSize) num_elements/num_dims; 
+            matlabdim[1] = num_dims;
+        // }
+        // mexPrintf("---matlab--- %d \n", sizeof(matlabdim[0]));  
     }
 
     switch (type)
@@ -129,7 +135,6 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
    
                 mx_data = mxCreateNumericArray(num_dims, matlabdim, mxINT8_CLASS, mxREAL);
                 data = mxGetData(mx_data);
-
                 for(int j=0; j< num_elements;j++){
                     data[j] = variable_data.int8_data[j];
                 }
@@ -142,7 +147,6 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
    
                 mx_data = mxCreateNumericArray(num_dims, matlabdim, mxINT16_CLASS, mxREAL);
                 data = mxGetData(mx_data);
-
                 for(int j=0; j < num_elements;j++){
                     data[j] = variable_data.int16_data[j];
                 }   
@@ -164,13 +168,22 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
             {
                 double *data;
 
-                mx_data = mxCreateNumericArray(num_dims, matlabdim, mxDOUBLE_CLASS, mxREAL);
-                data = mxGetData(mx_data);
-
-                data = mxGetData(mx_data);
-                for(int j=0; j<num_elements;j++){
-                    data[j] = variable_data.double_data[j];
-                }          
+                if(num_dims==1){
+                    mx_data = mxCreateNumericArray(num_dims, matlabdim, mxDOUBLE_CLASS, mxREAL);
+                    mexPrintf("original data is: %d \n", variable_data.double_data[100]);
+                    data = mxGetData(mx_data);
+                    for(int j=0; j<num_elements;j++){
+                        data[j] = variable_data.double_data[j];
+                    }          
+                }
+                if(num_dims==2){
+                    mx_data = mxCreateNumericArray(num_dims, matlabdim, mxDOUBLE_CLASS, mxREAL);
+                    data = mxGetData(mx_data);
+                    mexPrintf("original data is: %d \n", variable_data.double_data[100]);
+                    for(int j=0; j<num_elements;j++){
+                        data[j] = variable_data.double_data[j]; 
+                    } 
+                }
 
             }
             break;
@@ -180,7 +193,6 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
 
                 mx_data = mxCreateNumericArray(num_dims, matlabdim, mxSINGLE_CLASS, mxREAL);
                 data = mxGetData(mx_data);
-
                 for(int j=0; j<num_elements;j++){
                     data[j] = variable_data.float_data[j];
                 }

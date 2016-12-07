@@ -36,10 +36,12 @@ function harp_gome_l1(filename)
 
 data = harp_ingest(filename);
 longitude = data.longitude;
+longitude_bounds = data.longitude_bounds;
 %fraction = data.cloud_fraction;
-%display(data);
-display(longitude);
+display(data);
+%display(longitude);
 %display(fraction);
+display(longitude_bounds(:,1));
 
 
 
