@@ -94,9 +94,6 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
 
     mexPrintf("---inside the add function--3- \n");  
 
-    // dim[0] = num_elements/num_dims;
-    // dim[1] = num_dims;
-
     for (i = 0; i < HARP_MAX_NUM_DIMS; i++){
          dim[i] = (*variable).dimension[i];
     }
@@ -120,8 +117,6 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
         mexPrintf("---inside the add function--5- \n");  
         dim[num_dims++] = 1;
     }
-
-    
 
     for (i = 0; i < num_dims; i++)
     {
@@ -167,25 +162,38 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
             break;
         case harp_type_double:
             {
+
+             // harp_array_transpose(harp_data_type data_type, int num_dimensions, const long *dimension, const int *order,
+             //      harp_array data)
                 double *data;
+                if (num_dims == 1){
+                    for(i =0; i< num_dims; i++){
+                        mx_data = mxCreateNumericArray(num_dims, matlabdim, mxDOUBLE_CLASS, mxREAL);
+                        data = mxGetData(mx_data);
+                        mexPrintf("dimensionality is %d \n", matlabdim[i]);
+                       
+                        for(mwSize j=0; j<matlabdim[i];j++){
+                            data[j] = variable_data.double_data[j]; 
+                        }
 
-                if(num_dims==1){
-                    mx_data = mxCreateNumericArray(num_dims, matlabdim, mxDOUBLE_CLASS, mxREAL);
-                    mexPrintf("original data is: %d \n", variable_data.double_data[100]);
-                    data = mxGetData(mx_data);
-                    for(int j=0; j<num_elements;j++){
-                        data[j] = variable_data.double_data[j];
-                    }          
+                    }
                 }
-                if(num_dims==2){
-                    mx_data = mxCreateNumericArray(num_dims, matlabdim, mxDOUBLE_CLASS, mxREAL);
-                    data = mxGetData(mx_data);
-                    mexPrintf("original data is: %d \n", variable_data.double_data[100]);
-                    for(int j=0; j<num_elements;j++){
-                        data[j] = variable_data.double_data[j]; 
-                    } 
-                }
-
+                if (num_dims == 2){
+                    // for(i =0; i< num_dims; i++){
+                        mx_data = mxCreateNumericArray(num_dims, matlabdim, mxDOUBLE_CLASS, mxREAL);
+                        data = mxGetData(mx_data);
+                        // mexPrintf("dimensionality is %d \n", matlabdim[i]);
+                        int counter = 0;
+                        while(counter<num_elements){
+                         for(mwSize j=0; j<num_elements/matlabdim[num_dims-1];j++){
+                            for(mwSize k=0; k<matlabdim[num_dims-1];k++){
+                                // data[j*(matlabdim[num_dims-1]-1)+k+j] = variable_data.double_data[counter++]; // not correct
+                                 data[j+k*num_elements/matlabdim[num_dims-1]] = variable_data.double_data[counter++];
+                                } 
+                            } 
+                        }                      
+                    }        
+                // }   
             }
             break;
         case harp_type_float:
