@@ -178,6 +178,8 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
         mexErrMsgTxt("Unable to copy filename string.");
     }
 
+    mexPrintf("--top level call--\n");
+    mexPrintf("prhs[2] is %s \n", prhs[2]);
     product = harp_matlab_set_product(prhs[2]);
 
     if (harp_export(format, filename, product) != 0)
@@ -257,7 +259,7 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 {
     harp_product *product;
     char **filenames;
-    char *name;
+    // char *name;
     int num_files;
     char *script;
     char *option;
