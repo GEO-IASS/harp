@@ -165,24 +165,24 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
     }
 
     buflen = mxGetN(prhs[0]) + 1;
-    format = (char *)mxCalloc(buflen, sizeof(char));
-    if (mxGetString(prhs[0], format, buflen) != 0)
+    filename = (char *)mxCalloc(buflen, sizeof(char));
+    if (mxGetString(prhs[0], filename, buflen) != 0)
     {
-        mexErrMsgTxt("Unable to copy export format string.");
+        mexErrMsgTxt("Unable to copy filename string.");
     }
 
     buflen = mxGetN(prhs[1]) + 1;
-    filename = (char *)mxCalloc(buflen, sizeof(char));
-    if (mxGetString(prhs[1], filename, buflen) != 0)
+    format = (char *)mxCalloc(buflen, sizeof(char));
+    if (mxGetString(prhs[1], format, buflen) != 0)
     {
-        mexErrMsgTxt("Unable to copy filename string.");
+        mexErrMsgTxt("Unable to copy export format string.");
     }
 
     mexPrintf("--top level call--\n");
     mexPrintf("prhs[2] is %s \n", prhs[2]);
     product = harp_matlab_set_product(prhs[2]);
 
-    if (harp_export(format, filename, product) != 0)
+    if (harp_export(filename, format, product) != 0)
     {
         harp_product_delete(product);
         harp_matlab_harp_error();
