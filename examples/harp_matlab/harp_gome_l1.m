@@ -48,7 +48,7 @@ display(data);
 %latitude = data.corner_latitude';
 longitude = data.longitude_bounds';
 latitude = data.latitude_bounds';
-display(data.longitude');
+%display(data.longitude');
 
 value = getfield(data, 'O3_column_number_density')';
 %value = getfield(data, 'O3_column_number_density_uncertainty')';
