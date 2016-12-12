@@ -408,8 +408,8 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
         mxFree(option);
     }
        
-
     plhs[0] = harp_matlab_get_product(&product);
+   
     harp_product_delete(product);
 
     if (plhs[0] == NULL)
