@@ -49,8 +49,9 @@ static int has_num_dims_extension(const char *variable_name)
     return 0;
 }
 
-static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_product **product, int index, int fieldnum)
+static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_product **product, int index)
 {
+    mexPrintf("--here 1---\n");    
     harp_variable *variable = (**product).variable[index];
     harp_data_type type = (*variable).data_type;
     const char *variable_name = (*variable).name;
@@ -59,9 +60,6 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
       /**--more variables info--**/
     char * description = (*variable).description;
     char * unit = (*variable).unit;
-    mxArray * string_des = mxCreateString(description);
-    mxArray * string_unit = mxCreateString(unit);
-    mexPrintf("description is: %s \n", description);
 
     long dim[HARP_MAX_NUM_DIMS]; 
     harp_dimension_type dim_type[HARP_MAX_NUM_DIMS];
@@ -71,14 +69,11 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     int num_dims = (*variable).num_dimensions;
     long num_elements= (*variable).num_elements;
     long i;
-
+    int field_index;
    
     mxArray *mx_data = NULL;//temp
-    // mx_data = mxCreateStructMatrix(1, 1, 0, NULL);
-    // mexPrintf("things went wrong here");
-    // mxSetField(mx_struct,0,"data",mx_data);
 
-
+    mexPrintf("--here 2---\n");    
     if (harp_product_get_variable_by_name(*product, variable_name, &variable) != 0)
     {
         harp_matlab_harp_error();
@@ -100,24 +95,33 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     }
 
     /**--add more infomation for each variable--**/
-   
-    mexPrintf("before add fields---");
-    mxAddField(mx_data, "description");
-    mxSetField(mx_data, 0, "description", string_des);
-  
-
-    mxAddField(mx_data, "unit");
-    mxSetField(mx_data, 1, "unit", string_unit);
-
-    /* Add extra _num_dims element if the last dimensions equals 1 */
-    if (num_dims > 0 && dim[num_dims - 1] == 1)
-    {
-        char *dim_variable_name;
-        dim_variable_name = create_num_dims_variable(variable_name);
-        mxAddField(mx_struct, dim_variable_name);
-        mxSetField(mx_struct, 0, dim_variable_name, mxCreateDoubleScalar((double)num_dims));
-        mxFree(dim_variable_name);
+    
+    mexPrintf("---before adding the fields---\n");
+    field_index = 0;
+    if(description != NULL){
+        mxArray * string_des = mxCreateString(description);
+        mxAddField(mx_struct, "description");
+        mxSetField(mx_struct, field_index, "description", string_des);
+        field_index++;
     }
+    if(unit != NULL){
+        mxArray * string_unit = mxCreateString(unit);    
+        mxAddField(mx_struct, "unit");
+        mxSetField(mx_struct, field_index, "unit", string_unit);
+        field_index ++;
+    }
+   
+    //// to add: dim_type and dim
+    //------- also to deal when the last dimension equals to 1 --------
+    /* Add extra _num_dims element if the last dimensions equals 1 */
+    // if (num_dims > 0 && dim[num_dims - 1] == 1)
+    // {
+    //     char *dim_variable_name;
+    //     dim_variable_name = create_num_dims_variable(variable_name);
+    //     mxAddField(mx_struct, dim_variable_name);
+    //     mxSetField(mx_struct, 0, dim_variable_name, mxCreateDoubleScalar((double)num_dims));
+    //     mxFree(dim_variable_name);
+    // }
 
     /* MATLAB does not allow creation of arrays with num_dims == 0 */
     if (num_dims == 0 && type != harp_type_string)
@@ -234,8 +238,8 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
 
  
 
-    mxAddField(mx_struct, variable_name);
-    mxSetField(mx_struct, 3, variable_name, mx_data);
+    mxAddField(mx_struct, "value");
+    mxSetField(mx_struct, field_index, "value", mx_data);
 }
 
 mxArray *harp_matlab_get_product(harp_product **product)
@@ -272,19 +276,17 @@ mxArray *harp_matlab_get_product(harp_product **product)
         mxSetField(mx_data, 1, "history", string_his);
         fieldnum ++;
     }
-    // /**----add variables-----**/
-
-    // mxArray* variable_data = mxCreateStructMatrix(1,1,0, NULL);
-    // mxAddField(mx_data, "variables");
-    // mxSetField(mx_data, fieldnum, "variables", variable_data);
+    
+    /**----add variables-----**/
+   
 
     for (index = 0; index < num_variables; index++)
-    {
-        mxArray* variable_data = mxCreateStructMatrix(1,1,0, NULL);
+    {        
+        mxArray* variable_data = mxCreateStructMatrix(3,1,0, NULL);
         mxAddField(mx_data, (**product).variable[index]->name);
         mxSetField(mx_data, fieldnum, (**product).variable[index]->name, variable_data);
-        // harp_matlab_add_harp_product_variable(mx_data, product, index,fieldnum);
-    }
+        harp_matlab_add_harp_product_variable(variable_data, product, index); 
+     }
 
     return mx_data;
 }
