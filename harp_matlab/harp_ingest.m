@@ -4,7 +4,7 @@ function varargout = harp_ingest(varargin)
 %   PRODUCT = HARP_INGEST(FILEPATH) reads data from the product file(s)
 %   specified by filepath.
 %
-%   RECORD = BEATL2_INGEST(FILEPATH, FILTER) reads data matching the
+%   PRODUCT = HARP_INGEST(FILEPATH, FILTER) reads data matching the
 %   filter from the product file(s) specified by filepath.
 %
 %   The filepath parameter must, in case you want to ingest a single
@@ -19,9 +19,9 @@ function varargout = harp_ingest(varargin)
 %   The filter should be a single string containing a ',' or ';'
 %   separated list of filter options.
 %
-%   More information about BEAT-II records can be found in the BEAT-II Data
+%   More information about HARP products can be found in the HARP Data
 %   Description documentation.
 %
 
-% Call BEATL2_MATLAB.MEX to do the actual work.
+% Call HARP_MATLAB.MEX to do the actual work.
 [varargout{1:max(1,nargout)}] = harp_matlab('INGEST',varargin{:});

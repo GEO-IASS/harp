@@ -9,6 +9,7 @@ function varargout = harp_import(varargin)
 %     - BINARY
 %     - HDF4
 %     - HDF5
+% 	  - NETCDF
 %   You should provide the format as a string to HARP_IMPORT.
 %
 %   See also HARP_EXPORT

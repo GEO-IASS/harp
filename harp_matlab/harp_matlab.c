@@ -178,8 +178,6 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
         mexErrMsgTxt("Unable to copy export format string.");
     }
 
-    mexPrintf("--top level call--\n");
-    mexPrintf("prhs[2] is %s \n", prhs[2]);
     product = harp_matlab_set_product(prhs[2]);
 
     if (harp_export(filename, format, product) != 0)

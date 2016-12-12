@@ -8,6 +8,7 @@ function varargout = harp_export(varargin)
 %     - BINARY
 %     - HDF4
 %     - HDF5
+%     - NETCDF
 %   You should provide the format as a string to HARP_EXPORT. If the
 %   export file already exists it will be overwritten.
 %
