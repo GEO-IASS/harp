@@ -339,6 +339,8 @@ static char *get_matlab_string_value(mxArray *mx_data)
 
 static void harp_matlab_add_matlab_product_variable(harp_product **product, const char *variable_name, mxArray *mx_variable,
                                                   int req_num_dims)
+// static void harp_matlab_add_matlab_product_variable(harp_product **product, char *variable_name, mxArray *mx_variable,
+//                                                   int req_num_dims)
 {
     mxClassID class;
    
@@ -364,44 +366,54 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
         mexErrMsgTxt("This variable is not a struct.");
     }
     int num_fields = mxGetNumberOfFields(mx_variable);
+    mexPrintf("the loops are: %d \n", num_fields);
 
     for (iindex = 0; iindex < num_fields; iindex++)
     {
         const char *field_name;
-        field_name = mxGetFieldNameByNumber(mx_variable, index);
+        char * cast_field_name;
+        int iiindex = 0;
+
+        field_name = mxGetFieldNameByNumber(mx_variable, iindex);
+        cast_field_name = (char*)field_name;
         /*------set meta info-------*/
-        if(field_name == 'description'){
-            (*variable).description = field_name;
+        if(strncmp(field_name,"description",11) ==0){
+            (*variable).description = cast_field_name;
+            iiindex++;
         }
-        if(field_name == 'unit'){
-            (*variable).unit = field_name;
+        else if(strncmp(field_name,"unit",4)==0){
+            (*variable).unit = cast_field_name;
+             iiindex++;
         }
         
-        if(field_name == 'dimensions'){
+        else if(strncmp(field_name,"dimensions",10)==0){
+             iiindex++;
             //--to be done--
         }
-        if(field_name == 'dimension_type' ){
+        else if(strncmp(field_name,"dimension_type",14)==0){
+             iiindex++;
             //--to be done--
         }
-
-        if(field_name == 'value'){
-
-            class = mxGetClassID(mx_variable);
-            num_dims = mxGetNumberOfDimensions(mx_variable);
+        else if(strncmp(field_name,"value",5)==0)
+        {
+            mxArray * datastructure = mxGetField(mx_variable, iiindex, field_name);;    
+            mexPrintf("checking the real values!\n");
+            class = mxGetClassID(datastructure);
+            num_dims = mxGetNumberOfDimensions(datastructure);
             if (num_dims > HARP_MAX_NUM_DIMS)
             {
                 mexErrMsgTxt("Number of dimensions for product variable is too high.");
             }
             for (i = 0; i < num_dims; i++)
             {
-                dim[i] = (long)mxGetDimensions(mx_variable)[i];
+                dim[i] = (long)mxGetDimensions(datastructure)[i];
                 // dim_type[i] = harp_dimension_time;
             }
             dim_type[0] = harp_dimension_time;
             dim_type[1] = harp_dimension_independent;
             
-            num_elements = mxGetNumberOfElements(mx_variable);
-            // mexPrintf("-------value of the elements is--------- : %d \n", num_elements);
+            num_elements = mxGetNumberOfElements(datastructure);
+            mexPrintf("-------value of the elements is--------- : %d \n", num_elements);
             // mexPrintf("-------dim 1--------- : %d \n", dim[0]);
             // mexPrintf("-------dim 2--------- : %d \n", dim[1]);
             //-- fix it later
@@ -466,9 +478,8 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         {
                             harp_matlab_harp_error();
                         }
-                        data = mxGetData(mx_variable);
-                        // data = mxGetData();
-                    
+                        data = mxGetData(datastructure);
+                                    
                         int counter = 0;
                         while(counter<num_elements){
                             for(long j=0; j<num_elements/dim[req_num_dims-1];j++){
@@ -496,7 +507,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                             harp_matlab_harp_error();
                         }
                         int counter = 0;
-                        data = mxGetData(mx_variable);
+                        data = mxGetData(datastructure);
                         while(counter<num_elements){
                             for(long j=0; j<num_elements/dim[req_num_dims-1];j++){
                                 for(long k=0; k<dim[req_num_dims-1];k++){
@@ -522,7 +533,10 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         {
                             harp_matlab_harp_error();
                         }
-                        data = mxGetData(mx_variable);
+                        mexPrintf("sucessfully added the variable \n");
+                        mexPrintf("verifying num of variables %d \n", (**product).num_variables);
+
+                        data = mxGetData(datastructure);
                         int counter = 0;
                         while(counter<num_elements){
                             for(long j=0; j<num_elements/dim[req_num_dims-1];j++){
@@ -531,6 +545,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                                 } 
                             } 
                         }  
+                        mexPrintf("finished assigning of the last one! \n");
 
                     }
                     break;
@@ -555,7 +570,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                             harp_matlab_harp_error();
                         }
 
-                        data = mxGetData(mx_variable);
+                        data = mxGetData(datastructure);
                     
                         int counter = 0;
                         while(counter<num_elements){
@@ -565,7 +580,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                                 } 
                             } 
                         }    
-                        mexPrintf("finished one assigning of a variable");
+                        mexPrintf("finished one assigning of a variable \n");
                     }
                     break;
                 case mxSINGLE_CLASS:
@@ -586,7 +601,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         {
                             harp_matlab_harp_error();
                         }
-                        data = mxGetData(mx_variable);
+                        data = mxGetData(datastructure);
                    
                         int counter = 0;
                         while(counter<num_elements){
@@ -600,11 +615,11 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                     break;    
                 case mxCHAR_CLASS:
                 {
-                    if (mxGetNumberOfDimensions(mx_variable) != 2 || mxGetDimensions(mx_variable)[0] != 1)
+                    if (mxGetNumberOfDimensions(datastructure) != 2 || mxGetDimensions(datastructure)[0] != 1)
                     {
                         mexErrMsgTxt("Multi-dimensional string arrays are not allowed. Use a cell array of strings instead.");
                     }
-                    string_data = get_matlab_string_value(mx_variable);
+                    string_data = get_matlab_string_value(datastructure);
                   
                     if( harp_variable_new(variable_name, harp_type_string, num_dims, dim_type, dim, &variable) !=0)
                     {
@@ -624,7 +639,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
 
                         for (i = 0; i < num_elements; i++)
                         {
-                            mx_cell = mxGetCell(mx_variable, i);
+                            mx_cell = mxGetCell(datastructure, i);
                             if (mxGetClassID(mx_cell) != mxCHAR_CLASS || mxGetNumberOfDimensions(mx_cell) != 2 ||
                                 mxGetDimensions(mx_cell)[0] > 1)
                             {
@@ -642,7 +657,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                     
                         for (i = 0; i < num_elements; i++)
                         {
-                            mx_cell = mxGetCell(mx_variable, coda_c_index_to_fortran_index(num_dims, dim, i));
+                            mx_cell = mxGetCell(datastructure, coda_c_index_to_fortran_index(num_dims, dim, i));
                             string_data = get_matlab_string_value(mx_cell);
                             if (harp_variable_set_string_data_element(variable, i, string_data) != 0)
                             {
@@ -683,59 +698,63 @@ harp_product *harp_matlab_set_product(const mxArray *mx_struct)
     for (index = 0; index < num_variables; index++)
     {
         const char *variable_name;
+        
         // mexPrintf(" number of the variables is: %d \n", num_variables);
 
         variable_name = mxGetFieldNameByNumber(mx_struct, index);
+        char * cast_variable_name = (char*) variable_name; 
         /*------set meta info-------*/
-        if(variable_name == 'source'){
+        if(strncmp(variable_name,"source",6)==0){
             // mx_variable = mxGetFieldByNumber(mx_struct, 0, index);
-            (*product).source_product = variable_name;
+            (*product).source_product = cast_variable_name;
         }
-        if(variable_name == 'history'){
-            (*product).history = variable_name;
-        }else{
-        // mexPrintf(" name of the variable is: %s \n", variable_name);
-        if (!has_num_dims_extension(variable_name))
-        {
-            // const char *dim_variable_name;
-            char *dim_variable_name;
-            mxArray *mx_variable;
-            mxArray *mx_dim_variable;
-            int dim_variable_index;
-            const size_t *dim2;
-            int dim1=2;
+        else if(strncmp(variable_name, "history",7)==0){
+            (*product).history = cast_variable_name;
+        }
+        else{
+            mexPrintf(" name of the variable is: %s \n", variable_name);
+            if (!has_num_dims_extension(variable_name))
+            {
+                // const char *dim_variable_name;
+                char *dim_variable_name;
+                mxArray *mx_variable;
+                mxArray *mx_dim_variable;
+                int dim_variable_index;
+                const size_t *dim2;
+                int dim1=2;
 
-            /* find and retrieve dimension variable if it exists */
-            /* to check  **/
-            mx_dim_variable = NULL;
-            dim_variable_name = create_num_dims_variable(variable_name);
-            // dim_variable_name = variable_name;
-            // dim_variable_index = mxGetFieldNumber(mx_struct, dim_variable_name);
-            dim_variable_index = mxGetFieldNumber(mx_struct, variable_name);
-            // int number = mxGetNumberOfFields(mx_struct);
-            // mexPrintf("number of the fields is: %d \n", number);
-            // mexPrintf(" dim_variable_name is: %s \n", dim_variable_name);
-            // mexPrintf(" dim_variable_index is: %d \n", dim_variable_index);
-            mxFree(dim_variable_name);
+                /* find and retrieve dimension variable if it exists */
+                /* to check  **/
+                mx_dim_variable = NULL;
+                dim_variable_name = create_num_dims_variable(variable_name);
+                // dim_variable_name = variable_name;
+                // dim_variable_index = mxGetFieldNumber(mx_struct, dim_variable_name);
+                dim_variable_index = mxGetFieldNumber(mx_struct, variable_name);
+                // int number = mxGetNumberOfFields(mx_struct);
+                // mexPrintf("number of the fields is: %d \n", number);
+                // mexPrintf(" dim_variable_name is: %s \n", dim_variable_name);
+                // mexPrintf(" dim_variable_index is: %d \n", dim_variable_index);
+                mxFree(dim_variable_name);
 
-            if (dim_variable_index >= 0)
-            {   
-                // mx_dim_variable = mxGetField(mx_struct,0, dim_variable_name);
+                if (dim_variable_index >= 0)
+                {   
+                    // mx_dim_variable = mxGetField(mx_struct,0, dim_variable_name);
 
-                mx_dim_variable = mxGetFieldByNumber(mx_struct,0, dim_variable_index);
-                // int elements = mxGetNumberOfElements(mx_dim_variable);
-                dim1 = mxGetNumberOfDimensions(mx_dim_variable);
-                dim2 = mxGetDimensions(mx_dim_variable);
-                // mexPrintf("dimension 1 of the variable is: %d \n", dim1);
+                    mx_dim_variable = mxGetFieldByNumber(mx_struct,0, dim_variable_index);
+                    // int elements = mxGetNumberOfElements(mx_dim_variable);
+                    dim1 = mxGetNumberOfDimensions(mx_dim_variable);
+                    dim2 = mxGetDimensions(mx_dim_variable);
+                    // mexPrintf("dimension 1 of the variable is: %d \n", dim1);
+                }
+
+                mx_variable = mxGetFieldByNumber(mx_struct, 0, index);
+        
+                harp_matlab_add_matlab_product_variable(&product, variable_name, mx_variable, dim1);
+            
             }
-
-            mx_variable = mxGetFieldByNumber(mx_struct, 0, index);
-    
-            harp_matlab_add_matlab_product_variable(&product, variable_name, mx_variable, dim1);
-    
-        }
        }
     }
 
+    mexPrintf(" did i finish set product? \n");
     return product;
 }

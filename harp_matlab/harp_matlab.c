@@ -180,6 +180,13 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 
     product = harp_matlab_set_product(prhs[2]);
 
+    mexPrintf("oh, no, i didn't make until here\n");
+
+    if (harp_export(filename, format, product) == 0){
+        mexPrintf("why not!!!\n");
+        harp_matlab_harp_error();
+    }
+
     if (harp_export(filename, format, product) != 0)
     {
         harp_product_delete(product);
