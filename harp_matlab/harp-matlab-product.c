@@ -133,52 +133,35 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     {
         matlabdim[i] = (mwSize)dim[i];    
         // matlabdim_type[i] = (mwSize)dim_type[i];
-        // mexPrintf("types of dimensions are:%s \n", dim_type[i]);
+        mexPrintf("types of dimensions are:%d \n", dim_type[i]);
     }
 
-    // matlabdim_type[0] = num_dims;
 
-    // for (i = 0; i < num_dims; i++)
-    // {
-    //      matlabdim_type[i+1] = 0;
-    // }
+    matlabdim_type[0] = num_dims;
+    for (i = 0; i < num_dims; i++)
+    {
+        matlabdim_type[i+1] = 0;
+    }
   
-
-
     // mxArray * dim_info_type = mxCreateNumericArray(num_dims,matlabdim_type,mxINT16_CLASS,mxREAL);    
     // int *data1 = mxGetData(dim_info_type);
 
-    // mxArray * dim_info = mxCreateNumericArray(num_dims,matlabdim_type,mxINT16_CLASS,mxREAL);  
-    // // mxArray * dim_info = mxCreateCellArray(num_dims,matlabdim_type,mxINT16_CLASS,mxREAL);   
-    // int *data2 = mxGetData(dim_info);
-    // mexPrintf("must be here -before\n");
-    // for (i = 0; i < num_dims; i++)
-    // {   
-    //         mexPrintf("i was only: %d\n", i); 
-    //         // data1[i] =  dim_type[i]; ;
-    //         data2[i] =  dim[i];
-    //         mexPrintf("just want to know the values\n");
-    //         mexPrintf("dim info is: %d", dim[i]);
-    // }
+    mxArray * dim_info = mxCreateNumericArray(1,matlabdim_type,mxINT32_CLASS,mxREAL);  
+    // mxArray * dim_info = mxCreateCellArray(num_dims,matlabdim_type,mxINT16_CLASS,mxREAL);   
+    int *data2 = mxGetData(dim_info);
+    mexPrintf("must be here -before\n");
+    for (i = 0; i < num_dims; i++)
+    {   
+            mexPrintf("i was only: %d\n", i); 
+            // data1[i] =  dim_type[i]; ;
+            data2[i] =  dim[i];
+            mexPrintf("just want to know the values\n");
+            mexPrintf("dim info is: %d", dim[i]);
+    }
 
-    // dim_info = mxCreateNumericArray(num_dims, matlabdim_type, mxINT32_CLASS, mxREAL);
-    // data = mxGetData(mx_data);
-    // int counter = 0;
-    // while(counter<2){
-    // for(mwSize j=0; j<2/matlabdim_type[num_dims-1];j++){
-    //          for(mwSize k=0; k<matlabdim_type[num_dims-1];k++){
-    //               data[j+k*2/matlabdim[num_dims-1]] = variable_data.int32_data[counter++];
-    //             } 
-    //          } 
-    //  }
-
-
-    // mexPrintf("must be here -after\n");
-    // // mxAddField(struct_data, "dimension type");
-    // // mxSetField(struct_data, 0, "dimension type", dim_info_type);
-
-    // mxAddField(struct_data, "dimension");
-    // mxSetField(struct_data, 0, "dimension", dim_info);
+    mexPrintf("must be here -after\n");
+    mxAddField(struct_data, "dimension");
+    mxSetField(struct_data, 0, "dimension", dim_info);
    
 
     switch (type)
