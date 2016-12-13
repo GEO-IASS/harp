@@ -702,14 +702,17 @@ harp_product *harp_matlab_set_product(const mxArray *mx_struct)
         // mexPrintf(" number of the variables is: %d \n", num_variables);
 
         variable_name = mxGetFieldNameByNumber(mx_struct, index);
-        char * cast_variable_name = (char*) variable_name; 
+        // char * cast_variable_name = (char*) variable_name; 
         /*------set meta info-------*/
         if(strncmp(variable_name,"source",6)==0){
-            // mx_variable = mxGetFieldByNumber(mx_struct, 0, index);
-            (*product).source_product = cast_variable_name;
+            mxArray * meta  = mxGetField(mx_struct, index, variable_name);
+            char * metastring = mxArrayToString(meta);
+            (*product).source_product = metastring;
         }
         else if(strncmp(variable_name, "history",7)==0){
-            (*product).history = cast_variable_name;
+            mxArray * meta  = mxGetField(mx_struct, index, variable_name);
+            char * metastring = mxArrayToString(meta);
+            (*product).history = metastring;
         }
         else{
             mexPrintf(" name of the variable is: %s \n", variable_name);
@@ -755,6 +758,8 @@ harp_product *harp_matlab_set_product(const mxArray *mx_struct)
        }
     }
 
-    mexPrintf(" did i finish set product? \n");
+    // mexPrintf(" did i finish set product? \n");
+    // mexPrintf("let's see what's inside: %d \n",(*product).num_variables);
+    // mexPrintf("and: %d",(*product).variable[10]);
     return product;
 }

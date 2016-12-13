@@ -180,7 +180,13 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 
     product = harp_matlab_set_product(prhs[2]);
 
-    mexPrintf("oh, no, i didn't make until here\n");
+    //-----------debugging---------//
+    mexPrintf("top-level inside: %d \n",(*product).num_variables);
+    for(int i = 0; i<(*product).num_variables; i++){
+        mexPrintf("and: %s \n",(*product).variable[i]->name);
+    }
+    mexPrintf("meta: %s \n",(*product).source_product);
+    //--------------------------//
 
     if (harp_export(filename, format, product) == 0){
         mexPrintf("why not!!!\n");
