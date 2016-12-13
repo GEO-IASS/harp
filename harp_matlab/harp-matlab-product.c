@@ -69,7 +69,6 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     int num_dims = (*variable).num_dimensions;
     long num_elements= (*variable).num_elements;
     long i;
-    int field_index;
    
     mxArray *mx_data = NULL;//temp
 
@@ -94,21 +93,21 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
          dim_type[i] = (*variable).dimension_type[i];
     }
 
-    /**--add more infomation for each variable--**/
+    // top-level
+    mxArray* struct_data = mxCreateStructMatrix(1,1,0, NULL);
     
+
+    /**--add more infomation for each variable--**/    
     mexPrintf("---before adding the fields---\n");
-    field_index = 0;
     if(description != NULL){
         mxArray * string_des = mxCreateString(description);
-        mxAddField(mx_struct, "description");
-        mxSetField(mx_struct, field_index, "description", string_des);
-        field_index++;
+        mxAddField(struct_data, "description");
+        mxSetField(struct_data, 0, "description", string_des);
     }
     if(unit != NULL){
         mxArray * string_unit = mxCreateString(unit);    
-        mxAddField(mx_struct, "unit");
-        mxSetField(mx_struct, field_index, "unit", string_unit);
-        field_index ++;
+        mxAddField(struct_data, "unit");
+        mxSetField(struct_data, 0, "unit", string_unit);
     }
    
     //// to add: dim_type and dim
@@ -238,8 +237,13 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
 
  
 
-    mxAddField(mx_struct, "value");
-    mxSetField(mx_struct, field_index, "value", mx_data);
+    mxAddField(struct_data, "value");
+    mxSetField(struct_data, 0, "value", mx_data);
+
+
+    //back to the top-level again
+    mxAddField(mx_struct, variable_name);
+    mxSetField(mx_struct, 0, variable_name, struct_data);
 }
 
 mxArray *harp_matlab_get_product(harp_product **product)
@@ -269,7 +273,6 @@ mxArray *harp_matlab_get_product(harp_product **product)
     mxAddField(mx_data, "source");
     mxSetField(mx_data, 0, "source", string_source);
     fieldnum =0;
-    // mxSetField(struct_array_ptr, index, "grade", field_value); 
 
     if(history != NULL){
         mxAddField(mx_data, "history");
@@ -278,14 +281,15 @@ mxArray *harp_matlab_get_product(harp_product **product)
     }
     
     /**----add variables-----**/
-   
-
     for (index = 0; index < num_variables; index++)
     {        
-        mxArray* variable_data = mxCreateStructMatrix(3,1,0, NULL);
-        mxAddField(mx_data, (**product).variable[index]->name);
-        mxSetField(mx_data, fieldnum, (**product).variable[index]->name, variable_data);
-        harp_matlab_add_harp_product_variable(variable_data, product, index); 
+        // mxArray* variable_data = mxCreateStructMatrix(3,1,0, NULL);// (3,1,0)
+        // mxAddField(mx_data, (**product).variable[index]->name);
+        // mxSetField(mx_data, fieldnum, (**product).variable[index]->name, variable_data);
+        // harp_matlab_add_harp_product_variable(variable_data, product, index); 
+
+
+        harp_matlab_add_harp_product_variable(mx_data, product, index);
      }
 
     return mx_data;
