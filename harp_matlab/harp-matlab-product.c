@@ -143,26 +143,30 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
         matlabdim_type[i+1] = 0;
     }
   
-    // mxArray * dim_info_type = mxCreateNumericArray(num_dims,matlabdim_type,mxINT16_CLASS,mxREAL);    
-    // int *data1 = mxGetData(dim_info_type);
+   
 
     mxArray * dim_info = mxCreateNumericArray(1,matlabdim_type,mxINT32_CLASS,mxREAL);  
-    // mxArray * dim_info = mxCreateCellArray(num_dims,matlabdim_type,mxINT16_CLASS,mxREAL);   
-    int *data2 = mxGetData(dim_info);
+    int *data1 = mxGetData(dim_info);
+
+    mxArray * dim_info_type = mxCreateNumericArray(1,matlabdim_type,mxINT32_CLASS,mxREAL);    
+    int *data2 = mxGetData(dim_info_type);
     mexPrintf("must be here -before\n");
     for (i = 0; i < num_dims; i++)
     {   
-            mexPrintf("i was only: %d\n", i); 
+            // mexPrintf("i was only: %d\n", i); 
             // data1[i] =  dim_type[i]; ;
-            data2[i] =  dim[i];
-            mexPrintf("just want to know the values\n");
-            mexPrintf("dim info is: %d", dim[i]);
+            data1[i] = dim[i];
+            data2[i] = dim_type[i];
+            // mexPrintf("just want to know the values\n");
+            // mexPrintf("dim info is: %d", dim[i]);
     }
 
     mexPrintf("must be here -after\n");
     mxAddField(struct_data, "dimension");
     mxSetField(struct_data, 0, "dimension", dim_info);
    
+    mxAddField(struct_data, "dimensiontype");
+    mxSetField(struct_data, 0, "dimensiontype", dim_info_type);
 
     switch (type)
     {
