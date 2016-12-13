@@ -65,14 +65,13 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     harp_dimension_type dim_type[HARP_MAX_NUM_DIMS];
 
     mwSize matlabdim[HARP_MAX_NUM_DIMS];
-    mwSize matlabdimtype[HARP_MAX_NUM_DIMS];
+    mwSize matlabdim_type[HARP_MAX_NUM_DIMS];
     int num_dims = (*variable).num_dimensions;
     long num_elements= (*variable).num_elements;
     long i;
    
-    mxArray *mx_data = NULL;//temp
+    mxArray *mx_data = NULL;
 
-    mexPrintf("--here 2---\n");    
     if (harp_product_get_variable_by_name(*product, variable_name, &variable) != 0)
     {
         harp_matlab_harp_error();
@@ -96,7 +95,7 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
     // top-level
     mxArray* struct_data = mxCreateStructMatrix(1,1,0, NULL);
     
-
+    mexPrintf("number of dimensions:%d \n", num_dims);
     /**--add more infomation for each variable--**/    
     mexPrintf("---before adding the fields---\n");
     if(description != NULL){
@@ -109,7 +108,8 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
         mxAddField(struct_data, "unit");
         mxSetField(struct_data, 0, "unit", string_unit);
     }
-   
+
+
     //// to add: dim_type and dim
     //------- also to deal when the last dimension equals to 1 --------
     /* Add extra _num_dims element if the last dimensions equals 1 */
@@ -128,11 +128,58 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
         dim[num_dims++] = 1;
     }
 
+
     for (i = 0; i < num_dims; i++)
     {
-            matlabdim[i] = (mwSize)dim[i];
-            matlabdimtype[i] = (mwSize) dim_type[i]; // this field also to be add?
+        matlabdim[i] = (mwSize)dim[i];    
+        // matlabdim_type[i] = (mwSize)dim_type[i];
+        // mexPrintf("types of dimensions are:%s \n", dim_type[i]);
     }
+
+    // matlabdim_type[0] = num_dims;
+
+    // for (i = 0; i < num_dims; i++)
+    // {
+    //      matlabdim_type[i+1] = 0;
+    // }
+  
+
+
+    // mxArray * dim_info_type = mxCreateNumericArray(num_dims,matlabdim_type,mxINT16_CLASS,mxREAL);    
+    // int *data1 = mxGetData(dim_info_type);
+
+    // mxArray * dim_info = mxCreateNumericArray(num_dims,matlabdim_type,mxINT16_CLASS,mxREAL);  
+    // // mxArray * dim_info = mxCreateCellArray(num_dims,matlabdim_type,mxINT16_CLASS,mxREAL);   
+    // int *data2 = mxGetData(dim_info);
+    // mexPrintf("must be here -before\n");
+    // for (i = 0; i < num_dims; i++)
+    // {   
+    //         mexPrintf("i was only: %d\n", i); 
+    //         // data1[i] =  dim_type[i]; ;
+    //         data2[i] =  dim[i];
+    //         mexPrintf("just want to know the values\n");
+    //         mexPrintf("dim info is: %d", dim[i]);
+    // }
+
+    // dim_info = mxCreateNumericArray(num_dims, matlabdim_type, mxINT32_CLASS, mxREAL);
+    // data = mxGetData(mx_data);
+    // int counter = 0;
+    // while(counter<2){
+    // for(mwSize j=0; j<2/matlabdim_type[num_dims-1];j++){
+    //          for(mwSize k=0; k<matlabdim_type[num_dims-1];k++){
+    //               data[j+k*2/matlabdim[num_dims-1]] = variable_data.int32_data[counter++];
+    //             } 
+    //          } 
+    //  }
+
+
+    // mexPrintf("must be here -after\n");
+    // // mxAddField(struct_data, "dimension type");
+    // // mxSetField(struct_data, 0, "dimension type", dim_info_type);
+
+    // mxAddField(struct_data, "dimension");
+    // mxSetField(struct_data, 0, "dimension", dim_info);
+   
 
     switch (type)
     {
@@ -283,12 +330,6 @@ mxArray *harp_matlab_get_product(harp_product **product)
     /**----add variables-----**/
     for (index = 0; index < num_variables; index++)
     {        
-        // mxArray* variable_data = mxCreateStructMatrix(3,1,0, NULL);// (3,1,0)
-        // mxAddField(mx_data, (**product).variable[index]->name);
-        // mxSetField(mx_data, fieldnum, (**product).variable[index]->name, variable_data);
-        // harp_matlab_add_harp_product_variable(variable_data, product, index); 
-
-
         harp_matlab_add_harp_product_variable(mx_data, product, index);
      }
 
@@ -598,7 +639,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
             }
             break;
         default:
-            mexErrMsgTxt("Unsupported class for variabledata.");
+            mexErrMsgTxt("Unsupported class for variable data.");
             return;
     }
 }
