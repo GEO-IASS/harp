@@ -371,18 +371,22 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
     for (iindex = 0; iindex < num_fields; iindex++)
     {
         const char *field_name;
-        char * cast_field_name;
+        // char * cast_field_name;
         int iiindex = 0;
 
         field_name = mxGetFieldNameByNumber(mx_variable, iindex);
-        cast_field_name = (char*)field_name;
+        // cast_field_name = (char*)field_name;
         /*------set meta info-------*/
         if(strncmp(field_name,"description",11) ==0){
-            (*variable).description = cast_field_name;
+            mxArray * meta_variable  = mxGetField(mx_variable, iiindex, field_name);
+            char * desstring = mxArrayToString(meta_variable);
+            variable->description = desstring;
             iiindex++;
         }
         else if(strncmp(field_name,"unit",4)==0){
-            (*variable).unit = cast_field_name;
+            mxArray * meta_variable  = mxGetField(mx_variable, iiindex, field_name);
+            char * unitstring = mxArrayToString(meta_variable);
+            variable->unit = unitstring;
              iiindex++;
         }
         

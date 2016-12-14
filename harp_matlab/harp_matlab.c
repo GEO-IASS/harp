@@ -182,10 +182,12 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 
     //-----------debugging---------//
     mexPrintf("top-level inside: %d \n",(*product).num_variables);
-    for(int i = 0; i<(*product).num_variables; i++){
-        mexPrintf("and: %s \n",(*product).variable[i]->name);
+    for(int i = 0; i<product->num_variables; i++){
+        mexPrintf("and: %s \n",product->variable[i]->name);
     }
-    mexPrintf("meta: %s \n",(*product).source_product);
+    mexPrintf("meta: %s \n", product->source_product);
+    mexPrintf("description: %s \n", product->variable[10]->description);
+    mexPrintf("unit: %s \n", product->variable[10]->unit);
     //--------------------------//
 
     if (harp_export(filename, format, product) == 0){
