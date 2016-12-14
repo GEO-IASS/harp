@@ -391,12 +391,52 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
         }
         
         else if(strncmp(field_name,"dimensions",10)==0){
-             iiindex++;
-            //--to be done--
+            mxArray * meta_variable  = mxGetField(mx_variable, iiindex, field_name);
+            int num_dims_variable = mxGetNumberOfDimensions(meta_variable);
+            int32_t *dimvalue = mxGetData(meta_variable);
+            int counter = 0;
+            while(counter<num_dims_variable){
+                variable->dimension[counter] = dimvalue[counter];
+            }
+            iiindex++;
         }
         else if(strncmp(field_name,"dimension_type",14)==0){
+            // mxArray * meta_variable  = mxGetField(mx_variable, iiindex, field_name);
+            // int num_dims_variable = mxGetNumberOfDimensions(meta_variable);
+            // int32_t *dimvalue = mxGetData(meta_variable);
+            // int counter = 0;
+            // while(counter<num_dims_variable){
+            //     switch(dimvalue[counter])
+            //     {
+            //       case -1:      
+            //       {
+            //         variable->dimension_type[counter] = harp_dimension_independent;
+            //       }   
+            //       case 0:      
+            //       {
+            //         variable->dimension_type[counter] = harp_dimension_time;
+            //       }
+            //       case 1:      
+            //       {
+            //         variable->dimension_type[counter] = harp_dimension_latitude;
+            //       }
+            //       case 2:      
+            //       {
+            //         variable->dimension_type[counter] = harp_dimension_longitude;
+            //       }
+            //       case 3:      
+            //       {
+            //         variable->dimension_type[counter] = harp_dimension_vertical;
+            //       }
+            //       case 4:      
+            //       {
+            //         variable->dimension_type[counter] = harp_dimension_spectral;
+            //       }
+            //     } 
+            // }
+
              iiindex++;
-            //--to be done--
+        
         }
         else if(strncmp(field_name,"value",5)==0)
         {
