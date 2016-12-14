@@ -401,9 +401,10 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
             iiindex++;
         }
         else if(strncmp(field_name,"dimension_type",14)==0){
-            // mxArray * meta_variable  = mxGetField(mx_variable, iiindex, field_name);
-            // int num_dims_variable = mxGetNumberOfDimensions(meta_variable);
-            // int32_t *dimvalue = mxGetData(meta_variable);
+            mxArray * meta_variable  = mxGetField(mx_variable, iiindex, field_name);
+            int num_dims_variable = mxGetNumberOfDimensions(meta_variable);
+            int32_t *dimvalue = mxGetData(meta_variable);
+            mexPrintf("num_dims of dim type is: %d \n", num_dims_variable);
             // int counter = 0;
             // while(counter<num_dims_variable){
             //     switch(dimvalue[counter])
@@ -411,28 +412,29 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
             //       case -1:      
             //       {
             //         variable->dimension_type[counter] = harp_dimension_independent;
-            //       }   
+            //       } break;   
             //       case 0:      
             //       {
             //         variable->dimension_type[counter] = harp_dimension_time;
-            //       }
+            //       } break; 
             //       case 1:      
             //       {
             //         variable->dimension_type[counter] = harp_dimension_latitude;
-            //       }
+            //       }  break; 
             //       case 2:      
             //       {
             //         variable->dimension_type[counter] = harp_dimension_longitude;
-            //       }
+            //       } break; 
             //       case 3:      
             //       {
             //         variable->dimension_type[counter] = harp_dimension_vertical;
-            //       }
+            //       }  break; 
             //       case 4:      
             //       {
             //         variable->dimension_type[counter] = harp_dimension_spectral;
-            //       }
+            //       } break; 
             //     } 
+            //     counter++;
             // }
 
              iiindex++;
@@ -453,13 +455,19 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                 dim[i] = (long)mxGetDimensions(datastructure)[i];
                 // dim_type[i] = harp_dimension_time;
             }
-            dim_type[0] = harp_dimension_time;
-            dim_type[1] = harp_dimension_independent;
-            
+
+            if(dim[1]==1){
+               dim_type[0] = harp_dimension_time;
+               dim_type[1] = harp_dimension_latitude;
+            }
+            else{
+                dim_type[0] = harp_dimension_time;
+                dim_type[1] = harp_dimension_independent;
+            }
             num_elements = mxGetNumberOfElements(datastructure);
             mexPrintf("-------value of the elements is--------- : %d \n", num_elements);
-            // mexPrintf("-------dim 1--------- : %d \n", dim[0]);
-            // mexPrintf("-------dim 2--------- : %d \n", dim[1]);
+            mexPrintf("-------dim 1--------- : %d \n", dim[0]);
+            mexPrintf("-------dim 2--------- : %d \n", dim[1]);
             //-- fix it later
             // if (num_elements == 0)
             // {

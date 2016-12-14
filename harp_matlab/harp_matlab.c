@@ -189,9 +189,10 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
     mexPrintf("description: %s \n", product->variable[10]->description);
     mexPrintf("unit: %s \n", product->variable[10]->unit);
     mexPrintf("dimensions: %d \n", product->variable[10]->dimension[0]);
-    // mexPrintf("dimensions type: %d \n", product->variable[10]->dimension_type[0]);
+    mexPrintf("dimensions type: %d \n", product->variable[0]->dimension_type[0]);
+    mexPrintf("dimensions type: %d \n", product->variable[0]->dimension_type[1]);
     mexPrintf("data: %d \n", product->variable[10]->data.double_data[0]);
-    //--------------------------//
+    //----------end of debugging----------------//
 
     if (harp_export(filename, format, product) == 0){
         mexPrintf("why not!!!\n");
