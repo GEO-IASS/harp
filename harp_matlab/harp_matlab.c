@@ -183,15 +183,18 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
     //-----------debugging---------//
     mexPrintf("---top-level outside---: %d \n",product->num_variables);
     for(int i = 0; i<product->num_variables; i++){
+        mexPrintf("--$$$----%d--- $$$---", i);
         mexPrintf("and: %s \n",product->variable[i]->name);
+        mexPrintf("dimensions type 1: %d \n", product->variable[i]->dimension_type[0]);        
+        mexPrintf("dimensions type 2: %d \n", product->variable[i]->dimension_type[1]);
+
     }
+    mexPrintf("name: %s \n",product->variable[5]->name);
     mexPrintf("meta: %s \n", product->source_product);
     mexPrintf("description: %s \n", product->variable[0]->description);
     mexPrintf("unit: %s \n", product->variable[0]->unit);
-    mexPrintf("dimensions: %d \n", product->variable[0]->dimension[0]);
-    mexPrintf("dimensions type: %d \n", product->variable[0]->dimension_type[0]);
-    mexPrintf("dimensions type: %d \n", product->variable[0]->dimension_type[1]);
-    mexPrintf("data: %d \n", product->variable[2]->data.double_data[0]);
+    
+    mexPrintf("data: %g \n", product->variable[2]->data.double_data[0]);
     mexPrintf("index: %d \n", product->variable[14]->data.int32_data[14]);
     //----------end of debugging----------------//
 
@@ -203,8 +206,8 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
     if (harp_export(filename, format, product) != 0)
     {
         mexPrintf("it didn't export successfully\n");
-        harp_product_delete(product);
-        harp_matlab_harp_error();
+        harp_matlab_harp_error();        
+        harp_product_delete(product);        
     }
     harp_product_delete(product);
 
