@@ -350,7 +350,8 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
     mexPrintf("the name of the variable is: %s \n", variable_name );
     // mexPrintf("requested dim is: %d \n", req_num_dims );
 
-    harp_variable *variable;
+    // harp_variable *variable;
+    harp_variable *variable_new;
 
     char *string_data;
     long dim[HARP_MAX_NUM_DIMS];
@@ -370,72 +371,77 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
     int num_fields = mxGetNumberOfFields(mx_variable);
     mexPrintf("the loops are: %d \n", num_fields);
 
+      char * des_string;
+        char * unit_string;
+        int32_t *dimtypevalue;
+        int32_t *dimvalue;
+
     for (iindex = 0; iindex < num_fields; iindex++)
     {
         const char *field_name;
-        // char * cast_field_name;
-        // int iiindex = 0;
+      
 
         field_name = mxGetFieldNameByNumber(mx_variable, iindex);
        
         /*------set meta info-------*/
         if(strncmp(field_name,"description",11) ==0){
             mxArray * meta_variable  = mxGetField(mx_variable, 0, field_name);
-            char * des_string = mxArrayToString(meta_variable);
-            variable->description = des_string;
+            des_string = mxArrayToString(meta_variable);
+            mexPrintf("description is %s \n", des_string);
+            // variable_new->description = des_string;
         }
         else if(strncmp(field_name,"unit",4)==0){
             mxArray * meta_variable  = mxGetField(mx_variable, 0, field_name);
-            char * unit_string = mxArrayToString(meta_variable);
-            variable->unit = unit_string;
+            unit_string = mxArrayToString(meta_variable);
+            // variable_new->unit = unit_string;
         }
         
         else if(strncmp(field_name,"dimensions",10)==0){
             mxArray * meta_variable  = mxGetField(mx_variable, 0, field_name);
-            int num_dims_variable = mxGetNumberOfDimensions(meta_variable);
-            int32_t *dimvalue = mxGetData(meta_variable);
-            int counter = 0;
-            while(counter<num_dims_variable){
-                variable->dimension[counter] = dimvalue[counter];
-                counter++;
-            }
+            // int num_dims_variable = mxGetNumberOfDimensions(meta_variable);
+            dimvalue = mxGetData(meta_variable);
+            // int counter = 0;
+            // while(counter<num_dims_variable){
+            //     variable_new->dimension[counter] = dimvalue[counter];
+            //     counter++;
+            // }
         }
         else if(strncmp(field_name,"dimension_type",14)==0){
             mxArray * meta_variable  = mxGetField(mx_variable, 0, field_name);
             int num_dims_variable = mxGetNumberOfDimensions(meta_variable);
-            int32_t *dimvalue = mxGetData(meta_variable);
+            dimtypevalue = mxGetData(meta_variable);
             mexPrintf("num_dims of dim type is: %d \n", num_dims_variable);
-            int counter = 0;
-            while(counter<num_dims_variable){
-                switch(dimvalue[counter])
-                {
-                  case -1:      
-                  {
-                    variable->dimension_type[counter] = harp_dimension_independent;
-                  } break;   
-                  case 0:      
-                  {
-                    variable->dimension_type[counter] = harp_dimension_time;
-                  } break; 
-                  case 1:      
-                  {
-                    variable->dimension_type[counter] = harp_dimension_latitude;
-                  }  break; 
-                  case 2:      
-                  {
-                    variable->dimension_type[counter] = harp_dimension_longitude;
-                  } break; 
-                  case 3:      
-                  {
-                    variable->dimension_type[counter] = harp_dimension_vertical;
-                  }  break; 
-                  case 4:      
-                  {
-                    variable->dimension_type[counter] = harp_dimension_spectral;
-                  } break; 
-                } 
-                counter++;
-            }    
+            // int counter = 0;
+            // while(counter<num_dims_variable){
+            //     switch(dimtypevalue[counter])
+            //     {
+            //       case -1:      
+            //       {
+            //         variable_new->dimension_type[counter] = harp_dimension_independent;
+            //       } break;   
+            //       case 0:      
+            //       {
+            //         variable_new->dimension_type[counter] = harp_dimension_time;
+            //       } break; 
+            //       case 1:      
+            //       {
+            //         variable_new->dimension_type[counter] = harp_dimension_latitude;
+            //       }  break; 
+            //       case 2:      
+            //       {
+            //         variable_new->dimension_type[counter] = harp_dimension_longitude;
+            //       } break; 
+            //       case 3:      
+            //       {
+            //         variable_new->dimension_type[counter] = harp_dimension_vertical;
+            //       }  break; 
+            //       case 4:      
+            //       {
+            //         variable_new->dimension_type[counter] = harp_dimension_spectral;
+            //       } break; 
+            //     } 
+            //     counter++;
+            // }    
         }
         else if(strncmp(field_name,"value",5)==0)
         {
@@ -456,9 +462,39 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
             {
                 dim[i] = (long)mxGetDimensions(datastructure)[i];
                 if(dim[i]>1){
-                 dim_type[i] = variable->dimension_type[i];
-                 mexPrintf("type dimensions is %d \n",dim_type[i]);
-                }
+                 // dim_type[i] = variable_new->dimension_type[i];
+                        // dim_type[i] = dimtypevalue[i];
+                    switch(dimtypevalue[i])
+                    {
+                      case -1:      
+                      {
+                        dim_type[i] = harp_dimension_independent;
+                      } break;   
+                      case 0:      
+                      {
+                        dim_type[i] = harp_dimension_time;
+                      } break; 
+                      case 1:      
+                      {
+                        dim_type[i] = harp_dimension_latitude;
+                      }  break; 
+                      case 2:      
+                      {
+                        dim_type[i] = harp_dimension_longitude;
+                      } break; 
+                      case 3:      
+                      {
+                        dim_type[i] = harp_dimension_vertical;
+                      }  break; 
+                      case 4:      
+                      {
+                        dim_type[i] = harp_dimension_spectral;
+                      } break; 
+                    } 
+             
+
+                     mexPrintf("type dimensions is %d \n",dim_type[i]);
+                    }
                
             }
 
@@ -482,7 +518,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                 {
                     // index = harp_product_add_variable(product, variable);
                     // if (index < 0)
-                    if(!(harp_product_add_variable(*product,variable)))
+                    if(!(harp_product_add_variable(*product,variable_new)))
                     {
                         harp_matlab_harp_error();
                     }
@@ -528,15 +564,15 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                     {
                         int8_t *data;
 
-                        if( harp_variable_new(variable_name, harp_type_int8, num_dims, dim_type, dim, &variable) !=0)
+                        if( harp_variable_new(variable_name, harp_type_int8, num_dims, dim_type, dim, &variable_new) !=0)
                         {
                             harp_matlab_harp_error();
                         }
-                        if(harp_product_add_variable(*product, variable) != 0)
+                        if(harp_product_add_variable(*product, variable_new) != 0)
                         {
                             harp_matlab_harp_error();
                         }
-                        if(harp_product_get_variable_by_name(*product, variable_name, &variable)!=0)
+                        if(harp_product_get_variable_by_name(*product, variable_name, &variable_new)!=0)
                         {
                             harp_matlab_harp_error();
                         }
@@ -546,7 +582,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         while(counter<num_elements){
                             for(long j=0; j<num_elements/dim[req_num_dims-1];j++){
                                 for(long k=0; k<dim[req_num_dims-1];k++){
-                                    (*variable).data.int8_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
+                                    (*variable_new).data.int8_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
                                 } 
                             } 
                         }     
@@ -556,15 +592,15 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                     {
                         int16_t *data;
 
-                        if( harp_variable_new(variable_name, harp_type_int16, num_dims, dim_type, dim, &variable) !=0)
+                        if( harp_variable_new(variable_name, harp_type_int16, num_dims, dim_type, dim, &variable_new) !=0)
                         {
                             harp_matlab_harp_error();
                         }
-                        if( harp_product_add_variable(*product, variable)!= 0)
+                        if( harp_product_add_variable(*product, variable_new)!= 0)
                         {
                             harp_matlab_harp_error();
                         }
-                        if(harp_product_get_variable_by_name(*product, variable_name, &variable)!=0)
+                        if(harp_product_get_variable_by_name(*product, variable_name, &variable_new)!=0)
                         {
                             harp_matlab_harp_error();
                         }
@@ -574,7 +610,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         while(counter<num_elements){
                             for(long j=0; j<num_elements/dim[req_num_dims-1];j++){
                                 for(long k=0; k<dim[req_num_dims-1];k++){
-                                    (*variable).data.int16_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
+                                    (*variable_new).data.int16_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
                                 } 
                             } 
                         }     
@@ -584,32 +620,32 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                     {
                         int32_t *data;
                        
-                        if( harp_variable_new(variable_name, harp_type_int32, num_dims, dim_type, dim, &variable) !=0)
+                        if( harp_variable_new(variable_name, harp_type_int32, num_dims, dim_type, dim, &variable_new) !=0)
                         {
                             harp_matlab_harp_error();
                         }
-                        if( harp_product_add_variable(*product, variable) !=0)
+                        if( harp_product_add_variable(*product, variable_new) !=0)
                         {
                             harp_matlab_harp_error();
                         }
-                        if(harp_product_get_variable_by_name(*product, variable_name, &variable)!=0)
+                        if(harp_product_get_variable_by_name(*product, variable_name, &variable_new)!=0)
                         {
                             harp_matlab_harp_error();
                         }
-                        mexPrintf("sucessfully added the INT32 variable \n");
-                        mexPrintf("verifying no of variables %d \n", (**product).num_variables);
+                        // mexPrintf("sucessfully added the INT32 variable \n");
+                        // mexPrintf("verifying no of variables %d \n", (**product).num_variables);
 
                         data = mxGetData(datastructure);
-                        mexPrintf("before the loop, the integerals is: %g \n", data[0]);
+                        // mexPrintf("before the loop, the integerals is: %d \n", data[0]);
                         int counter = 0;
                         while(counter<num_elements){
                             for(long j=0; j<num_elements/dim[req_num_dims-1];j++){
                                 for(long k=0; k<dim[req_num_dims-1];k++){
-                                    variable->data.int32_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
+                                    variable_new->data.int32_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
                                 } 
                             } 
                         }  
-                        mexPrintf("finished assigning of the last one! \n");
+                        // mexPrintf("finished assigning of the last one! \n");
 
                     }
                     break;
@@ -617,17 +653,17 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                     {
                         double *data;
                      
-                        if( harp_variable_new(variable_name, harp_type_double, num_dims, dim_type, dim, &variable) !=0)
+                        if( harp_variable_new(variable_name, harp_type_double, num_dims, dim_type, dim, &variable_new) !=0)
                         {
                             harp_matlab_harp_error();
                         }
                   
-                        if( harp_product_add_variable(*product, variable) !=0)    
+                        if( harp_product_add_variable(*product, variable_new) !=0)    
                         {
                             harp_matlab_harp_error();
                         }
                                             
-                        if(harp_product_get_variable_by_name(*product, variable_name, &variable)!=0)
+                        if(harp_product_get_variable_by_name(*product, variable_name, &variable_new)!=0)
                         {
                             harp_matlab_harp_error();
                         }
@@ -636,10 +672,13 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         mexPrintf("verifying num of variables %d \n", (**product).num_variables);
                         int inner = (**product).num_variables;
 
+                        // assigning meta data
+                        (**product).variable[inner-1]->unit = unit_string;
+                        (**product).variable[inner-1]->description = des_string;
+
                         // mexPrintf("dimensions number is: %d \n", num_dims);
                         // mexPrintf("dimensions is: %d \n", (**product).variable[inner-1]->num_dimensions);
                         
-
                         if(mxIsDouble(datastructure)){
                             mexPrintf("this is actually DOUBLE TYPE \n");
                         }
@@ -649,15 +688,19 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         while(counter<num_elements){
                             for(long j=0; j<num_elements/dim[req_num_dims-1];j++){
                                 for(long k=0; k<dim[req_num_dims-1];k++){
-                                    variable->data.double_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
+                                    variable_new->data.double_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
                                 } 
                             } 
                         }    
 
-                        if(num_dims==2){
+                        
                             mexPrintf("------$$$$$$---variable name is---: %s \n", (**product).variable[inner-1]->name);
                             mexPrintf("--- name is---: %s \n", variable_name);
+                            mexPrintf("--- index is---: %d \n", inner-1);
+                            // mexPrintf("---unit is---- %s \n", (**product).variable[inner-1]->unit);
+                            // mexPrintf("---description is---- %s \n", (**product).variable[inner-1]->description);
                             mexPrintf("dimension type 1 is: %d \n", (**product).variable[inner-1]->dimension_type[0]);
+                        if(num_dims==2){       
                             mexPrintf("dimension type 2 is: %d \n", (**product).variable[inner-1]->dimension_type[1]);
                         }   
 
@@ -677,15 +720,15 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
 
                         // index = harp_product_add_variable(product, variable);
                         // if (index < 0)
-                        if( harp_variable_new(variable_name, harp_type_float, num_dims, dim_type, dim, &variable) !=0)
+                        if( harp_variable_new(variable_name, harp_type_float, num_dims, dim_type, dim, &variable_new) !=0)
                         {
                             harp_matlab_harp_error();
                         }
-                        if( harp_product_add_variable(*product, variable)!= 0)
+                        if( harp_product_add_variable(*product, variable_new)!= 0)
                         {
                             harp_matlab_harp_error();
                         }
-                        if(harp_product_get_variable_by_name(*product, variable_name, &variable)!=0)
+                        if(harp_product_get_variable_by_name(*product, variable_name, &variable_new)!=0)
                         {
                             harp_matlab_harp_error();
                         }
@@ -695,7 +738,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         while(counter<num_elements){
                             for(long j=0; j<num_elements/dim[req_num_dims-1];j++){
                                 for(long k=0; k<dim[req_num_dims-1];k++){
-                                    (*variable).data.float_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
+                                    (*variable_new).data.float_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
                                 } 
                             } 
                         } 
@@ -709,11 +752,11 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                     }
                     string_data = get_matlab_string_value(datastructure);
                   
-                    if( harp_variable_new(variable_name, harp_type_string, num_dims, dim_type, dim, &variable) !=0)
+                    if( harp_variable_new(variable_name, harp_type_string, num_dims, dim_type, dim, &variable_new) !=0)
                     {
                             harp_matlab_harp_error();
                     }
-                    if( harp_product_add_variable(*product, variable)!=0)
+                    if( harp_product_add_variable(*product, variable_new)!=0)
                      {
                             harp_matlab_harp_error();
                      }
@@ -734,11 +777,11 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                                 mexErrMsgTxt("Cell arrays are only allowed for one dimensional string data.");
                             }
                         }
-                         if( harp_variable_new(variable_name, harp_type_string, num_dims, dim_type, dim, &variable) !=0)
+                         if( harp_variable_new(variable_name, harp_type_string, num_dims, dim_type, dim, &variable_new) !=0)
                         {
                             harp_matlab_harp_error();
                          }
-                        if( harp_product_add_variable(*product, variable)!=0)
+                        if( harp_product_add_variable(*product, variable_new)!=0)
                         {
                             harp_matlab_harp_error();
                         }
@@ -747,7 +790,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         {
                             mx_cell = mxGetCell(datastructure, coda_c_index_to_fortran_index(num_dims, dim, i));
                             string_data = get_matlab_string_value(mx_cell);
-                            if (harp_variable_set_string_data_element(variable, i, string_data) != 0)
+                            if (harp_variable_set_string_data_element(variable_new, i, string_data) != 0)
                             {
                                 mxFree(string_data);
                                 harp_matlab_harp_error();
@@ -832,9 +875,9 @@ harp_product *harp_matlab_set_product(const mxArray *mx_struct)
 
                     mx_dim_variable = mxGetFieldByNumber(mx_struct,0, dim_variable_index);
                     // int elements = mxGetNumberOfElements(mx_dim_variable);
-                    dim1 = mxGetNumberOfDimensions(mx_dim_variable);
+                    dim1 = mxGetNumberOfDimensions(mx_dim_variable);// matlab dim1 is always 2
                     dim2 = mxGetDimensions(mx_dim_variable);
-                    // mexPrintf("dimension 1 of the variable is: %d \n", dim1);
+                    mexPrintf("dimension of the variable from matlab is: %d \n", dim1);
                 }
 
                 mx_variable = mxGetFieldByNumber(mx_struct, 0, index);
@@ -843,6 +886,8 @@ harp_product *harp_matlab_set_product(const mxArray *mx_struct)
             
             }
        }
+
+        mexPrintf("~~~~~ %d ~~~~~:\n", index);
     }
 
     return product;
