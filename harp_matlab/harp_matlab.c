@@ -186,7 +186,9 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
         mexPrintf("--$$$----%d--- $$$---", i);
         mexPrintf("and: %s \n",product->variable[i]->name);
         mexPrintf("description: %s \n", product->variable[i]->description);
+        // if( product->variable[i]->unit != NULL){
         // mexPrintf("unit: %s \n", product->variable[i]->unit);//some of them don't have unit, then it will crash
+        // }
         mexPrintf("dimensions type 1: %d \n", product->variable[i]->dimension_type[0]);
         if(product->variable[i]->num_dimensions ==2)   {   
             mexPrintf("dimensions type 2: %d \n", product->variable[i]->dimension_type[1]);
