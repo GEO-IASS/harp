@@ -182,15 +182,20 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 
     //-----------debugging---------//
     mexPrintf("---top-level outside---: %d \n",product->num_variables);
-    // for(int i = 0; i<product->num_variables; i++){
-    //     mexPrintf("--$$$----%d--- $$$---", i);
-    //     mexPrintf("and: %s \n",product->variable[i]->name);
-    //     // mexPrintf("description: %s \n", product->variable[i]->description);
-    //     // mexPrintf("unit: %s \n", product->variable[i]->unit);//some of them don't have unit, then it will crash
-    //     mexPrintf("dimensions type 1: %d \n", product->variable[i]->dimension_type[0]);      
-    //     mexPrintf("dimensions type 2: %d \n", product->variable[i]->dimension_type[1]);
-    //  }
-     mexPrintf("---end of top-level ---");
+    for(int i = 0; i<product->num_variables; i++){
+        mexPrintf("--$$$----%d--- $$$---", i);
+        mexPrintf("and: %s \n",product->variable[i]->name);
+        mexPrintf("description: %s \n", product->variable[i]->description);
+        // mexPrintf("unit: %s \n", product->variable[i]->unit);//some of them don't have unit, then it will crash
+        mexPrintf("dimensions type 1: %d \n", product->variable[i]->dimension_type[0]);
+        if(product->variable[i]->num_dimensions ==2)   {   
+            mexPrintf("dimensions type 2: %d \n", product->variable[i]->dimension_type[1]);
+        }
+     }
+    // harp_matlab_harp_error();
+    
+    mexPrintf("---end of top-level --- \n");
+    mexPrintf("what's wrong here? \n");
     // mexPrintf("name: %s \n",product->variable[5]->name);
     // mexPrintf("meta: %s \n", product->source_product);
     // // mexPrintf("description: %s \n", product->variable[0]->description);
@@ -207,14 +212,19 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
         harp_matlab_harp_error();
     }
 
+    // harp_matlab_harp_error();
+    if (product == NULL){
+        mexPrintf("again something isn't right");
+    }
     //----------end of debugging----------------//
     if (harp_export(filename, format, product) != 0)
     {
-        // mexPrintf("it didn't export successfully\n");
+        mexPrintf("it didn't export successfully\n");
         harp_matlab_harp_error();        
         harp_product_delete(product);        
     }
-    harp_product_delete(product);
+
+    // harp_product_delete(product);
 
     mxFree(format);
     mxFree(filename);
