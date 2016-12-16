@@ -180,53 +180,13 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 
     product = harp_matlab_set_product(prhs[2]);
 
-    //-----------debugging---------//
-    mexPrintf("---top-level outside---: %d \n",product->num_variables);
-    for(int i = 0; i<product->num_variables; i++){
-        mexPrintf("--$$$----%d--- $$$---", i);
-        mexPrintf("and: %s \n",product->variable[i]->name);
-        mexPrintf("description: %s \n", product->variable[i]->description);
-        // if( product->variable[i]->unit != NULL){
-        // mexPrintf("unit: %s \n", product->variable[i]->unit);//some of them don't have unit, then it will crash
-        // }
-        mexPrintf("dimensions type 1: %d \n", product->variable[i]->dimension_type[0]);
-        if(product->variable[i]->num_dimensions ==2)   {   
-            mexPrintf("dimensions type 2: %d \n", product->variable[i]->dimension_type[1]);
-        }
-     }
-    // harp_matlab_harp_error();
-    
-    mexPrintf("---end of top-level --- \n");
-    mexPrintf("what's wrong here? \n");
-    // mexPrintf("name: %s \n",product->variable[5]->name);
-    // mexPrintf("meta: %s \n", product->source_product);
-    // // mexPrintf("description: %s \n", product->variable[0]->description);
-    // mexPrintf("unit: %s \n", product->variable[0]->unit);
-    
-    // mexPrintf("data: %g \n", product->variable[2]->data.double_data[0]);
-    // mexPrintf("index: %d \n", product->variable[14]->data.int32_data[14]);
-   
-
-    // harp_matlab_harp_error();
-
-    // if (harp_export(filename, format, product) == 0){
-    //     mexPrintf("it exported, but still errors?\n");
-    //     harp_matlab_harp_error();
-    // }
-
-    // // harp_matlab_harp_error();
-    // if (product == NULL){
-    //     mexPrintf("again something isn't right");
-    // }
-    //----------end of debugging----------------//
     if (harp_export(filename, format, product) != 0)
     {
-        mexPrintf("it didn't export successfully\n");
         harp_matlab_harp_error();        
         harp_product_delete(product);        
     }
 
-    // harp_product_delete(product);
+    // harp_product_delete(product); // if there is, then matlab crashes
 
     mxFree(format);
     mxFree(filename);
