@@ -106,13 +106,13 @@ static void calculate_corner_coordinates(long num_time, long num_xtrack, const d
                 /* extrapolate */
                 id1 = i * num_xtrack + j - 1 + (j == 0);
                 id2 = id1 + num_xtrack + (j == 0);
-                harp_geographic_extrapolation(longitude[id1], latitude[id1], longitude[id2], latitude[id2],
-                                              &center_longitude[0], &center_latitude[0]);
+                harp_geographic_extrapolation(latitude[id1], longitude[id1], latitude[id2], longitude[id2],
+                                              &center_latitude[0], &center_longitude[0]);
 
                 id1 = i * num_xtrack + j - (j == num_xtrack);
                 id2 = id1 + num_xtrack - (j == num_xtrack);
-                harp_geographic_extrapolation(longitude[id1], latitude[id1], longitude[id2], latitude[id2],
-                                              &center_longitude[1], &center_latitude[1]);
+                harp_geographic_extrapolation(latitude[id1], longitude[id1], latitude[id2], longitude[id2],
+                                              &center_latitude[1], &center_longitude[1]);
             }
             else
             {
@@ -121,8 +121,8 @@ static void calculate_corner_coordinates(long num_time, long num_xtrack, const d
                     /* extrapolate */
                     id1 = (i - 1) * num_xtrack + j;
                     id2 = id1 + 1;
-                    harp_geographic_extrapolation(longitude[id1], latitude[id1], longitude[id2], latitude[id2],
-                                                  &center_longitude[0], &center_latitude[0]);
+                    harp_geographic_extrapolation(latitude[id1], longitude[id1], latitude[id2], longitude[id2],
+                                                  &center_latitude[0], &center_longitude[0]);
                 }
                 else
                 {
@@ -135,8 +135,8 @@ static void calculate_corner_coordinates(long num_time, long num_xtrack, const d
                     /* extrapolate */
                     id1 = (i - 1) * num_xtrack + j - 1;
                     id2 = id1 - 1;
-                    harp_geographic_extrapolation(longitude[id1], latitude[id1], longitude[id2], latitude[id2],
-                                                  &center_longitude[1], &center_latitude[1]);
+                    harp_geographic_extrapolation(latitude[id1], longitude[id1], latitude[id2], longitude[id2],
+                                                  &center_latitude[1], &center_longitude[1]);
                 }
                 else
                 {
@@ -150,13 +150,13 @@ static void calculate_corner_coordinates(long num_time, long num_xtrack, const d
                 /* extrapolate */
                 id1 = (i - 1) * num_xtrack + j - (j == num_xtrack);
                 id2 = id1 - num_xtrack - (j == num_xtrack);
-                harp_geographic_extrapolation(longitude[id1], latitude[id1], longitude[id2], latitude[id2],
-                                              &center_longitude[2], &center_latitude[2]);
+                harp_geographic_extrapolation(latitude[id1], longitude[id1], latitude[id2], longitude[id2],
+                                              &center_latitude[2], &center_longitude[2]);
 
                 id1 = (i - 1) * num_xtrack + j - 1 + (j == 0);
                 id2 = id1 - num_xtrack + (j == 0);
-                harp_geographic_extrapolation(longitude[id1], latitude[id1], longitude[id2], latitude[id2],
-                                              &center_longitude[3], &center_latitude[3]);
+                harp_geographic_extrapolation(latitude[id1], longitude[id1], latitude[id2], longitude[id2],
+                                              &center_latitude[3], &center_longitude[3]);
             }
             else
             {
@@ -165,8 +165,8 @@ static void calculate_corner_coordinates(long num_time, long num_xtrack, const d
                     /* extrapolate */
                     id1 = i * num_xtrack + j - 1;
                     id2 = id1 - 1;
-                    harp_geographic_extrapolation(longitude[id1], latitude[id1], longitude[id2], latitude[id2],
-                                                  &center_longitude[2], &center_latitude[2]);
+                    harp_geographic_extrapolation(latitude[id1], longitude[id1], latitude[id2], longitude[id2],
+                                                  &center_latitude[2], &center_longitude[2]);
                 }
                 else
                 {
@@ -179,8 +179,8 @@ static void calculate_corner_coordinates(long num_time, long num_xtrack, const d
                     /* extrapolate */
                     id1 = i * num_xtrack + j;
                     id2 = id1 + 1;
-                    harp_geographic_extrapolation(longitude[id1], latitude[id1], longitude[id2], latitude[id2],
-                                                  &center_longitude[3], &center_latitude[3]);
+                    harp_geographic_extrapolation(latitude[id1], longitude[id1], latitude[id2], longitude[id2],
+                                                  &center_latitude[3], &center_longitude[3]);
                 }
                 else
                 {
@@ -189,12 +189,12 @@ static void calculate_corner_coordinates(long num_time, long num_xtrack, const d
                 }
             }
 
-            harp_geographic_intersection(center_longitude[0], center_latitude[0],
-                                         center_longitude[2], center_latitude[2],
-                                         center_longitude[1], center_latitude[1],
-                                         center_longitude[3], center_latitude[3],
-                                         &longitude_grid[i * (num_xtrack + 1) + j],
-                                         &latitude_grid[i * (num_xtrack + 1) + j]);
+            harp_geographic_intersection(center_latitude[0], center_longitude[0],
+                                         center_latitude[2], center_longitude[2],
+                                         center_latitude[1], center_longitude[1],
+                                         center_latitude[3], center_longitude[3],
+                                         &latitude_grid[i * (num_xtrack + 1) + j],
+                                         &longitude_grid[i * (num_xtrack + 1) + j]);
         }
     }
 }
@@ -2268,7 +2268,7 @@ static void register_ombro_product(void)
                                                                      harp_type_double, 1, dimension_type, NULL,
                                                                      description, "molec/cm^2", NULL, read_bro_column);
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_BRO/Data_Fields/ColumnAmount[]";
-    harp_variable_definition_add_mapping(variable_definition, "destriped=false", NULL, path, NULL);
+    harp_variable_definition_add_mapping(variable_definition, "destriped=false (default)", NULL, path, NULL);
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_BRO/Data_Fields/ColumnAmountDestriped[]";
     harp_variable_definition_add_mapping(variable_definition, "destriped=true", NULL, path, NULL);
 
@@ -2279,9 +2279,8 @@ static void register_ombro_product(void)
                                                                      harp_type_double, 1, dimension_type, NULL,
                                                                      description, "molec/cm^2", exclude_destriped,
                                                                      read_bro_column_error);
-    description = "will only be ingested if destriped=false (default)";
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_BRO/Data_Fields/ColumnUncertainty[]";
-    harp_variable_definition_add_mapping(variable_definition, "destriped=false", NULL, path, description);
+    harp_variable_definition_add_mapping(variable_definition, "destriped=false (default)", NULL, path, NULL);
 }
 
 static void register_omchocho_product(void)
@@ -2325,7 +2324,7 @@ static void register_omchocho_product(void)
                                                                      description, "molec/cm^2", NULL,
                                                                      read_chocho_column);
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_CHOCHO/Data_Fields/ColumnAmount[]";
-    harp_variable_definition_add_mapping(variable_definition, "destriped=false", NULL, path, NULL);
+    harp_variable_definition_add_mapping(variable_definition, "destriped=false (default)", NULL, path, NULL);
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_CHOCHO/Data_Fields/ColumnAmountDestriped[]";
     harp_variable_definition_add_mapping(variable_definition, "destriped=true", NULL, path, NULL);
 
@@ -2336,9 +2335,8 @@ static void register_omchocho_product(void)
                                                                      harp_type_double, 1, dimension_type, NULL,
                                                                      description, "molec/cm^2", exclude_destriped,
                                                                      read_chocho_column_error);
-    description = "will only be ingested if destriped=false (default)";
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_CHOCHO/Data_Fields/ColumnUncertainty[]";
-    harp_variable_definition_add_mapping(variable_definition, "destriped=false", NULL, path, description);
+    harp_variable_definition_add_mapping(variable_definition, "destriped=false (default)", NULL, path, NULL);
 }
 
 static void register_omcldo2_product(void)
@@ -2797,7 +2795,7 @@ static void register_omhcho_product(void)
                                                                      harp_type_double, 1, dimension_type, NULL,
                                                                      description, "molec/cm^2", NULL, read_hcho_column);
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_HCHO/Data_Fields/ColumnAmount[]";
-    harp_variable_definition_add_mapping(variable_definition, "destriped=false", NULL, path, NULL);
+    harp_variable_definition_add_mapping(variable_definition, "destriped=false (default)", NULL, path, NULL);
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_HCHO/Data_Fields/ColumnAmountDestriped[]";
     harp_variable_definition_add_mapping(variable_definition, "destriped=true", NULL, path, NULL);
 
@@ -2808,9 +2806,8 @@ static void register_omhcho_product(void)
                                                                      harp_type_double, 1, dimension_type, NULL,
                                                                      description, "molec/cm^2", exclude_destriped,
                                                                      read_hcho_column_error);
-    description = "will only be ingested if destriped=false (default)";
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_HCHO/Data_Fields/ColumnUncertainty[]";
-    harp_variable_definition_add_mapping(variable_definition, "destriped=false", NULL, path, description);
+    harp_variable_definition_add_mapping(variable_definition, "destriped=false (default)", NULL, path, NULL);
 }
 
 static void register_omno2_product(void)
@@ -3049,7 +3046,7 @@ static void register_omoclo_product(void)
                                                                      harp_type_double, 1, dimension_type, NULL,
                                                                      description, "molec/cm^2", NULL, read_oclo_column);
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_OClO/Data_Fields/ColumnAmount[]";
-    harp_variable_definition_add_mapping(variable_definition, "destriped=false", NULL, path, NULL);
+    harp_variable_definition_add_mapping(variable_definition, "destriped=false (default)", NULL, path, NULL);
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_OClO/Data_Fields/ColumnAmountDestriped[]";
     harp_variable_definition_add_mapping(variable_definition, "destriped=true", NULL, path, NULL);
 
@@ -3060,9 +3057,8 @@ static void register_omoclo_product(void)
                                                                      harp_type_double, 1, dimension_type, NULL,
                                                                      description, "molec/cm^2", exclude_destriped,
                                                                      read_oclo_column_error);
-    description = "will only be ingested if destriped=false (default)";
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_OClO/Data_Fields/ColumnUncertainty[]";
-    harp_variable_definition_add_mapping(variable_definition, "destriped=false", NULL, path, description);
+    harp_variable_definition_add_mapping(variable_definition, "destriped=false (default)", NULL, path, description);
 }
 
 static void register_omso2_product(void)
@@ -3081,7 +3077,7 @@ static void register_omso2_product(void)
     /* so2_column_variant ingestion option */
     description = "for V2 products: 'pbl' (anthropogenic SO2 pollution at the planet boundary layer), '5km' (showing"
         " passive degassing at 5km altitude), or '15km' (showing explosive eruptions at 15km); for V3"
-        " products: 'pbl' (planet boundary layer - 0.9km), 'trl' (lower troposhere - 2.5km), 'trm' (middle"
+        " products: 'pbl' (planet boundary layer - 0.9km), 'trl' (lower troposphere - 2.5km), 'trm' (middle"
         " troposphere - 7.5km), 'stl' (upper tropospheric and stratospheric - 17km)";
     harp_ingestion_register_option(module, "so2_column_variant", description, 6, so2_column_variant_option_values);
 
@@ -3123,13 +3119,15 @@ static void register_omso2_product(void)
                                                                      harp_type_double, 1, dimension_type, NULL,
                                                                      description, "DU", NULL, read_so2_column);
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_SO2/Data_Fields/SO2ColumnAmountPBL[]";
-    harp_variable_definition_add_mapping(variable_definition, "so2_column_variant=pbl", "V2 product", path, "default");
+    harp_variable_definition_add_mapping(variable_definition, "so2_column_variant=pbl (default)", "V2 product", path,
+                                         NULL);
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_SO2/Data_Fields/SO2ColumnAmount05KM[]";
     harp_variable_definition_add_mapping(variable_definition, "so2_column_variant=5km", "V2 product", path, NULL);
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_SO2/Data_Fields/SO2ColumnAmount15KM[]";
     harp_variable_definition_add_mapping(variable_definition, "so2_column_variant=15km", "V2 product", path, NULL);
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_SO2/Data_Fields/ColumnAmountSO2_PBL[]";
-    harp_variable_definition_add_mapping(variable_definition, "so2_column_variant=pbl", "V3 product", path, "default");
+    harp_variable_definition_add_mapping(variable_definition, "so2_column_variant=pbl (default)", "V3 product", path,
+                                         NULL);
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_SO2/Data_Fields/ColumnAmountSO2_TRL[]";
     harp_variable_definition_add_mapping(variable_definition, "so2_column_variant=trl", "V3 product", path, NULL);
     path = "/HDFEOS/SWATHS/OMI_Total_Column_Amount_SO2/Data_Fields/ColumnAmountSO2_TRM[]";
@@ -3242,8 +3240,8 @@ static void register_omto3_product(void)
     path = "/HDFEOS/SWATHS/OMI_Column_Amount_O3/Data_Fields/CloudFraction[]";
     harp_variable_definition_add_mapping(variable_definition, NULL, "V2 product", path, NULL);
     path = "/HDFEOS/SWATHS/OMI_Column_Amount_O3/Data_Fields/fc[]";
-    harp_variable_definition_add_mapping(variable_definition, "cloud_fraction_variant=effective", "V3 product", path,
-                                         NULL);
+    harp_variable_definition_add_mapping(variable_definition, "cloud_fraction_variant=effective (default)",
+                                         "V3 product", path, NULL);
     path = "/HDFEOS/SWATHS/OMI_Column_Amount_O3/Data_Fields/RadiativeCloudFraction[]";
     harp_variable_definition_add_mapping(variable_definition, "cloud_fraction_variant=radiative", "V3 product", path,
                                          NULL);
@@ -3317,13 +3315,17 @@ static void register_omuvb_product(void)
                                                                      description, "W/(m^2.nm)", NULL,
                                                                      read_uv_irradiance_surface);
     path = "/HDFEOS/SWATHS/UVB/Data_Fields/Irradiance305[]";
-    harp_variable_definition_add_mapping(variable_definition, "clear_sky=false and wavelength=305nm", NULL, path, NULL);
+    harp_variable_definition_add_mapping(variable_definition, "clear_sky=false (default) and wavelength=305nm", NULL,
+                                         path, NULL);
     path = "/HDFEOS/SWATHS/UVB/Data_Fields/Irradiance310[]";
-    harp_variable_definition_add_mapping(variable_definition, "clear_sky=false and wavelength=310nm", NULL, path, NULL);
+    harp_variable_definition_add_mapping(variable_definition, "clear_sky=false (default) and wavelength=310nm", NULL,
+                                         path, NULL);
     path = "/HDFEOS/SWATHS/UVB/Data_Fields/Irradiance324[]";
-    harp_variable_definition_add_mapping(variable_definition, "clear_sky=false and wavelength=324nm", NULL, path, NULL);
+    harp_variable_definition_add_mapping(variable_definition, "clear_sky=false (default) and wavelength=324nm", NULL,
+                                         path, NULL);
     path = "/HDFEOS/SWATHS/UVB/Data_Fields/Irradiance380[]";
-    harp_variable_definition_add_mapping(variable_definition, "clear_sky=false and wavelength=380nm", NULL, path, NULL);
+    harp_variable_definition_add_mapping(variable_definition, "clear_sky=false (default) and wavelength=380nm", NULL,
+                                         path, NULL);
     path = "/HDFEOS/SWATHS/UVB/Data_Fields/CSIrradiance305[]";
     harp_variable_definition_add_mapping(variable_definition, "clear_sky=true and wavelength=305nm", NULL, path, NULL);
     path = "/HDFEOS/SWATHS/UVB/Data_Fields/CSIrradiance310[]";

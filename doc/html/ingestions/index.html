@@ -2997,7 +2997,7 @@
 <tbody valign="top">
 <tr class="row-even"><td>so2_column_variant</td>
 <td><strong>pbl</strong>, 5km, 15km, trl, trm, stl</td>
-<td>for V2 products: &#8216;pbl&#8217; (anthropogenic SO2 pollution at the planet boundary layer), &#8216;5km&#8217; (showing passive degassing at 5km altitude), or &#8216;15km&#8217; (showing explosive eruptions at 15km); for V3 products: &#8216;pbl&#8217; (planet boundary layer - 0.9km), &#8216;trl&#8217; (lower troposhere - 2.5km), &#8216;trm&#8217; (middle troposphere - 7.5km), &#8216;stl&#8217; (upper tropospheric and stratospheric - 17km)</td>
+<td>for V2 products: &#8216;pbl&#8217; (anthropogenic SO2 pollution at the planet boundary layer), &#8216;5km&#8217; (showing passive degassing at 5km altitude), or &#8216;15km&#8217; (showing explosive eruptions at 15km); for V3 products: &#8216;pbl&#8217; (planet boundary layer - 0.9km), &#8216;trl&#8217; (lower troposphere - 2.5km), &#8216;trm&#8217; (middle troposphere - 7.5km), &#8216;stl&#8217; (upper tropospheric and stratospheric - 17km)</td>
 </tr>
 </tbody>
 </table>
@@ -3506,6 +3506,26 @@
 <tr class="row-even"><td><a class="reference internal" href="QA4ECV_L2_NO2.html"><span class="doc">QA4ECV_L2_NO2</span></a></td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p>The table below lists the available ingestion options for <code class="docutils literal"><span class="pre">QA4ECV_L2_NO2</span></code> products.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="15%" />
+<col width="25%" />
+<col width="60%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">option name</th>
+<th class="head">legal values</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>total_column</td>
+<td><strong>summed</strong>, total</td>
+<td>whether to use total_no2_vertical_column (which is derived from the total slant column diveded by the total amf) or summed_no2_total_vertical_column (which is the sum of the retrieved tropospheric and statospheric columns); option values are &#8216;summed&#8217; (default) and &#8216;total&#8217;</td>
 </tr>
 </tbody>
 </table>

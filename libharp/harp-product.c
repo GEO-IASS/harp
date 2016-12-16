@@ -1160,7 +1160,6 @@ int harp_product_get_datetime_range(const harp_product *product, double *datetim
             return -1;
         }
 
-        start = harp_plusinf();
         for (i = 0; i < datetime->num_elements; i++)
         {
             const double value = datetime->data.double_data[i];
@@ -1176,7 +1175,7 @@ int harp_product_get_datetime_range(const harp_product *product, double *datetim
             }
         }
 
-        if (harp_isnan(start) || start < datetime->valid_min.double_data || start > datetime->valid_max.double_data)
+        if (harp_isplusinf(start) || start < datetime->valid_min.double_data || start > datetime->valid_max.double_data)
         {
             harp_variable_delete(datetime);
             harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "cannot determine valid start value for datetime range");
@@ -1214,7 +1213,6 @@ int harp_product_get_datetime_range(const harp_product *product, double *datetim
             return -1;
         }
 
-        stop = harp_mininf();
         for (i = 0; i < datetime->num_elements; i++)
         {
             const double value = datetime->data.double_data[i];
@@ -1230,7 +1228,7 @@ int harp_product_get_datetime_range(const harp_product *product, double *datetim
             }
         }
 
-        if (harp_isnan(stop) || stop < datetime->valid_min.double_data || stop > datetime->valid_max.double_data)
+        if (harp_ismininf(stop) || stop < datetime->valid_min.double_data || stop > datetime->valid_max.double_data)
         {
             harp_variable_delete(datetime);
             harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "cannot determine valid stop value for datetime range");

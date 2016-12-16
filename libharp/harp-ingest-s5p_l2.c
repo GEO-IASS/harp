@@ -1658,7 +1658,7 @@ static void register_aer_ai_product(void)
         harp_ingestion_register_variable_full_read(product_definition, "aerosol_index", harp_type_float, 1,
                                                    dimension_type, NULL, description, HARP_UNIT_DIMENSIONLESS, NULL,
                                                    read_aerosol_index);
-    harp_variable_definition_add_mapping(variable_definition, "wavelength_ratio=354_388nm", NULL,
+    harp_variable_definition_add_mapping(variable_definition, "wavelength_ratio=354_388nm (default)", NULL,
                                          "/PRODUCT/aerosol_index_354_388", NULL);
     harp_variable_definition_add_mapping(variable_definition, "wavelength_ratio=340_380nm", NULL,
                                          "/PRODUCT/aerosol_index_340_380", NULL);
@@ -1668,7 +1668,7 @@ static void register_aer_ai_product(void)
         harp_ingestion_register_variable_full_read(product_definition, "aerosol_index_uncertainty", harp_type_float, 1,
                                                    dimension_type, NULL, description, HARP_UNIT_DIMENSIONLESS, NULL,
                                                    read_aerosol_index_uncertainty);
-    harp_variable_definition_add_mapping(variable_definition, "wavelength_ratio=354_388nm", NULL,
+    harp_variable_definition_add_mapping(variable_definition, "wavelength_ratio=354_388nm (default)", NULL,
                                          "/PRODUCT/aerosol_index_354_388_precision", NULL);
     harp_variable_definition_add_mapping(variable_definition, "wavelength_ratio=340_380nm", NULL,
                                          "/PRODUCT/aerosol_index_340_380_precision", NULL);
@@ -2036,7 +2036,7 @@ static void register_o3_pr_product(void)
 
     description = "O3 tropospheric column";
     variable_definition =
-        harp_ingestion_register_variable_full_read(product_definition, "troposheric_O3_column_number_density",
+        harp_ingestion_register_variable_full_read(product_definition, "tropospheric_O3_column_number_density",
                                                    harp_type_float, 1, dimension_type, NULL, description, "mol/m^2",
                                                    NULL, read_o3_pr_tropospheric_column_number_density);
     path = "/PRODUCT/O3_tropospheric_column[]";
@@ -2045,7 +2045,7 @@ static void register_o3_pr_product(void)
     description = "uncertainty of the O3 tropospheric column";
     variable_definition =
         harp_ingestion_register_variable_full_read(product_definition,
-                                                   "troposheric_O3_column_number_density_uncertainty", harp_type_float,
+                                                   "tropospheric_O3_column_number_density_uncertainty", harp_type_float,
                                                    1, dimension_type, NULL, description, "mol/m^2", NULL,
                                                    read_o3_pr_tropospheric_column_number_density_uncertainty);
     path = "/PRODUCT/O3_tropospheric_column_precision[]";

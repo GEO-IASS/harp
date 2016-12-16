@@ -1,13 +1,35 @@
 
+* Added regrid() and smooth() operations.
+
+* Removed the harpprofile command line tool. Its functionality is replaced by
+  the regrid() and smooth() operations.
+
+* Added vertical_unit parameter to harp_product_smooth_vertical() and
+  harp_product_regrid_vertical_with_collocated_dataset() functions.
+
 * Python harp.import_product() and harp.ingest_product() functions now accept
   a list of filenames or a globbing pattern as parameter (which will return
   the result of harp.concatenate() on the imported/ingested products).
 
+* The parsing of the operations string has been rewritten using flex/yacc.
+  This has fixed several issues related to the parsing and execution of
+  operations.
+
 * Fixed issue with flatten() operation providing wrong results.
+
+* Fixed issue where vertical regridding to a common grid provided wrong
+  results.
+
+* Aligned order of latitude/longitude arguments in all functions to have
+  latitude first and longitude second.
+
+* Added variable conversions for apriori profiles.
 
 * Added support for GEOMS FTIR C2H2 ingestion.
 
 * Added support for OMI OMCHOCHO ingestion.
+
+* Added support for QA4ECV NO2 and HCHO products.
 
 0.4 2016-10-16
 ~~~~~~~~~~~~~~

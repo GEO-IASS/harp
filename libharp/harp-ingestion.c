@@ -1485,7 +1485,7 @@ static int evaluate_collocation_filter(ingest_info *info, harp_program *operatio
 
     for (op_id = 0; op_id < operations->num_operations; op_id++)
     {
-        if (operations->operation[op_id]->type == harp_operation_filter_collocation)
+        if (operations->operation[op_id]->type == harp_operation_collocation_filter)
         {
             break;
         }
@@ -1600,24 +1600,24 @@ static int evaluate_point_filters_0d(ingest_info *info, harp_program *ops_0d)
         operation = ops_0d->operation[i];
         switch (operation->type)
         {
-            case harp_operation_filter_point_distance:
+            case harp_operation_area_mask_covers_point_filter:
                 {
-                    const harp_point_distance_filter_args *args;
+                    const harp_area_mask_covers_point_filter_args *args;
 
-                    args = (const harp_point_distance_filter_args *)operation->args;
-                    if (harp_point_distance_filter_predicate_new(args, &predicate) != 0)
+                    args = (const harp_area_mask_covers_point_filter_args *)operation->args;
+                    if (harp_area_mask_covers_point_filter_predicate_new(args, &predicate) != 0)
                     {
                         harp_predicate_set_delete(predicate_set);
                         return -1;
                     }
                 }
                 break;
-            case harp_operation_filter_area_mask_covers_point:
+            case harp_operation_point_distance_filter:
                 {
-                    const harp_area_mask_covers_point_filter_args *args;
+                    const harp_point_distance_filter_args *args;
 
-                    args = (const harp_area_mask_covers_point_filter_args *)operation->args;
-                    if (harp_area_mask_covers_point_filter_predicate_new(args, &predicate) != 0)
+                    args = (const harp_point_distance_filter_args *)operation->args;
+                    if (harp_point_distance_filter_predicate_new(args, &predicate) != 0)
                     {
                         harp_predicate_set_delete(predicate_set);
                         return -1;
@@ -1647,41 +1647,41 @@ static int evaluate_point_filters_0d(ingest_info *info, harp_program *ops_0d)
     /* Update dimension mask. */
     if (predicate_set->num_predicates > 0)
     {
-        harp_variable_definition *longitude_def;
         harp_variable_definition *latitude_def;
-        harp_variable *longitude;
+        harp_variable_definition *longitude_def;
         harp_variable *latitude;
+        harp_variable *longitude;
 
-        if (find_variable_definition(info, "longitude", &longitude_def) != 0)
-        {
-            harp_predicate_set_delete(predicate_set);
-            harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_POINT_MISSING_LON);
-            return -1;
-        }
         if (find_variable_definition(info, "latitude", &latitude_def) != 0)
         {
             harp_predicate_set_delete(predicate_set);
             harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_POINT_MISSING_LAT);
             return -1;
         }
+        if (find_variable_definition(info, "longitude", &longitude_def) != 0)
+        {
+            harp_predicate_set_delete(predicate_set);
+            harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_POINT_MISSING_LON);
+            return -1;
+        }
 
         /* we were promised 0D filters */
-        assert(longitude_def->num_dimensions == 0 && latitude_def->num_dimensions == 0);
+        assert(latitude_def->num_dimensions == 0 && longitude_def->num_dimensions == 0);
 
-        if (get_variable(info, longitude_def, NULL, &longitude) != 0)
-        {
-            harp_predicate_set_delete(predicate_set);
-            return -1;
-        }
         if (get_variable(info, latitude_def, NULL, &latitude) != 0)
         {
-            harp_variable_delete(longitude);
+            harp_predicate_set_delete(predicate_set);
+            return -1;
+        }
+        if (get_variable(info, longitude_def, NULL, &longitude) != 0)
+        {
+            harp_variable_delete(latitude);
             harp_predicate_set_delete(predicate_set);
             return -1;
         }
 
-        if (harp_point_predicate_update_mask_0d(predicate_set->num_predicates, predicate_set->predicate, longitude,
-                                                latitude, &info->product_mask) != 0)
+        if (harp_point_predicate_update_mask_0d(predicate_set->num_predicates, predicate_set->predicate, latitude,
+                                                longitude, &info->product_mask) != 0)
         {
             harp_variable_delete(latitude);
             harp_variable_delete(longitude);
@@ -1727,24 +1727,24 @@ static int evaluate_point_filters_1d(ingest_info *info, harp_program *ops_1d)
         operation = ops_1d->operation[i];
         switch (operation->type)
         {
-            case harp_operation_filter_point_distance:
+            case harp_operation_area_mask_covers_point_filter:
                 {
-                    const harp_point_distance_filter_args *args;
+                    const harp_area_mask_covers_point_filter_args *args;
 
-                    args = (const harp_point_distance_filter_args *)operation->args;
-                    if (harp_point_distance_filter_predicate_new(args, &predicate) != 0)
+                    args = (const harp_area_mask_covers_point_filter_args *)operation->args;
+                    if (harp_area_mask_covers_point_filter_predicate_new(args, &predicate) != 0)
                     {
                         harp_predicate_set_delete(predicate_set);
                         return -1;
                     }
                 }
                 break;
-            case harp_operation_filter_area_mask_covers_point:
+            case harp_operation_point_distance_filter:
                 {
-                    const harp_area_mask_covers_point_filter_args *args;
+                    const harp_point_distance_filter_args *args;
 
-                    args = (const harp_area_mask_covers_point_filter_args *)operation->args;
-                    if (harp_area_mask_covers_point_filter_predicate_new(args, &predicate) != 0)
+                    args = (const harp_point_distance_filter_args *)operation->args;
+                    if (harp_point_distance_filter_predicate_new(args, &predicate) != 0)
                     {
                         harp_predicate_set_delete(predicate_set);
                         return -1;
@@ -1774,39 +1774,39 @@ static int evaluate_point_filters_1d(ingest_info *info, harp_program *ops_1d)
     /* Update dimension mask. */
     if (predicate_set->num_predicates > 0)
     {
-        harp_variable_definition *longitude_def;
         harp_variable_definition *latitude_def;
-        harp_variable *longitude;
+        harp_variable_definition *longitude_def;
         harp_variable *latitude;
+        harp_variable *longitude;
 
-        if (find_variable_definition(info, "longitude", &longitude_def) != 0)
-        {
-            harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_POINT_MISSING_LON);
-            return -1;
-        }
         if (find_variable_definition(info, "latitude", &latitude_def) != 0)
         {
             harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_POINT_MISSING_LAT);
             return -1;
         }
+        if (find_variable_definition(info, "longitude", &longitude_def) != 0)
+        {
+            harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_POINT_MISSING_LON);
+            return -1;
+        }
 
         /* We were promised 1D filters */
-        assert(longitude_def->num_dimensions == 1 && latitude_def->num_dimensions == 1);
-        if (!harp_variable_definition_has_dimension_types(longitude_def, 1, dimension_type) ||
-            !harp_variable_definition_has_dimension_types(latitude_def, 1, dimension_type))
+        assert(latitude_def->num_dimensions == 1 && longitude_def->num_dimensions == 1);
+        if (!harp_variable_definition_has_dimension_types(latitude_def, 1, dimension_type) ||
+            !harp_variable_definition_has_dimension_types(longitude_def, 1, dimension_type))
         {
             harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_POINT_WRONG_DIMENSION_FORMAT, "{time}");
             return -1;
         }
 
-        if (get_variable(info, longitude_def, NULL, &longitude) != 0)
+        if (get_variable(info, latitude_def, NULL, &latitude) != 0)
         {
             harp_predicate_set_delete(predicate_set);
             return -1;
         }
-        if (get_variable(info, latitude_def, NULL, &latitude) != 0)
+        if (get_variable(info, longitude_def, NULL, &longitude) != 0)
         {
-            harp_variable_delete(longitude);
+            harp_variable_delete(latitude);
             harp_predicate_set_delete(predicate_set);
             return -1;
         }
@@ -1824,8 +1824,8 @@ static int evaluate_point_filters_1d(ingest_info *info, harp_program *ops_1d)
             }
         }
 
-        if (harp_point_predicate_update_mask_1d(predicate_set->num_predicates, predicate_set->predicate, longitude,
-                                                latitude, info->dimension_mask_set[harp_dimension_time]) != 0)
+        if (harp_point_predicate_update_mask_1d(predicate_set->num_predicates, predicate_set->predicate, latitude,
+                                                longitude, info->dimension_mask_set[harp_dimension_time]) != 0)
         {
             harp_variable_delete(latitude);
             harp_variable_delete(longitude);
@@ -1871,7 +1871,7 @@ static int evaluate_area_filters_0d(ingest_info *info, harp_program *operations)
         operation = operations->operation[i];
         switch (operation->type)
         {
-            case harp_operation_filter_area_mask_covers_area:
+            case harp_operation_area_mask_covers_area_filter:
                 {
                     const harp_area_mask_covers_area_filter_args *args;
 
@@ -1883,7 +1883,7 @@ static int evaluate_area_filters_0d(ingest_info *info, harp_program *operations)
                     }
                 }
                 break;
-            case harp_operation_filter_area_mask_intersects_area:
+            case harp_operation_area_mask_intersects_area_filter:
                 {
                     const harp_area_mask_intersects_area_filter_args *args;
 
@@ -1917,26 +1917,26 @@ static int evaluate_area_filters_0d(ingest_info *info, harp_program *operations)
 
     if (predicate_set->num_predicates > 0)
     {
-        harp_variable_definition *longitude_bounds_def;
         harp_variable_definition *latitude_bounds_def;
-        harp_variable *longitude_bounds;
+        harp_variable_definition *longitude_bounds_def;
         harp_variable *latitude_bounds;
+        harp_variable *longitude_bounds;
 
-        if (find_variable_definition(info, "longitude_bounds", &longitude_bounds_def) != 0)
-        {
-            harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_AREA_MISSING_LON_BOUNDS);
-            harp_predicate_set_delete(predicate_set);
-            return -1;
-        }
         if (find_variable_definition(info, "latitude_bounds", &latitude_bounds_def) != 0)
         {
             harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_AREA_MISSING_LAT_BOUNDS);
             harp_predicate_set_delete(predicate_set);
             return -1;
         }
+        if (find_variable_definition(info, "longitude_bounds", &longitude_bounds_def) != 0)
+        {
+            harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_AREA_MISSING_LON_BOUNDS);
+            harp_predicate_set_delete(predicate_set);
+            return -1;
+        }
 
         /* We were promised 0D area filters */
-        assert(longitude_bounds_def->num_dimensions == 1 && latitude_bounds_def->num_dimensions == 1);
+        assert(latitude_bounds_def->num_dimensions == 1 && longitude_bounds_def->num_dimensions == 1);
 
         if (!harp_variable_definition_has_dimension_types(longitude_bounds_def, 1, dimension_type)
             || !harp_variable_definition_has_dimension_types(longitude_bounds_def, 1, dimension_type))
@@ -1946,20 +1946,20 @@ static int evaluate_area_filters_0d(ingest_info *info, harp_program *operations)
             return -1;
         }
 
-        if (get_variable(info, longitude_bounds_def, NULL, &longitude_bounds) != 0)
+        if (get_variable(info, latitude_bounds_def, NULL, &latitude_bounds) != 0)
         {
             harp_predicate_set_delete(predicate_set);
             return -1;
         }
-        if (get_variable(info, latitude_bounds_def, NULL, &latitude_bounds) != 0)
+        if (get_variable(info, longitude_bounds_def, NULL, &longitude_bounds) != 0)
         {
-            harp_variable_delete(longitude_bounds);
+            harp_variable_delete(latitude_bounds);
             harp_predicate_set_delete(predicate_set);
             return -1;
         }
 
         if (harp_area_predicate_update_mask_0d(predicate_set->num_predicates, predicate_set->predicate,
-                                               longitude_bounds, latitude_bounds, &info->product_mask) != 0)
+                                               latitude_bounds, longitude_bounds, &info->product_mask) != 0)
         {
             harp_variable_delete(latitude_bounds);
             harp_variable_delete(longitude_bounds);
@@ -2005,7 +2005,7 @@ static int evaluate_area_filters_1d(ingest_info *info, harp_program *ops_1d)
         operation = ops_1d->operation[i];
         switch (operation->type)
         {
-            case harp_operation_filter_area_mask_covers_area:
+            case harp_operation_area_mask_covers_area_filter:
                 {
                     const harp_area_mask_covers_area_filter_args *args;
 
@@ -2017,7 +2017,7 @@ static int evaluate_area_filters_1d(ingest_info *info, harp_program *ops_1d)
                     }
                 }
                 break;
-            case harp_operation_filter_area_mask_intersects_area:
+            case harp_operation_area_mask_intersects_area_filter:
                 {
                     const harp_area_mask_intersects_area_filter_args *args;
 
@@ -2051,43 +2051,43 @@ static int evaluate_area_filters_1d(ingest_info *info, harp_program *ops_1d)
 
     if (predicate_set->num_predicates > 0)
     {
-        harp_variable_definition *longitude_bounds_def;
         harp_variable_definition *latitude_bounds_def;
-        harp_variable *longitude_bounds;
+        harp_variable_definition *longitude_bounds_def;
         harp_variable *latitude_bounds;
+        harp_variable *longitude_bounds;
 
-        if (find_variable_definition(info, "longitude_bounds", &longitude_bounds_def) != 0)
-        {
-            harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_AREA_MISSING_LON_BOUNDS);
-            harp_predicate_set_delete(predicate_set);
-            return -1;
-        }
         if (find_variable_definition(info, "latitude_bounds", &latitude_bounds_def) != 0)
         {
             harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_AREA_MISSING_LAT_BOUNDS);
             harp_predicate_set_delete(predicate_set);
             return -1;
         }
+        if (find_variable_definition(info, "longitude_bounds", &longitude_bounds_def) != 0)
+        {
+            harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_AREA_MISSING_LON_BOUNDS);
+            harp_predicate_set_delete(predicate_set);
+            return -1;
+        }
 
         /* We were promised 1D area filters */
-        assert(longitude_bounds_def->num_dimensions == 2);
         assert(latitude_bounds_def->num_dimensions == 2);
-        if (!harp_variable_definition_has_dimension_types(longitude_bounds_def, 2, dimension_type) ||
-            !harp_variable_definition_has_dimension_types(latitude_bounds_def, 2, dimension_type))
+        assert(longitude_bounds_def->num_dimensions == 2);
+        if (!harp_variable_definition_has_dimension_types(latitude_bounds_def, 2, dimension_type) ||
+            !harp_variable_definition_has_dimension_types(longitude_bounds_def, 2, dimension_type))
         {
             harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_AREA_WRONG_DIMENSION_FORMAT, "{time, independent}");
             harp_predicate_set_delete(predicate_set);
             return -1;
         }
 
-        if (get_variable(info, longitude_bounds_def, NULL, &longitude_bounds) != 0)
+        if (get_variable(info, latitude_bounds_def, NULL, &latitude_bounds) != 0)
         {
             harp_predicate_set_delete(predicate_set);
             return -1;
         }
-        if (get_variable(info, latitude_bounds_def, NULL, &latitude_bounds) != 0)
+        if (get_variable(info, longitude_bounds_def, NULL, &longitude_bounds) != 0)
         {
-            harp_variable_delete(longitude_bounds);
+            harp_variable_delete(latitude_bounds);
             harp_predicate_set_delete(predicate_set);
             return -1;
         }
@@ -2106,7 +2106,7 @@ static int evaluate_area_filters_1d(ingest_info *info, harp_program *ops_1d)
         }
 
         if (harp_area_predicate_update_mask_1d(predicate_set->num_predicates, predicate_set->predicate,
-                                               longitude_bounds, latitude_bounds,
+                                               latitude_bounds, longitude_bounds,
                                                info->dimension_mask_set[harp_dimension_time]) != 0)
         {
             harp_variable_delete(latitude_bounds);
@@ -2221,7 +2221,7 @@ static int get_operation_dimensionality(ingest_info *info, harp_operation *opera
     harp_variable_definition *variable_def = NULL;
 
     /* collocation filters */
-    if (operation->type == harp_operation_filter_collocation)
+    if (operation->type == harp_operation_collocation_filter)
     {
         *num_dimensions = 1L;
     }
@@ -2244,23 +2244,24 @@ static int get_operation_dimensionality(ingest_info *info, harp_operation *opera
         *num_dimensions = variable_def->num_dimensions;
     }
     /* point filters */
-    else if (operation->type == harp_operation_filter_point_distance ||
-             operation->type == harp_operation_filter_area_mask_covers_point)
+    else if (operation->type == harp_operation_area_mask_covers_point_filter ||
+             operation->type == harp_operation_point_distance_filter)
     {
-        harp_variable_definition *longitude_def, *latitude_def = NULL;
+        harp_variable_definition *latitude_def = NULL;
+        harp_variable_definition *longitude_def = NULL;
 
-        if (find_variable_definition(info, "longitude", &longitude_def) != 0)
-        {
-            harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_POINT_MISSING_LON);
-            return -1;
-        }
         if (find_variable_definition(info, "latitude", &latitude_def) != 0)
         {
             harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_POINT_MISSING_LAT);
             return -1;
         }
+        if (find_variable_definition(info, "longitude", &longitude_def) != 0)
+        {
+            harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_POINT_MISSING_LON);
+            return -1;
+        }
         /* point filters must be 0D or 1D */
-        if (longitude_def->num_dimensions > 1 || latitude_def->num_dimensions > 1)
+        if (latitude_def->num_dimensions > 1 || longitude_def->num_dimensions > 1)
         {
             harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_POINT_WRONG_DIMENSION_FORMAT, "{time}");
             return -1;
@@ -2271,26 +2272,26 @@ static int get_operation_dimensionality(ingest_info *info, harp_operation *opera
             longitude_def->num_dimensions >
             latitude_def->num_dimensions ? longitude_def->num_dimensions : latitude_def->num_dimensions;
     }
-    else if (operation->type == harp_operation_filter_area_mask_covers_area ||
-             operation->type == harp_operation_filter_area_mask_intersects_area)
+    else if (operation->type == harp_operation_area_mask_covers_area_filter ||
+             operation->type == harp_operation_area_mask_intersects_area_filter)
     {
 
-        harp_variable_definition *longitude_bounds_def;
         harp_variable_definition *latitude_bounds_def;
+        harp_variable_definition *longitude_bounds_def;
 
-        if (find_variable_definition(info, "longitude_bounds", &longitude_bounds_def) != 0)
-        {
-            harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_AREA_MISSING_LON_BOUNDS);
-            return -1;
-        }
         if (find_variable_definition(info, "latitude_bounds", &latitude_bounds_def) != 0)
         {
             harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_AREA_MISSING_LAT_BOUNDS);
             return -1;
         }
+        if (find_variable_definition(info, "longitude_bounds", &longitude_bounds_def) != 0)
+        {
+            harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_AREA_MISSING_LON_BOUNDS);
+            return -1;
+        }
         /* area filters must be 0D or 1D, which means that the bounds are 1D or 2D resp. */
-        if (longitude_bounds_def->num_dimensions > 2 || latitude_bounds_def->num_dimensions > 2
-            || longitude_bounds_def->num_dimensions < 1 || latitude_bounds_def->num_dimensions < 1)
+        if (latitude_bounds_def->num_dimensions > 2 || longitude_bounds_def->num_dimensions > 2 ||
+            latitude_bounds_def->num_dimensions < 1 || longitude_bounds_def->num_dimensions < 1)
         {
             harp_set_error(HARP_ERROR_OPERATION, OPERATION_FILTER_POINT_WRONG_DIMENSION_FORMAT, "{time}");
             return -1;
@@ -2300,7 +2301,7 @@ static int get_operation_dimensionality(ingest_info *info, harp_operation *opera
             longitude_bounds_def->num_dimensions : latitude_bounds_def->num_dimensions;
     }
     /* collocation filters */
-    else if (operation->type == harp_operation_filter_collocation)
+    else if (operation->type == harp_operation_collocation_filter)
     {
         *num_dimensions = 1;
     }
@@ -2459,9 +2460,9 @@ static int execute_masking_phase(ingest_info *info, harp_program *phase_operatio
 }
 
 /* execute the variable exclude filter from the head of program */
-static int execute_variable_exclude_filter_operation(ingest_info *info, harp_program *program)
+static int execute_exclude_variable(ingest_info *info, harp_program *program)
 {
-    const harp_variable_exclusion_args *ex_args;
+    const harp_exclude_variable_args *ex_args;
     int variable_id;
     int j;
     harp_operation *operation;
@@ -2474,7 +2475,7 @@ static int execute_variable_exclude_filter_operation(ingest_info *info, harp_pro
     }
 
     /* unmark the variables to exclude */
-    ex_args = (const harp_variable_exclusion_args *)operation->args;
+    ex_args = (const harp_exclude_variable_args *)operation->args;
     for (j = 0; j < ex_args->num_variables; j++)
     {
 
@@ -2497,11 +2498,11 @@ static int execute_variable_exclude_filter_operation(ingest_info *info, harp_pro
     return 0;
 }
 
-static int execute_variable_keep_filter_operation(ingest_info *info, harp_program *program)
+static int execute_keep_variable(ingest_info *info, harp_program *program)
 {
     uint8_t *include_variable_mask;
     harp_operation *operation;
-    const harp_variable_inclusion_args *in_args;
+    const harp_keep_variable_args *in_args;
     int variable_id;
     int j;
 
@@ -2527,7 +2528,7 @@ static int execute_variable_keep_filter_operation(ingest_info *info, harp_progra
     }
 
     /* set the 'keep' flags in the mask */
-    in_args = (const harp_variable_inclusion_args *)operation->args;
+    in_args = (const harp_keep_variable_args *)operation->args;
     for (j = 0; j < in_args->num_variables; j++)
     {
 
@@ -2592,12 +2593,12 @@ static int evaluate_ingestion_mask(ingest_info *info, harp_program *program)
             harp_operation *operation = program->operation[0];
             harp_operation *operation_copy = NULL;
 
-            if (operation->type == harp_operation_keep_variable || operation->type == harp_operation_exclude_variable)
+            if (operation->type == harp_operation_exclude_variable || operation->type == harp_operation_keep_variable)
             {
                 /* includes/excludes mark the next phase */
                 break;
             }
-            else if (operation->type == harp_operation_filter_collocation)
+            else if (operation->type == harp_operation_collocation_filter)
             {
                 /* collocation filters are tricky;
                  * the 'collocation filter' is included during ingestion,
@@ -2678,16 +2679,16 @@ static int evaluate_ingestion_mask(ingest_info *info, harp_program *program)
         {
             harp_operation *operation = program->operation[0];
 
-            if (operation->type == harp_operation_keep_variable)
+            if (operation->type == harp_operation_exclude_variable)
             {
-                if (execute_variable_keep_filter_operation(info, program) != 0)
+                if (execute_exclude_variable(info, program) != 0)
                 {
                     return -1;
                 }
             }
-            else if (operation->type == harp_operation_exclude_variable)
+            else if (operation->type == harp_operation_keep_variable)
             {
-                if (execute_variable_exclude_filter_operation(info, program) != 0)
+                if (execute_keep_variable(info, program) != 0)
                 {
                     return -1;
                 }
