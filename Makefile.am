@@ -649,24 +649,24 @@ harpdoc_include:
 
 # matlab
 
-HARP_MATLAB_EXAMPLES = \
-	examples/harp_matlab/gom_lim_1p.m \
-	examples/harp_matlab/gome_l1.m \
-	examples/harp_matlab/gome_l2.m \
-	examples/harp_matlab/gome_l4.m \
-	examples/harp_matlab/gosat_fts_l1b.m \
-	examples/harp_matlab/gosat_fts_l2_ch4.m \
-	examples/harp_matlab/gosat_fts_l2_co2.m \
-	examples/harp_matlab/mip_nl__2p.m \
-	examples/harp_matlab/plot_geo_pixel.m \
-	examples/harp_matlab/sci_nl__2p.m \
-	examples/harp_matlab/sci_ol__2p.m
+#HARP_MATLAB_EXAMPLES = \
+#	examples/harp_matlab/gom_lim_1p.m \
+#	examples/harp_matlab/gome_l1.m \
+#	examples/harp_matlab/gome_l2.m \
+#	examples/harp_matlab/gome_l4.m \
+#	examples/harp_matlab/gosat_fts_l1b.m \
+#	examples/harp_matlab/gosat_fts_l2_ch4.m \
+#	examples/harp_matlab/gosat_fts_l2_co2.m \
+#	examples/harp_matlab/mip_nl__2p.m \
+#	examples/harp_matlab/plot_geo_pixel.m \
+#	examples/harp_matlab/sci_nl__2p.m \
+#	examples/harp_matlab/sci_ol__2p.m
 
-EXTRA_DIST += $(HARP_MATLAB_EXAMPLES)
+#EXTRA_DIST += $(HARP_MATLAB_EXAMPLES)
 
-if BUILD_MATLAB
-harpmatlabexamples_DATA = $(HARP_MATLAB_EXAMPLES)
-endif
+#if BUILD_MATLAB
+#harpmatlabexamples_DATA = $(HARP_MATLAB_EXAMPLES)
+#endif
 
 # *** indent ***
 
