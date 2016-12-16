@@ -382,23 +382,10 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
         
             num_elements = mxGetNumberOfElements(datastructure);
         
-            //-- fix it later
+    
             if (num_elements == 0)
             {
-                if (class == mxCHAR_CLASS)
-                {
-                    // index = harp_product_add_variable(product, variable);
-                    // if (index < 0)
-                    if(!(harp_product_add_variable(*product,variable_new)))
-                    {
-                        harp_matlab_harp_error();
-                    }
-                    return;
-                }
-                else
-                {
-                    mexErrMsgTxt("Empty arrays are not allowed for a product variable.");
-                }
+                    mexErrMsgTxt("Empty arrays are not allowed for a product variable.");            
             }
 
 
@@ -571,8 +558,6 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                     {
                         float *data;
 
-                        // index = harp_product_add_variable(product, variable);
-                        // if (index < 0)
                         if( harp_variable_new(variable_name, harp_type_float, num_dims, dim_type, dim, &variable_new) !=0)
                         {
                             harp_matlab_harp_error();
@@ -622,7 +607,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                      }
                     int inner = (**product).num_variables;
 
-                     // assigning meta data
+                     /* assigning meta data */
                     (**product).variable[inner-1]->unit = unit_string;
                     (**product).variable[inner-1]->description = des_string;
                 
