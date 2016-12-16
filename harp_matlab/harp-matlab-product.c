@@ -862,13 +862,13 @@ harp_product *harp_matlab_set_product(const mxArray *mx_struct)
             mxArray * meta  = mxGetField(mx_struct, index, variable_name);
             char * metastring = mxArrayToString(meta);
             (*product).source_product = metastring;
-            mxFree(metastring);
+            // mxFree(metastring);
         }
         else if(strncmp(variable_name, "history",7)==0){
             mxArray * meta  = mxGetField(mx_struct, index, variable_name);
             char * metastring = mxArrayToString(meta);
             (*product).history = metastring;
-            mxFree(metastring);
+            // mxFree(metastring);
         }
         else{
             // mexPrintf(" name of the variable is: %s \n", variable_name);

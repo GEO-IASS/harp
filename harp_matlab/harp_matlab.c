@@ -214,10 +214,10 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
         harp_matlab_harp_error();
     }
 
-    // harp_matlab_harp_error();
-    if (product == NULL){
-        mexPrintf("again something isn't right");
-    }
+    // // harp_matlab_harp_error();
+    // if (product == NULL){
+    //     mexPrintf("again something isn't right");
+    // }
     //----------end of debugging----------------//
     if (harp_export(filename, format, product) != 0)
     {
