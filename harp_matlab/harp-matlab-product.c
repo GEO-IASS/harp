@@ -28,21 +28,21 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
 {
     
     harp_variable *variable = (**product).variable[index];
-    harp_data_type type = (*variable).data_type;
-    const char *variable_name = (*variable).name;
-    harp_array variable_data = (*variable).data;
+    harp_data_type type = variable->data_type;
+    const char *variable_name = variable->name;
+    harp_array variable_data = variable->data;
   
     /* add meta info for each variable */
-    char * description = (*variable).description;
-    char * unit = (*variable).unit;
+    char * description = variable->description;
+    char * unit = variable->unit;
 
     long dim[HARP_MAX_NUM_DIMS]; 
     harp_dimension_type dim_type[HARP_MAX_NUM_DIMS];
 
     mwSize matlabdim[HARP_MAX_NUM_DIMS];
     mwSize matlabdim_type[HARP_MAX_NUM_DIMS];
-    int num_dims = (*variable).num_dimensions;
-    long num_elements= (*variable).num_elements;
+    int num_dims = variable->num_dimensions;
+    long num_elements= variable->num_elements;
     long i;
    
     mxArray *mx_data = NULL;
@@ -62,9 +62,9 @@ static void harp_matlab_add_harp_product_variable(mxArray *mx_struct, harp_produ
 
 
     for (i = 0; i < HARP_MAX_NUM_DIMS; i++){
-        dim[i] = (*variable).dimension[i];
+        dim[i] = variable->dimension[i];
         if(dim[i]>1){
-            dim_type[i] = (*variable).dimension_type[i];
+            dim_type[i] = variable->dimension_type[i];
         }
     }
 
@@ -304,8 +304,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
         mexErrMsgTxt("This variable is not a struct.");
     }
     int num_fields = mxGetNumberOfFields(mx_variable);
-    mexPrintf("the loops are: %d \n", num_fields);
-
+  
     char * des_string;
     char * unit_string;
     int32_t *dimtypevalue;
@@ -443,7 +442,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         while(counter<num_elements){
                             for(long j=0; j<num_elements/dim[req_num_dims-1];j++){
                                 for(long k=0; k<dim[req_num_dims-1];k++){
-                                    (*variable_new).data.int8_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
+                                    variable_new->data.int8_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
                                 } 
                             } 
                         }     
@@ -477,7 +476,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         while(counter<num_elements){
                             for(long j=0; j<num_elements/dim[req_num_dims-1];j++){
                                 for(long k=0; k<dim[req_num_dims-1];k++){
-                                    (*variable_new).data.int16_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
+                                    variable_new->data.int16_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
                                 } 
                             } 
                         }     
@@ -583,7 +582,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         while(counter<num_elements){
                             for(long j=0; j<num_elements/dim[req_num_dims-1];j++){
                                 for(long k=0; k<dim[req_num_dims-1];k++){
-                                    (*variable_new).data.float_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
+                                    variable_new->data.float_data[counter++] = data[j+k*num_elements/dim[num_dims-1]];
                                 } 
                             } 
                         } 
@@ -696,12 +695,12 @@ harp_product *harp_matlab_set_product(const mxArray *mx_struct)
         if(strncmp(variable_name,"source",6)==0){
             mxArray * meta  = mxGetField(mx_struct, index, variable_name);
             char * metastring = mxArrayToString(meta);
-            (*product).source_product = metastring;
+            product->source_product = metastring;
         }
         else if(strncmp(variable_name, "history",7)==0){
             mxArray * meta  = mxGetField(mx_struct, index, variable_name);
             char * metastring = mxArrayToString(meta);
-            (*product).history = metastring;
+            product->history = metastring;
         }
         else{
                 mxArray *mx_variable;
