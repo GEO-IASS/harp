@@ -186,10 +186,10 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
         harp_product_delete(product);        
     }
 
-    // harp_product_delete(product); // if there is, then matlab crashes
-
     mxFree(format);
     mxFree(filename);
+
+    // harp_product_delete(product); // if there is, then matlab crashes
 }
 
 
@@ -258,7 +258,6 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 {
     harp_product *product;
     char **filenames;
-    // char *name;
     int num_files;
     char *script;
     char *option;
@@ -276,7 +275,6 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
     }
 
     filenames = NULL;
-    // name = NULL;
     num_files = 0;
 
     if (mxIsChar(prhs[0]))
