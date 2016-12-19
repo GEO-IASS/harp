@@ -317,11 +317,11 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
        
         /* set meta info for each variable*/
         if(strncmp(field_name,"description",11) ==0){
-            mxArray * meta_variable  = mxGetField(mx_variable, 0, field_name);
+            mxArray * meta_variable  = mxGetField(mx_variable, 0, "description");
             des_string = mxArrayToString(meta_variable);
         }
         else if(strncmp(field_name,"unit",4)==0){
-            mxArray * meta_variable  = mxGetField(mx_variable, 0, field_name);
+            mxArray * meta_variable  = mxGetField(mx_variable, 0, "unit");
             unit_string = mxArrayToString(meta_variable);
         }        
         else if(strncmp(field_name,"dimensions",10)==0){
@@ -420,21 +420,25 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         {
                             harp_matlab_harp_error();
                         }
-                        if(harp_product_add_variable(*product, variable_new) != 0)
-                        {
-                            harp_matlab_harp_error();
-                        }
-                        if(harp_product_get_variable_by_name(*product, variable_name, &variable_new)!=0)
-                        {
-                            harp_matlab_harp_error();
-                        }
                         data = mxGetData(datastructure);
                         int inner = (**product).num_variables;
 
                         /* assigning meta data */
-                        (**product).variable[inner-1]->unit = unit_string;
-                        (**product).variable[inner-1]->description = des_string;
-                      
+                        if (unit_string != NULL)
+                        {
+                            if (harp_variable_set_unit((**product).variable[inner-1], unit_string) != 0)
+                            {
+                                harp_matlab_harp_error();
+                            }
+                        }
+                        if (des_string != NULL)
+                        {
+                            if (harp_variable_set_description((**product).variable[inner-1], des_string) != 0)
+                            {
+                                harp_matlab_harp_error();
+                            }
+                        }
+
                         mxFree(unit_string);
                         mxFree(des_string);
 
@@ -470,9 +474,21 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         int inner = (**product).num_variables;
 
                         /* assigning meta data */
-                        (**product).variable[inner-1]->unit = unit_string;
-                        (**product).variable[inner-1]->description = des_string;
-                    
+                        if (unit_string != NULL)
+                        {
+                            if (harp_variable_set_unit((**product).variable[inner-1], unit_string) != 0)
+                            {
+                                harp_matlab_harp_error();
+                            }
+                        }
+                        if (des_string != NULL)
+                        {
+                            if (harp_variable_set_description((**product).variable[inner-1], des_string) != 0)
+                            {
+                                harp_matlab_harp_error();
+                            }
+                        }
+
                         mxFree(unit_string);
                         mxFree(des_string);
 
@@ -509,8 +525,20 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         int inner = (**product).num_variables;
                        
                         /* assigning meta data */
-                        (**product).variable[inner-1]->unit = unit_string;
-                        (**product).variable[inner-1]->description = des_string;
+                        if (unit_string != NULL)
+                        {
+                            if (harp_variable_set_unit((**product).variable[inner-1], unit_string) != 0)
+                            {
+                                harp_matlab_harp_error();
+                            }
+                        }
+                        if (des_string != NULL)
+                        {
+                            if (harp_variable_set_description((**product).variable[inner-1], des_string) != 0)
+                            {
+                                harp_matlab_harp_error();
+                            }
+                        }
 
                         mxFree(unit_string);
                         mxFree(des_string);
@@ -550,8 +578,20 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         int inner = (**product).num_variables;
                         
                         /* assigning meta data */
-                        (**product).variable[inner-1]->unit = unit_string;
-                        (**product).variable[inner-1]->description = des_string;
+                        if (unit_string != NULL)
+                        {
+                            if (harp_variable_set_unit((**product).variable[inner-1], unit_string) != 0)
+                            {
+                                harp_matlab_harp_error();
+                            }
+                        }
+                        if (des_string != NULL)
+                        {
+                            if (harp_variable_set_description((**product).variable[inner-1], des_string) != 0)
+                            {
+                                harp_matlab_harp_error();
+                            }
+                        }
 
                         mxFree(unit_string);
                         mxFree(des_string);
@@ -588,9 +628,21 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         int inner = (**product).num_variables;
 
                         // assigning meta data
-                        (**product).variable[inner-1]->unit = unit_string;
-                        (**product).variable[inner-1]->description = des_string;
-                        mxFree(unit_string);   
+                        if (unit_string != NULL)
+                        {
+                            if (harp_variable_set_unit((**product).variable[inner-1], unit_string) != 0)
+                            {
+                                harp_matlab_harp_error();
+                            }
+                        }
+                        if (des_string != NULL)
+                        {
+                            if (harp_variable_set_description((**product).variable[inner-1], des_string) != 0)
+                            {
+                                harp_matlab_harp_error();
+                            }
+                        }
+                        mxFree(unit_string);
                         mxFree(des_string);   
                    
                         int counter = 0;
@@ -625,8 +677,20 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                     int inner = (**product).num_variables;
 
                      /* assigning meta data */
-                    (**product).variable[inner-1]->unit = unit_string;
-                    (**product).variable[inner-1]->description = des_string;
+                    if (unit_string != NULL)
+                    {
+                        if (harp_variable_set_unit((**product).variable[inner-1], unit_string) != 0)
+                        {
+                            harp_matlab_harp_error();
+                        }
+                    }
+                    if (des_string != NULL)
+                    {
+                        if (harp_variable_set_description((**product).variable[inner-1], des_string) != 0)
+                        {
+                            harp_matlab_harp_error();
+                        }
+                    }
 
                     mxFree(unit_string);
                     mxFree(des_string);
@@ -659,14 +723,21 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         }
 
                         int inner = (**product).num_variables;
-                     
-                        if(unit_string != NULL){
-                            (**product).variable[inner-1]->unit = unit_string;
+
+                        if (unit_string != NULL)
+                        {
+                            if (harp_variable_set_unit((**product).variable[inner-1], unit_string) != 0)
+                            {
+                                harp_matlab_harp_error();
+                            }
                         }
-              
-                        if(des_string != NULL){
-                            (**product).variable[inner-1]->description = des_string;
-                        }                  
+                        if (des_string != NULL)
+                        {
+                            if (harp_variable_set_description((**product).variable[inner-1], des_string) != 0)
+                            {
+                                harp_matlab_harp_error();
+                            }
+                        }
 
                         mxFree(unit_string);
                         mxFree(des_string);    
@@ -724,12 +795,24 @@ harp_product *harp_matlab_set_product(const mxArray *mx_struct)
         if(strncmp(variable_name,"source",6)==0){
             mxArray * meta  = mxGetField(mx_struct, index, variable_name);
             char * metastring = mxArrayToString(meta);
-            product->source_product = metastring;
+            if (metastring != NULL)
+            {
+                if (harp_product_set_source_product(product, metastring) != 0)
+                {
+                    harp_matlab_harp_error();
+                }
+            }
         }
         else if(strncmp(variable_name, "history",7)==0){
             mxArray * meta  = mxGetField(mx_struct, index, variable_name);
             char * metastring = mxArrayToString(meta);
-            product->history = metastring;
+            if (metastring != NULL)
+            {
+                if (harp_product_set_history(product, metastring) != 0)
+                {
+                    harp_matlab_harp_error();
+                }
+            }
         }
         else{
                 mxArray *mx_variable;

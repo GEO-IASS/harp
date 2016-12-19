@@ -189,7 +189,7 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
     mxFree(format);
     mxFree(filename);
 
-    // harp_product_delete(product); // if there is, then matlab crashes
+    harp_product_delete(product);
 }
 
 
