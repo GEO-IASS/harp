@@ -292,9 +292,8 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
     char *string_data;
     long dim[HARP_MAX_NUM_DIMS];
     harp_dimension_type dim_type[HARP_MAX_NUM_DIMS];
-    int num_dims;
+    int num_dims=0;
     long num_elements;
-    int index;
     long i;
 
     /* get top level from matlab */
@@ -302,43 +301,44 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
     {
         mexErrMsgTxt("This variable is not a struct.");
     }
-    int num_fields = mxGetNumberOfFields(mx_variable);
   
-    char * des_string;
-    char * unit_string;
-    int32_t *dimtypevalue;
-    int32_t *dimvalue;
+    char * des_string=NULL;
+    char * unit_string=NULL;
+    int32_t *dimtypevalue=NULL;
+    int32_t *dimvalue=NULL;
     mxArray * datastructure;
 
-    for (index = 0; index < num_fields; index++)
-    {
-        const char *field_name;    
-        field_name = mxGetFieldNameByNumber(mx_variable, index);    
-         
-        if(strncmp(field_name,"value",5)==0)
-        {
-            datastructure = mxGetField(mx_variable, 0, "value");      
-            class = mxGetClassID(datastructure);
-            num_dims = mxGetNumberOfDimensions(datastructure);
-        }  
-         /* set meta info for each variable*/
-        else if(strncmp(field_name,"description",11) ==0){
-            mxArray * meta_variable  = mxGetField(mx_variable, 0, "description");
-            des_string = mxArrayToString(meta_variable);
-        }
-        else if(strncmp(field_name,"unit",4)==0){
-            mxArray * meta_variable  = mxGetField(mx_variable, 0, "unit");
-            unit_string = mxArrayToString(meta_variable);
-        }        
-        else if(strncmp(field_name,"dimensions",10)==0){
-            mxArray * meta_variable  = mxGetField(mx_variable, 0, "dimensions");
-            dimvalue = mxGetData(meta_variable);
-        }
-        else if(strncmp(field_name,"dimension_type",14)==0){
-            mxArray * meta_variable  = mxGetField(mx_variable, 0, "dimension_type");
-            dimtypevalue = mxGetData(meta_variable);
-        }        
-    }// loop over all the fields
+    datastructure = mxGetField(mx_variable, 0, "value");     
+    if(datastructure!=NULL){ 
+        class = mxGetClassID(datastructure);
+        num_dims = mxGetNumberOfDimensions(datastructure);
+    }else {
+        mexErrMsgTxt("Field of value is missing.");
+    }
+
+     /* set meta info for each variable*/
+    mxArray * meta_variable_des  = mxGetField(mx_variable, 0, "description");
+    if(meta_variable_des!=NULL){
+        des_string = mxArrayToString(meta_variable_des);
+    }        
+    
+
+    mxArray * meta_variable_unit  = mxGetField(mx_variable, 0, "unit");
+    if(meta_variable_unit!=NULL){
+        unit_string = mxArrayToString(meta_variable_unit);
+    }             
+
+    mxArray * meta_variable_dim  = mxGetField(mx_variable, 0, "dimensions");
+    if(meta_variable_dim!=NULL){
+        dimvalue = mxGetData(meta_variable_dim);
+    }
+
+    mxArray * meta_variable  = mxGetField(mx_variable, 0, "dimension_type");
+    if(meta_variable!=NULL){
+        dimtypevalue = mxGetData(meta_variable);
+    }else {
+        mexErrMsgTxt("Field of dimension type is missing.");
+    }
 
 
      /*set value to variables after the meta data is ready*/
@@ -615,7 +615,7 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                         data = mxGetData(datastructure);
                         int inner = (**product).num_variables;
 
-                        // assigning meta data
+                        /* assigning meta data */
                         if (unit_string != NULL)
                         {
                             if (harp_variable_set_unit((**product).variable[inner-1], unit_string) != 0)
@@ -737,8 +737,6 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
                             }
                             mxFree(string_data);
                         }
-
-                        // harp_variable_delete(variable_new);
 
                     }
                     break;
