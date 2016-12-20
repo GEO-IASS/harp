@@ -308,20 +308,42 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
     char * unit_string;
     int32_t *dimtypevalue;
     int32_t *dimvalue;
+    mxArray * datastructure;
 
     for (index = 0; index < num_fields; index++)
     {
-        const char *field_name;      
-
-        field_name = mxGetFieldNameByNumber(mx_variable, index);       
-      
+        const char *field_name;    
+        field_name = mxGetFieldNameByNumber(mx_variable, index);    
+         
         if(strncmp(field_name,"value",5)==0)
         {
-            mxArray * datastructure = mxGetField(mx_variable, 0, "value");;    
+            datastructure = mxGetField(mx_variable, 0, "value");      
             class = mxGetClassID(datastructure);
             num_dims = mxGetNumberOfDimensions(datastructure);
+        }  
+         /* set meta info for each variable*/
+        else if(strncmp(field_name,"description",11) ==0){
+            mxArray * meta_variable  = mxGetField(mx_variable, 0, "description");
+            des_string = mxArrayToString(meta_variable);
+        }
+        else if(strncmp(field_name,"unit",4)==0){
+            mxArray * meta_variable  = mxGetField(mx_variable, 0, "unit");
+            unit_string = mxArrayToString(meta_variable);
+        }        
+        else if(strncmp(field_name,"dimensions",10)==0){
+            mxArray * meta_variable  = mxGetField(mx_variable, 0, "dimensions");
+            dimvalue = mxGetData(meta_variable);
+        }
+        else if(strncmp(field_name,"dimension_type",14)==0){
+            mxArray * meta_variable  = mxGetField(mx_variable, 0, "dimension_type");
+            dimtypevalue = mxGetData(meta_variable);
+        }        
+    }// loop over all the fields
 
-            if (num_dims > HARP_MAX_NUM_DIMS)
+
+     /*set value to variables after the meta data is ready*/
+       
+    if (num_dims > HARP_MAX_NUM_DIMS)
             {
                 mexErrMsgTxt("Number of dimensions for product variable is too high.");
             }
@@ -727,29 +749,8 @@ static void harp_matlab_add_matlab_product_variable(harp_product **product, cons
       
 
 
-        }  
 
-         /* set meta info for each variable*/
-        else if(strncmp(field_name,"description",11) ==0){
-            mxArray * meta_variable  = mxGetField(mx_variable, 0, "description");
-            des_string = mxArrayToString(meta_variable);
-        }
-        else if(strncmp(field_name,"unit",4)==0){
-            mxArray * meta_variable  = mxGetField(mx_variable, 0, "unit");
-            unit_string = mxArrayToString(meta_variable);
-        }        
-        else if(strncmp(field_name,"dimensions",10)==0){
-            mxArray * meta_variable  = mxGetField(mx_variable, 0, "dimensions");
-            dimvalue = mxGetData(meta_variable);
-        }
-        else if(strncmp(field_name,"dimension_type",14)==0){
-            mxArray * meta_variable  = mxGetField(mx_variable, 0, "dimension_type");
-            dimtypevalue = mxGetData(meta_variable);
-        }        
-
-    }//loop over all the fields
-
-
+   
 }
 
 harp_product *harp_matlab_set_product(const mxArray *mx_struct)
@@ -777,7 +778,7 @@ harp_product *harp_matlab_set_product(const mxArray *mx_struct)
      
         /* set meta info for each product from matlab input*/
         if(strncmp(variable_name,"source",6)==0){
-            mxArray * meta  = mxGetField(mx_struct, index, variable_name);
+            mxArray * meta  = mxGetField(mx_struct, index, "source");
             char * metastring = mxArrayToString(meta);
             if (metastring != NULL)
             {
@@ -788,7 +789,7 @@ harp_product *harp_matlab_set_product(const mxArray *mx_struct)
             }
         }
         else if(strncmp(variable_name, "history",7)==0){
-            mxArray * meta  = mxGetField(mx_struct, index, variable_name);
+            mxArray * meta  = mxGetField(mx_struct, index, "history");
             char * metastring = mxArrayToString(meta);
             if (metastring != NULL)
             {
