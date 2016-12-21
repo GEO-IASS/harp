@@ -18,10 +18,10 @@ static int harp_matlab_initialised = 0;
 
 static void harp_matlab_cleanup();
 
-static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
-static void harp_matlab_import(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
-static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
-static void harp_matlab_version(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
+static void harp_matlab_export(int nlhs, mxArray * plhs[], int nrhs, const mxArray * prhs[]);
+static void harp_matlab_import(int nlhs, mxArray * plhs[], int nrhs, const mxArray * prhs[]);
+static void harp_matlab_ingest(int nlhs, mxArray * plhs[], int nrhs, const mxArray * prhs[]);
+static void harp_matlab_version(int nlhs, mxArray * plhs[], int nrhs, const mxArray * prhs[]);
 
 void harp_matlab_harp_error(void)
 {
@@ -76,7 +76,7 @@ static void harp_matlab_set_definition_path(void)
     }
 }
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+void mexFunction(int nlhs, mxArray * plhs[], int nrhs, const mxArray * prhs[])
 {
     char funcname[MAX_FUNCNAME_LENGTH + 1];
 
@@ -105,7 +105,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         mexErrMsgTxt("Error in harp-MATLAB gateway function: Could not copy string.");
     }
 
-  
+
     if (strcmp(funcname, "IMPORT") == 0)
     {
         harp_matlab_import(nlhs, plhs, nrhs - 1, &(prhs[1]));
@@ -129,7 +129,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 }
 
 
-static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+static void harp_matlab_export(int nlhs, mxArray * plhs[], int nrhs, const mxArray * prhs[])
 {
     harp_product *product;
     char *format;
@@ -182,8 +182,8 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 
     if (harp_export(filename, format, product) != 0)
     {
-        harp_matlab_harp_error();        
-        harp_product_delete(product);        
+        harp_matlab_harp_error();
+        harp_product_delete(product);
     }
 
     mxFree(format);
@@ -193,7 +193,7 @@ static void harp_matlab_export(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 }
 
 
-static void harp_matlab_import(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+static void harp_matlab_import(int nlhs, mxArray * plhs[], int nrhs, const mxArray * prhs[])
 {
     harp_product *product;
     char *format;
@@ -254,7 +254,7 @@ static void harp_matlab_import(int nlhs, mxArray *plhs[], int nrhs, const mxArra
     mxFree(filename);
 }
 
-static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+static void harp_matlab_ingest(int nlhs, mxArray * plhs[], int nrhs, const mxArray * prhs[])
 {
     harp_product *product;
     char **filenames;
@@ -293,12 +293,12 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
         }
         filenames = (char **)mxCalloc(num_files, sizeof(char *));
         str = mxGetData(prhs[0]);
-      
+
         for (i = 0; i < num_files; i++)
         {
             int j;
 
-            filenames[i] = (char *)mxCalloc(buflen, sizeof(char ));
+            filenames[i] = (char *)mxCalloc(buflen, sizeof(char));
             for (j = 0; j < buflen - 1; j++)
             {
                 filenames[i][j] = (char)str[j * num_files + i];
@@ -310,7 +310,7 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
             }
             filenames[i][j] = '\0';
         }
-       
+
     }
     else if (mxIsCell(prhs[0]))
     {
@@ -349,15 +349,16 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
     {
         mexErrMsgTxt("First argument should be either a string or an array of strings.");
     }
-   
+
 
     script = NULL;
     option = NULL;
-    if(nrhs == 3 ){
+    if (nrhs == 3)
+    {
         if (!mxIsChar(prhs[1]))
-       {
+        {
             mexErrMsgTxt("Second argument should be a string.");
-       }
+        }
         if (mxGetM(prhs[1]) != 1)
         {
             mexErrMsgTxt("Second argument should be a row vector.");
@@ -371,7 +372,7 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
         {
             mexErrMsgTxt("Unable to copy script string.");
         }
-    
+
         if (!mxIsChar(prhs[2]))
         {
             mexErrMsgTxt("Third argument should be a string.");
@@ -382,33 +383,33 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
         {
             mexErrMsgTxt("Unable to copy option string.");
         }
-     } 
+    }
 
     for (i = 0; i < num_files; i++)
     {
-           
+
         if (harp_ingest(filenames[i], script, option, &product) != 0)
-         {
-           harp_matlab_harp_error();
+        {
+            harp_matlab_harp_error();
         }
-    }    
-        
+    }
+
     for (i = 0; i < num_files; i++)
     {
         mxFree(filenames[i]);
     }
     mxFree(filenames);
-    if ( script!= NULL)
+    if (script != NULL)
     {
         mxFree(script);
     }
-    if ( option!= NULL)
+    if (option != NULL)
     {
         mxFree(option);
     }
-       
+
     plhs[0] = harp_matlab_get_product(&product);
-   
+
     harp_product_delete(product);
 
     if (plhs[0] == NULL)
@@ -418,7 +419,7 @@ static void harp_matlab_ingest(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 }
 
 
-static void harp_matlab_version(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+static void harp_matlab_version(int nlhs, mxArray * plhs[], int nrhs, const mxArray * prhs[])
 {
     (void)prhs; /* prevents 'unused parameter' warning */
 
