@@ -16,10 +16,10 @@ EXTRA_DIST =
 INDENTFILES =
 MAINTAINERCLEANFILES =
 
-#INSTALL_DATA_HOOK_TARGETS =
-#UNINSTALL_HOOK_TARGETS =
-#install-data-hook: $(INSTALL_DATA_HOOK_TARGETS)
-#uninstall-hook: $(UNINSTALL_HOOK_TARGETS)
+INSTALL_DATA_HOOK_TARGETS =
+UNINSTALL_HOOK_TARGETS =
+install-data-hook: $(INSTALL_DATA_HOOK_TARGETS)
+uninstall-hook: $(UNINSTALL_HOOK_TARGETS)
 
 .PHONY: doc
 
@@ -590,7 +590,6 @@ RSTFILES = \
 	doc/libharp_product.rst \
 	doc/libharp_product_metadata.rst \
 	doc/libharp_variable.rst \
-	doc/html/codadef/codadef.css \
 	doc/operations.rst \
 	doc/python.rst \
 	doc/tools.rst
@@ -656,39 +655,6 @@ harpdoc_include:
 	else \
 	  mv $(srcdir)/harpdoc.mk2 $(srcdir)/harpdoc.mk ; \
 	fi
-
-# INSTALL_DATA_HOOK_TARGETS += install_codadef_doc
-# UNINSTALL_HOOK_TARGETS += uninstall_codadef_doc
-# install_codadef_doc:
-#	@echo "installing product format definition documentation"
-#	@$(MKDIR_P) $(DESTDIR)$(pkgdatadir)/doc/html/codadef
-#	@CODA_DEFINITION=$(DESTDIR)$(pkgdatadir)/definitions $(CODADD) doc $(DESTDIR)$(pkgdatadir)/doc/html/codadef
-# uninstall_codadef_doc:
-#	@echo "removing product format definition documentation"
-#	@rm -rf $(DESTDIR)$(pkgdatadir)/doc/html/codadef	
-
-# *** examples ***
-
-# matlab
-
-#HARP_MATLAB_EXAMPLES = \
-#	examples/harp_matlab/gom_lim_1p.m \
-#	examples/harp_matlab/gome_l1.m \
-#	examples/harp_matlab/gome_l2.m \
-#	examples/harp_matlab/gome_l4.m \
-#	examples/harp_matlab/gosat_fts_l1b.m \
-#	examples/harp_matlab/gosat_fts_l2_ch4.m \
-#	examples/harp_matlab/gosat_fts_l2_co2.m \
-#	examples/harp_matlab/mip_nl__2p.m \
-#	examples/harp_matlab/plot_geo_pixel.m \
-#	examples/harp_matlab/sci_nl__2p.m \
-#	examples/harp_matlab/sci_ol__2p.m
-
-#EXTRA_DIST += $(HARP_MATLAB_EXAMPLES)
-
-#if BUILD_MATLAB
-#harpmatlabexamples_DATA = $(HARP_MATLAB_EXAMPLES)
-#endif
 
 # *** indent ***
 
