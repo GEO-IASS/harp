@@ -108,16 +108,53 @@ static void harp_matlab_add_harp_product_variable(mxArray * mx_struct, harp_prod
 
     mxArray *dim_info = mxCreateNumericArray(1, matlabdim_type, mxINT32_CLASS, mxREAL);
     int *data_dim = mxGetData(dim_info);
-
-    mxArray *dim_info_type = mxCreateNumericArray(1, matlabdim_type, mxINT32_CLASS, mxREAL);
-    int *data_dim_type = mxGetData(dim_info_type);
-
+    
+    mxArray *dim_info_type  = mxCreateCellArray(1, matlabdim_type);
+    
     for (i = 0; i < num_dims; i++)
     {
         data_dim[i] = dim[i];
-        data_dim_type[i] = dim_type[i];
     }
 
+    for (i = 0; i < num_dims; i++)
+    {   
+        switch(dim_type[i])
+        {
+            case -1:
+                {
+                   mxSetCell(dim_info_type, (mwIndex)i,mxCreateString("independent"));                   
+                }
+                break;
+            case 0:
+                {
+                   mxSetCell(dim_info_type, (mwIndex)i,mxCreateString("time"));
+                }
+                break;
+            case 1:
+                {
+                   mxSetCell(dim_info_type, (mwIndex)i,mxCreateString("latitude"));
+                }
+                break;
+            case 2:
+                {
+                    mxSetCell(dim_info_type, (mwIndex)i,mxCreateString("longitude"));   
+                }
+                break;
+            case 3:
+                {
+                    mxSetCell(dim_info_type, (mwIndex)i,mxCreateString("vertical"));
+                }
+                break;
+            case 4:
+                {
+                    mxSetCell(dim_info_type, (mwIndex)i,mxCreateString("spectral"));
+                }
+                break;
+        }    
+
+    }
+
+   
     mxAddField(struct_data, "dimension");
     mxSetField(struct_data, 0, "dimension", dim_info);
 
