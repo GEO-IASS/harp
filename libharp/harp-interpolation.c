@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of CODA.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * CODA is free software; you can redistribute it and/or modify
- * it unmin1der the terms of the GNU General Public License as published by
- * the Free Software Founmin1dation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * CODA is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with CODA; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "harp-internal.h"
@@ -694,74 +705,69 @@ void harp_interpolate_array_loglinear(long source_length, const double *source_g
 /* Interpolate array from source grid to target grid using linear interpolation
  * Both source_grid_boundaries and target_grid_boundaries need to be strict monotonic.
  */
-int harp_interval_interpolate_array_linear(long source_length, const double *source_grid_boundaries,
-                                           const double *source_array, long target_length,
-                                           const double *target_grid_boundaries, double *target_array)
+void harp_interval_interpolate_array_linear(long source_length, const double *source_grid_boundaries,
+                                            const double *source_array, long target_length,
+                                            const double *target_grid_boundaries, double *target_array)
 {
     long i, j;
 
     for (i = 0; i < target_length; i++)
     {
-        target_array[i] = harp_nan();
-    }
-
-    for (i = 0; i < target_length; i++)
-    {
+        long num_valid_contributions = 0;
         double sum = 0.0;
-        long count_valid_contributions = 0;
+        double xminb, xmaxb;
+
+        if (target_grid_boundaries[2 * i] < target_grid_boundaries[2 * i + 1])
+        {
+            xminb = target_grid_boundaries[2 * i];
+            xmaxb = target_grid_boundaries[2 * i + 1];
+        }
+        else
+        {
+            xminb = target_grid_boundaries[2 * i + 1];
+            xmaxb = target_grid_boundaries[2 * i];
+        }
 
         for (j = 0; j < source_length; j++)
         {
-            double xmina = source_grid_boundaries[2 * j];
-            double xmaxa = source_grid_boundaries[2 * j + 1];
-            double xminb = target_grid_boundaries[2 * i];
-            double xmaxb = target_grid_boundaries[2 * i + 1];
+            double xmina, xmaxa;
 
-            if (!harp_isnan(source_array[i]))
+            if (source_grid_boundaries[2 * j] < source_grid_boundaries[2 * j + 1])
             {
-                harp_overlapping_scenario overlapping_scenario;
-                double weight = 0.0;
+                xmina = source_grid_boundaries[2 * j];
+                xmaxa = source_grid_boundaries[2 * j + 1];
+            }
+            else
+            {
+                xmina = source_grid_boundaries[2 * j + 1];
+                xmaxa = source_grid_boundaries[2 * j];
+            }
 
-                if (harp_determine_overlapping_scenario(xmina, xmaxa, xminb, xmaxb, &overlapping_scenario) != 0)
-                {
-                    return -1;
-                }
+            if (xmina < xmaxb && xminb < xmaxa && xmaxa > xmina && !harp_isnan(source_array[i]))
+            {
+                double xminc, xmaxc, weight;
 
-                switch (overlapping_scenario)
-                {
-                    case harp_overlapping_scenario_no_overlap_b_a:
-                    case harp_overlapping_scenario_no_overlap_a_b:
-                        weight = 0.0;
-                        break;
-                    case harp_overlapping_scenario_overlap_a_equals_b:
-                        weight = 1.0;
-                        break;
-                    case harp_overlapping_scenario_partial_overlap_a_b:
-                        weight = (xmaxa - xminb) / (xmaxa - xmina);
-                        break;
-                    case harp_overlapping_scenario_partial_overlap_b_a:
-                        weight = (xmaxb - xmina) / (xmaxa - xmina);
-                        break;
-                    case harp_overlapping_scenario_overlap_a_contains_b:
-                        weight = (xmaxb - xminb) / (xmaxa - xmina);
-                        break;
-                    case harp_overlapping_scenario_overlap_b_contains_a:
-                        weight = 1.0;
-                        break;
-                }
+                /* there is overlap, interval A is not empty, and interval A has a valid value */
 
+                /* calculate intersection interval C of intervals A and B */
+                xminc = xmina < xminb ? xminb : xmina;
+                xmaxc = xmaxa > xmaxb ? xmaxb : xmaxa;
+
+                weight = (xmaxc - xminc) / (xmaxa - xmina);
                 sum += weight * source_array[i];
-                count_valid_contributions++;
+                num_valid_contributions++;
             }
         }
 
-        if (count_valid_contributions != 0)
+        if (num_valid_contributions != 0)
         {
             target_array[i] = sum;
         }
+        else
+        {
+            target_array[i] = harp_nan();
+        }
     }
-
-    return 0;
 }
 
 /* Determine boundary intervals based on linear inter-/extrapolation of mid points.

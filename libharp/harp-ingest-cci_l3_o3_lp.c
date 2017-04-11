@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "coda.h"
@@ -587,7 +598,7 @@ static void register_mzm_product(void)
     description =
         "approximate altitude at pressure levels computed as 16 * log10(1013 / pressure), with pressure in hPa";
     variable_definition =
-        harp_ingestion_register_variable_full_read(product_definition, "approximate_altitude", harp_type_double, 1,
+        harp_ingestion_register_variable_full_read(product_definition, "altitude", harp_type_double, 1,
                                                    vertical_dimension_type, NULL, description, "km", NULL,
                                                    read_altitude);
     path = "/approximate_altitude[]";
@@ -651,6 +662,15 @@ static void register_mmzm_product(void)
         "is used as the time of the measurement";
     harp_variable_definition_add_mapping(variable_definition, NULL, NULL, path, description);
 
+    /* longitude */
+    description = "longitude of the bin center";
+    variable_definition =
+        harp_ingestion_register_variable_full_read(product_definition, "longitude", harp_type_double, 1,
+                                                   latitude_dimension_type, NULL, description, "degree_east", NULL,
+                                                   read_latitude);
+    path = "/longitude_centers[]";
+    harp_variable_definition_add_mapping(variable_definition, NULL, NULL, path, NULL);
+
     /* latitude */
     description = "latitude of the bin center";
     variable_definition =
@@ -665,7 +685,7 @@ static void register_mmzm_product(void)
     description =
         "approximate altitude at pressure levels computed as 16 * log10(1013 / pressure), with pressure in hPa";
     variable_definition =
-        harp_ingestion_register_variable_full_read(product_definition, "approximate_altitude", harp_type_double, 1,
+        harp_ingestion_register_variable_full_read(product_definition, "altitude", harp_type_double, 1,
                                                    vertical_dimension_type, NULL, description, "km", NULL,
                                                    read_altitude);
     path = "/approximate_altitude[]";

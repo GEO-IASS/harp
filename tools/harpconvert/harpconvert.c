@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -43,7 +54,7 @@ static int print_warning(const char *message, va_list ap)
 static void print_version()
 {
     printf("harpconvert version %s\n", libharp_version);
-    printf("Copyright (C) 2015-2016 S[&]T, The Netherlands.\n\n");
+    printf("Copyright (C) 2015-2017 S[&]T, The Netherlands.\n\n");
 }
 
 static void print_help()
@@ -78,7 +89,7 @@ static void print_help()
     printf("        Perform an internal test for each product by ingesting the product\n");
     printf("        using all possible combinations of ingestion options.\n");
     printf("\n");
-    printf("    harpconvert --list-conversions [options] [input product file]\n");
+    printf("    harpconvert --list-derivations [options] [input product file]\n");
     printf("        List all available variable conversions. If an input product file is\n");
     printf("        specified, limit the list to variable conversions that are possible\n");
     printf("        given the specified product.\n");
@@ -104,7 +115,7 @@ static void print_help()
     printf("\n");
 }
 
-static int list_conversions(int argc, char *argv[])
+static int list_derivations(int argc, char *argv[])
 {
     const char *options = NULL;
     harp_product *product = NULL;
@@ -341,9 +352,9 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    if (strcmp(argv[1], "--list-conversions") == 0)
+    if (strcmp(argv[1], "--list-derivations") == 0)
     {
-        result = list_conversions(argc, argv);
+        result = list_derivations(argc, argv);
     }
     else if (strcmp(argv[1], "--generate-documentation") == 0)
     {

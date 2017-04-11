@@ -1,194 +1,37 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "harp-internal.h"
 #include "harp-constants.h"
 #include "harp-geometry.h"
-
-/** Check whether two ranges overlap, and if this is the case an overlapping percentage is returned.
- * The ranges must consist of a positive minimum and maximum.
- *
- * The overlapping percentage is calculated with
- *
- *    delta_overlapping_range / min(delta_rangeA, delta_rangeB)
- *
- * where
- *
- *    delta_overlapping_range = max_range - min_range.
- *
- * and
- *
- *    delta_overlapping_range =
- *      max_overlapping_range - min_overlapping_range
- *
- * The following cases need to be considered:
- * --------------------------------------------
- *   1. No overlap,
- *      range A lies rightwards of range B
- *      'harp_overlapping_scenario_no_overlap_b_a'
- *
- *            A----A
- *       B--B
- *
- *       max range B < min range A
- *
- * --------------------------------------------
- *   2. No overlap,
- *      range A lies leftwards of range B
- *      'harp_overlapping_scenario_no_overlap_a_b'
- *
- *       A----A
- *               B--B
- *
- *       max range A < min range B
- *
- * --------------------------------------------
- *   3. Equal,
- *      range A is equal to range B
- *      'harp_overlapping_scenario_overlap_a_equals_b'
- *
- *       A----A
- *       B----B
- *
- *       min range A == min range B &&
- *       max range A == max range B
- *
- * --------------------------------------------
- *   4. Partial overlap,
- *      max range B lies outside range A
- *      'harp_overlapping_scenario_partial_overlap_a_b'
- *
- *       A----A     A----A
- *           B--B        B---B
- *
- *       min range A < min range B <= max range A &&
- *       min range B <= max range A < max range B
- *
- * --------------------------------------------
- *   5. Partial overlap:
- *      min range B lies outside range A
- *      'harp_overlapping_scenario_partial_overlap_b_a'
- *
- *          A----A       A----A
- *        B--B        B--B
- *
- *        min range B < min range A <= max range B &&
- *        min range A <= max range B < max range A
- *
- * --------------------------------------------
- *   6. Contain:
- *      range A contains range B
- *      'harp_overlapping_scenario_overlap_a_contains_b'
- *
- *         A----A   A----A  A----A
- *           B-B    B-B        B-B
- *
- *         min range B >= min range A &&
- *          max range B <= max range A
- *
- * --------------------------------------------
- *   7. Contain:
- *      range B contains range A
- *      'harp_overlapping_scenario_overlap_b_contains_a'
- *
- *          A--A     A---A       A---A
- *         B-----B   B------B  B-----B
- *
- *         min range A >= min range B &&
- *         max range A <= max range B
- */
-int harp_determine_overlapping_scenario(double xmin_a, double xmax_a, double xmin_b, double xmax_b,
-                                        harp_overlapping_scenario *new_overlapping_scenario)
-{
-    harp_overlapping_scenario overlapping_scenario = harp_overlapping_scenario_no_overlap_b_a;
-
-    /* Make sure that elements in range A and B are in ascending order */
-    if (xmax_a < xmin_a)
-    {
-        harp_set_error(HARP_ERROR_INVALID_ARGUMENT,
-                       "arguments 'xmin_a' (%g) and 'xmax_a' (%g) for overlapping scenario must be in ascending order",
-                       xmin_a, xmax_a);
-        return -1;
-    }
-    if (xmax_b < xmin_b)
-    {
-        harp_set_error(HARP_ERROR_INVALID_ARGUMENT,
-                       "arguments 'xmin_b' (%g) and 'xmax_b' (%g) for overlapping scenario must be in ascending order",
-                       xmin_b, xmax_b);
-        return -1;
-    }
-
-    /* Consider all overlapping cases ... */
-    if (xmax_b < xmin_a)
-    {
-        /* There is no overlap, because range A lies rightwards of range B */
-        overlapping_scenario = harp_overlapping_scenario_no_overlap_b_a;
-        /* overlapping_percentage = 0.0; */
-    }
-    else if (xmax_a < xmin_b)
-    {
-        /* There is no overlap, because range A lies leftwards of range B */
-        overlapping_scenario = harp_overlapping_scenario_no_overlap_a_b;
-        /* overlapping_percentage = 0.0; */
-    }
-    else if (xmin_a == xmin_b && xmax_a == xmax_b)
-    {
-        /* The two ranges are exactly the same */
-        overlapping_scenario = harp_overlapping_scenario_overlap_a_equals_b;
-        /* overlapping_percentage = 100.0; */
-    }
-    else if (xmin_a < xmin_b && xmin_b <= xmax_a && xmin_b <= xmax_a && xmax_a < xmax_b)
-    {
-        /* There is a partial overlap between range A and B (min range B lies outside range A) */
-        overlapping_scenario = harp_overlapping_scenario_partial_overlap_a_b;
-        /* overlapping_percentage = 0.0; */
-    }
-    else if (xmin_b < xmin_a && xmin_a <= xmax_b && xmin_a <= xmax_b && xmax_b < xmax_a)
-    {
-        /* There is a partial overlap between range A and B (min range A lies outside range B) */
-        overlapping_scenario = harp_overlapping_scenario_partial_overlap_b_a;
-        /* overlapping_percentage = 0.0; */
-    }
-    else if (xmin_b >= xmin_a && xmax_b <= xmax_a)
-    {
-        /* Range A contains range B */
-        overlapping_scenario = harp_overlapping_scenario_overlap_a_contains_b;
-        /* overlapping_percentage = 100.0; */
-    }
-    else if (xmin_a >= xmin_b && xmax_a <= xmax_b)
-    {
-        /* Range B contains range A */
-        overlapping_scenario = harp_overlapping_scenario_overlap_b_contains_a;
-        /* overlapping_percentage = 100.0; */
-    }
-    else
-    {
-        harp_set_error(HARP_ERROR_INVALID_ARGUMENT,
-                       "exception determining overlapping range: rangeA = [%11.3f, %11.3f]; rangeB = [%11.3f, %11.3f]",
-                       xmin_a, xmax_a, xmin_b, xmax_b);
-        return -1;
-    }
-
-    *new_overlapping_scenario = overlapping_scenario;
-    return 0;
-}
 
 /** Calculate the fraction of the day
  * \param datetime   Datetime [s since 2000-01-01]
@@ -757,4 +600,16 @@ double harp_wavenumber_from_frequency(double frequency)
 double harp_wavenumber_from_wavelength(double wavelength)
 {
     return 1.0 / wavelength;
+}
+
+/** Wrap a value to the given min/max range
+ * The result is: min + (value - min) % (max - min)
+ * \param value Value to wrap to the given range
+ * \param min Minimum value of the range
+ * \param max Maximum value of the range
+ * \return Wrapped value
+ */
+double harp_wrap(double value, double min, double max)
+{
+    return min + fmod(value - min, max - min);
 }

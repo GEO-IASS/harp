@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "harp-internal.h"
@@ -205,6 +216,487 @@ static void sync_product_dimensions_on_variable_remove(harp_product *product, co
     }
 }
 
+/** Add a time dimension to each variable in the product.
+ * If a variable in the product does not have a time dimension as first dimension then this dimension is introduced
+ * and the data of the variable is replicated for each time element.
+ * If the product was not time dependent (i.e. none of the variables were time dependent) then the product will be
+ * made time dependent with time dimension length 1.
+ * \param product Product that should be made time dependent.
+ * \return
+ *   \arg \c 0, Success.
+ *   \arg \c -1, Error occurred (check #harp_errno).
+ */
+int harp_product_make_time_dependent(harp_product *product)
+{
+    int i;
+
+    if (product->dimension[harp_dimension_time] == 0)
+    {
+        product->dimension[harp_dimension_time] = 1;
+    }
+
+    for (i = 0; i < product->num_variables; i++)
+    {
+        harp_variable *variable = product->variable[i];
+
+        if (variable->num_dimensions == 0 || variable->dimension_type[0] != harp_dimension_time)
+        {
+            if (harp_variable_add_dimension(variable, 0, harp_dimension_time, product->dimension[harp_dimension_time])
+                != 0)
+            {
+                return -1;
+            }
+        }
+    }
+
+    return 0;
+}
+
+int harp_product_rearrange_dimension(harp_product *product, harp_dimension_type dimension_type, long num_dim_elements,
+                                     const long *dim_element_ids)
+{
+    int i;
+
+    if (dimension_type == harp_dimension_independent)
+    {
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "cannot rearrange '%s' dimension (%s:%u)",
+                       harp_get_dimension_type_name(harp_dimension_independent), __FILE__, __LINE__);
+        return -1;
+    }
+
+    if (product->dimension[dimension_type] == 0)
+    {
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "product does not depend on dimension '%s' (%s:%u)",
+                       harp_get_dimension_type_name(dimension_type), __FILE__, __LINE__);
+        return -1;
+    }
+
+    if (dim_element_ids == NULL)
+    {
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "dim_element_ids is NULL (%s:%u)", __FILE__, __LINE__);
+        return -1;
+    }
+
+    if (num_dim_elements == 0)
+    {
+        /* If the new length of the dimension to be rearranged is zero, return an empty product. */
+        harp_product_remove_all_variables(product);
+        return 0;
+    }
+
+    for (i = 0; i < product->num_variables; i++)
+    {
+        harp_variable *variable = product->variable[i];
+        int j;
+
+        for (j = 0; j < variable->num_dimensions; j++)
+        {
+            if (variable->dimension_type[j] != dimension_type)
+            {
+                continue;
+            }
+
+            if (harp_variable_rearrange_dimension(variable, j, num_dim_elements, dim_element_ids) != 0)
+            {
+                return -1;
+            }
+        }
+    }
+
+    product->dimension[dimension_type] = num_dim_elements;
+
+    return 0;
+}
+
+int harp_product_sort_by_index(harp_product *product, const char *index_variable, long num_elements, int32_t *index)
+{
+    harp_variable *variable;
+    long *dim_element_ids;
+    long i, j;
+
+    if (harp_product_get_variable_by_name(product, index_variable, &variable) != 0)
+    {
+        return -1;
+    }
+
+    if (num_elements != variable->num_elements)
+    {
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "length of index variable (%ld) and index array (%ld) don't match",
+                       variable->num_elements, num_elements);
+        return -1;
+    }
+
+    dim_element_ids = malloc(num_elements * sizeof(long));
+    if (dim_element_ids == NULL)
+    {
+        harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not allocate %lu bytes) (%s:%u)",
+                       num_elements * sizeof(long), __FILE__, __LINE__);
+        return -1;
+    }
+
+    for (i = 0; i < num_elements; i++)
+    {
+        for (j = 0; j < num_elements; j++)
+        {
+            if (index[i] == variable->data.int32_data[j])
+            {
+                break;
+            }
+        }
+        if (j == num_elements)
+        {
+            harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "index %ld not found in index variable", (long)index[i]);
+            return -1;
+        }
+        dim_element_ids[i] = j;
+    }
+
+    if (harp_product_rearrange_dimension(product, harp_dimension_time, num_elements, dim_element_ids) != 0)
+    {
+        free(dim_element_ids);
+        return -1;
+    }
+
+    free(dim_element_ids);
+
+    return 0;
+}
+
+int harp_product_resize_dimension(harp_product *product, harp_dimension_type dimension_type, long length)
+{
+    int i;
+
+    for (i = 0; i < product->num_variables; i++)
+    {
+        harp_variable *variable = product->variable[i];
+        int j;
+
+        for (j = 0; j < variable->num_dimensions; j++)
+        {
+            if (variable->dimension_type[j] == dimension_type)
+            {
+                if (harp_variable_resize_dimension(variable, j, length) != 0)
+                {
+                    return -1;
+                }
+            }
+        }
+    }
+    product->dimension[dimension_type] = length;
+
+    return 0;
+}
+
+/* Filter data of a variable in one dimension.
+ * This function removes for all variables all elements in the given dimension where \a mask is set to 0.
+ * The size of \a mask should correspond to the length of the given dimension.
+ * It is an error to provide a list of \a mask values that only contain zeros (i.e. filter out all elements).
+ *
+ * Input:
+ *    product        Pointer to product for which the variables should have their data filtered.
+ *    dimension_type Dimension to filter.
+ *    mask           An array containing true/false (1/0) values on whether to keep an element or not.
+ */
+int harp_product_filter_dimension(harp_product *product, harp_dimension_type dimension_type, const uint8_t *mask)
+{
+    long masked_dimension_length;
+    int i;
+
+    if (dimension_type == harp_dimension_independent)
+    {
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "cannot filter '%s' dimension (%s:%u)",
+                       harp_get_dimension_type_name(harp_dimension_independent), __FILE__, __LINE__);
+        return -1;
+    }
+
+    if (product->dimension[dimension_type] == 0)
+    {
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "product does not depend on dimension '%s'",
+                       harp_get_dimension_type_name(dimension_type));
+        return -1;
+    }
+
+    if (mask == NULL)
+    {
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "mask is NULL (%s:%u)", __FILE__, __LINE__);
+        return -1;
+    }
+
+    masked_dimension_length = 0;
+    for (i = 0; i < product->dimension[dimension_type]; i++)
+    {
+        if (mask[i])
+        {
+            masked_dimension_length++;
+        }
+    }
+
+    if (masked_dimension_length == 0)
+    {
+        /* If the new length of the dimension to be filtered is zero, return an empty product. */
+        harp_product_remove_all_variables(product);
+        return 0;
+    }
+
+    for (i = 0; i < product->num_variables; i++)
+    {
+        harp_variable *variable = product->variable[i];
+        int j;
+
+        for (j = 0; j < variable->num_dimensions; j++)
+        {
+            if (variable->dimension_type[j] != dimension_type)
+            {
+                continue;
+            }
+
+            if (harp_variable_filter_dimension(variable, j, mask) != 0)
+            {
+                return -1;
+            }
+        }
+    }
+
+    product->dimension[dimension_type] = masked_dimension_length;
+
+    return 0;
+}
+
+/* Remove the specified dimension from the product.
+ * All variables that depend on the specified dimension will be removed from the product.
+ *
+ * Input:
+ *    product        Product to operate on.
+ *    dimension_type The dimension that should be removed.
+ */
+int harp_product_remove_dimension(harp_product *product, harp_dimension_type dimension_type)
+{
+    int i;
+
+    if (dimension_type == harp_dimension_independent)
+    {
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "cannot remove '%s' dimension (%s:%u)",
+                       harp_get_dimension_type_name(harp_dimension_independent), __FILE__, __LINE__);
+        return -1;
+    }
+
+    if (product->dimension[dimension_type] == 0)
+    {
+        /* Product does not depend on dimensions to be removed, so nothing has to be done. */
+        return 0;
+    }
+
+    for (i = product->num_variables - 1; i >= 0; i--)
+    {
+        harp_variable *variable = product->variable[i];
+
+        if (!harp_variable_has_dimension_type(variable, dimension_type))
+        {
+            continue;
+        }
+
+        if (harp_product_remove_variable(product, variable) != 0)
+        {
+            return -1;
+        }
+    }
+    assert(product->dimension[dimension_type] == 0);
+
+    return 0;
+}
+
+/** Remove all variables from a product.
+ * \param product Product from which variables should be removed.
+ */
+void harp_product_remove_all_variables(harp_product *product)
+{
+    if (product->variable != NULL)
+    {
+        int i;
+
+        for (i = 0; i < product->num_variables; i++)
+        {
+            harp_variable_delete(product->variable[i]);
+        }
+
+        free(product->variable);
+    }
+
+    memset(product->dimension, 0, HARP_NUM_DIM_TYPES * sizeof(long));
+    product->num_variables = 0;
+    product->variable = NULL;
+}
+
+/**
+ * Determine the datetime range covered by the product. Start and stop datetimes are returned as the (fractional) number
+ * of days since 2000.
+ *
+ * \param  product        Product to compute the datetime range of.
+ * \param  datetime_start Pointer to the location where the start datetime of the product will be stored. If NULL, the
+ *   start datetime will not be stored.
+ * \param  datetime_stop  Pointer to the location where the stop datetime of the product will be stored. If NULL, the
+ *   stop datetime will not be stored.
+ * \return
+ *   \arg \c 0, Success.
+ *   \arg \c -1, Error occurred (check #harp_errno).
+ */
+int harp_product_get_datetime_range(const harp_product *product, double *datetime_start, double *datetime_stop)
+{
+    harp_dimension_type dimension_type[1] = { harp_dimension_time };
+    harp_variable *mid_datetime = NULL;
+    harp_variable *datetime;
+    long i;
+
+    if (datetime_start != NULL)
+    {
+        double start = harp_plusinf();
+
+        if (harp_product_get_derived_variable(product, "datetime_start", "days since 2000-01-01", 1, dimension_type,
+                                              &datetime) != 0)
+        {
+            if (harp_product_get_derived_variable(product, "datetime", "days since 2000-01-01", 1, dimension_type,
+                                                  &datetime) != 0)
+            {
+                return -1;
+            }
+            mid_datetime = datetime;
+        }
+        if (harp_variable_convert_data_type(datetime, harp_type_double) != 0)
+        {
+            harp_variable_delete(datetime);
+            return -1;
+        }
+
+        for (i = 0; i < datetime->num_elements; i++)
+        {
+            const double value = datetime->data.double_data[i];
+
+            if (harp_isnan(value) || value < datetime->valid_min.double_data || value > datetime->valid_max.double_data)
+            {
+                continue;
+            }
+
+            if (value < start)
+            {
+                start = value;
+            }
+        }
+
+        if (harp_isplusinf(start) || start < datetime->valid_min.double_data || start > datetime->valid_max.double_data)
+        {
+            harp_variable_delete(datetime);
+            harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "cannot determine valid start value for datetime range");
+            return -1;
+        }
+
+        *datetime_start = start;
+
+        if (mid_datetime == NULL)
+        {
+            harp_variable_delete(datetime);
+        }
+    }
+
+    if (datetime_stop != NULL)
+    {
+        double stop = harp_mininf();
+
+        if (harp_product_get_derived_variable(product, "datetime_stop", "days since 2000-01-01", 1, dimension_type,
+                                              &datetime) != 0)
+        {
+            if (mid_datetime != NULL)
+            {
+                datetime = mid_datetime;
+            }
+            else if (harp_product_get_derived_variable(product, "datetime", "days since 2000-01-01", 1, dimension_type,
+                                                       &datetime) != 0)
+            {
+                return -1;
+            }
+        }
+        if (harp_variable_convert_data_type(datetime, harp_type_double) != 0)
+        {
+            harp_variable_delete(datetime);
+            return -1;
+        }
+
+        for (i = 0; i < datetime->num_elements; i++)
+        {
+            const double value = datetime->data.double_data[i];
+
+            if (harp_isnan(value) || value < datetime->valid_min.double_data || value > datetime->valid_max.double_data)
+            {
+                continue;
+            }
+
+            if (value > stop)
+            {
+                stop = value;
+            }
+        }
+
+        if (harp_ismininf(stop) || stop < datetime->valid_min.double_data || stop > datetime->valid_max.double_data)
+        {
+            harp_variable_delete(datetime);
+            harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "cannot determine valid stop value for datetime range");
+            return -1;
+        }
+
+        *datetime_stop = stop;
+
+        if (mid_datetime == NULL)
+        {
+            harp_variable_delete(datetime);
+        }
+    }
+
+    if (mid_datetime != NULL)
+    {
+        harp_variable_delete(mid_datetime);
+    }
+
+    return 0;
+}
+
+int harp_product_get_storage_size(const harp_product *product, int with_attributes, int64_t *size)
+{
+    int64_t total_size = 0;
+    int i;
+
+    if (with_attributes)
+    {
+        if (product->source_product != NULL)
+        {
+            total_size += strlen(product->source_product);
+        }
+        if (product->history != NULL)
+        {
+            total_size += strlen(product->history);
+        }
+    }
+
+    for (i = 0; i < product->num_variables; i++)
+    {
+        harp_variable *variable = product->variable[i];
+
+        total_size += variable->num_elements * harp_get_size_for_type(variable->data_type);
+        if (with_attributes)
+        {
+            if (variable->description != 0)
+            {
+                total_size += strlen(variable->description);
+            }
+            if (variable->unit != 0)
+            {
+                total_size += strlen(variable->unit);
+            }
+        }
+    }
+
+    *size = total_size;
+    return 0;
+}
+
 /** \addtogroup harp_product
  * @{
  */
@@ -333,6 +825,115 @@ LIBHARP_API int harp_product_copy(const harp_product *other_product, harp_produc
     }
 
     *new_product = product;
+    return 0;
+}
+
+/** Append one product to another.
+ * The 'index' variable, if present, will be removed.
+ * All variables in both products will have a 'time' dimension introduced as first dimension.
+ * Both products will have all non-time dimensions extended to the maximum of either product.
+ * Any 'source_product' attribute for the first product will be removed.
+ * \param product Product to which data should be appended.
+ * \param other_product Product that should be appended.
+ * \return
+ *   \arg \c 0, Success.
+ *   \arg \c -1, Error occurred (check #harp_errno).
+ */
+LIBHARP_API int harp_product_append(harp_product *product, harp_product *other_product)
+{
+    harp_variable *variable;
+    harp_variable *other_variable;
+    harp_dimension_type dimension_type;
+    int i;
+
+    /* first remove any 'index' variable in both products */
+    if (harp_product_has_variable(product, "index"))
+    {
+        if (harp_product_remove_variable_by_name(product, "index") != 0)
+        {
+            return -1;
+        }
+    }
+    if (harp_product_has_variable(other_product, "index"))
+    {
+        if (harp_product_remove_variable_by_name(other_product, "index") != 0)
+        {
+            return -1;
+        }
+    }
+
+    /* now check if both products have the same variables */
+    if (product->num_variables != other_product->num_variables)
+    {
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "products don't have the same number of variables");
+        return -1;
+    }
+    for (i = 0; i < product->num_variables; i++)
+    {
+        variable = product->variable[i];
+        if (harp_product_get_variable_by_name(other_product, variable->name, &other_variable) != 0)
+        {
+            harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "products don't both have variable '%s'", variable->name);
+            return -1;
+        }
+    }
+
+    /* add time dimension to all variables */
+    if (harp_product_make_time_dependent(product) != 0)
+    {
+        return -1;
+    }
+    if (harp_product_make_time_dependent(other_product) != 0)
+    {
+        return -1;
+    }
+
+    /* align size of all non-time dimensions */
+    for (dimension_type = 0; dimension_type < HARP_NUM_DIM_TYPES; dimension_type++)
+    {
+        if (dimension_type != harp_dimension_time)
+        {
+            if (product->dimension[dimension_type] > other_product->dimension[dimension_type])
+            {
+                if (harp_product_resize_dimension(other_product, dimension_type, product->dimension[dimension_type]) !=
+                    0)
+                {
+                    return -1;
+                }
+            }
+            else if (product->dimension[dimension_type] < other_product->dimension[dimension_type])
+            {
+                if (harp_product_resize_dimension(product, dimension_type, other_product->dimension[dimension_type]) !=
+                    0)
+                {
+                    return -1;
+                }
+            }
+        }
+    }
+
+    /* append all variables */
+    for (i = 0; i < product->num_variables; i++)
+    {
+        variable = product->variable[i];
+        if (harp_product_get_variable_by_name(other_product, variable->name, &other_variable) != 0)
+        {
+            assert(0);
+            exit(1);
+        }
+        if (harp_variable_append(variable, other_variable) != 0)
+        {
+            return -1;
+        }
+    }
+    product->dimension[harp_dimension_time] += other_product->dimension[harp_dimension_time];
+
+    if (product->source_product != NULL)
+    {
+        free(product->source_product);
+        product->source_product = NULL;
+    }
+
     return 0;
 }
 
@@ -548,6 +1149,31 @@ LIBHARP_API int harp_product_remove_variable(harp_product *product, harp_variabl
     return 0;
 }
 
+/** Remove a variable from a product using the name of the variable.
+ * This function removes the variable with the specified name from the product and then deletes the variable itself.
+ * \param product Product from which the variable should be removed.
+ * \param name Name of the variable that should be removed.
+ * \return
+ *   \arg \c 0, Success.
+ *   \arg \c -1, Error occurred (check #harp_errno).
+ */
+LIBHARP_API int harp_product_remove_variable_by_name(harp_product *product, const char *name)
+{
+    harp_variable *variable;
+
+    if (harp_product_get_variable_by_name(product, name, &variable) != 0)
+    {
+        return -1;
+    }
+    if (harp_product_detach_variable(product, variable) != 0)
+    {
+        return -1;
+    }
+    harp_variable_delete(variable);
+
+    return 0;
+}
+
 /** Replaces an existing variable with the one provided.
  * The product should already contain a variable with the same name as \a variable. This function searches in the list
  * of variables in the product for one with the same name, removes this variable and then adds the given \a variable in
@@ -560,7 +1186,7 @@ LIBHARP_API int harp_product_remove_variable(harp_product *product, harp_variabl
  */
 LIBHARP_API int harp_product_replace_variable(harp_product *product, harp_variable *variable)
 {
-    int variable_id;
+    int index;
     int i;
 
     if (variable == NULL)
@@ -569,14 +1195,14 @@ LIBHARP_API int harp_product_replace_variable(harp_product *product, harp_variab
         return -1;
     }
 
-    if (harp_product_get_variable_id_by_name(product, variable->name, &variable_id) != 0)
+    if (harp_product_get_variable_index_by_name(product, variable->name, &index) != 0)
     {
         harp_set_error(HARP_ERROR_VARIABLE_NOT_FOUND, "variable '%s' does not exist (%s:%u)", variable->name, __FILE__,
                        __LINE__);
         return -1;
     }
 
-    if (product->variable[variable_id] == variable)
+    if (product->variable[index] == variable)
     {
         /* Attempt to replace variable by itself. */
         return 0;
@@ -603,11 +1229,11 @@ LIBHARP_API int harp_product_replace_variable(harp_product *product, harp_variab
     }
 
     /* Replace variable. */
-    sync_product_dimensions_on_variable_remove(product, product->variable[variable_id]);
-    harp_variable_delete(product->variable[variable_id]);
+    sync_product_dimensions_on_variable_remove(product, product->variable[index]);
+    harp_variable_delete(product->variable[index]);
 
-    product->variable[variable_id] = variable;
-    sync_product_dimensions_on_variable_add(product, product->variable[variable_id]);
+    product->variable[index] = variable;
+    sync_product_dimensions_on_variable_add(product, product->variable[index]);
 
     return 0;
 }
@@ -682,12 +1308,12 @@ LIBHARP_API int harp_product_get_variable_by_name(const harp_product *product, c
  * If no variable with the given name can be found an error is returned.
  * \param product Product in which the find the variable.
  * \param name Name of the variable.
- * \param variable_id Pointer to the C variable where the index in the HARP variables list for the product is returned.
+ * \param index Pointer to the C variable where the index in the HARP variables list for the product is returned.
  * \return
  *   \arg \c 0, Success.
  *   \arg \c -1, Error occurred (check #harp_errno).
  */
-LIBHARP_API int harp_product_get_variable_id_by_name(const harp_product *product, const char *name, int *variable_id)
+LIBHARP_API int harp_product_get_variable_index_by_name(const harp_product *product, const char *name, int *index)
 {
     int i;
 
@@ -697,9 +1323,9 @@ LIBHARP_API int harp_product_get_variable_id_by_name(const harp_product *product
         return -1;
     }
 
-    if (variable_id == NULL)
+    if (index == NULL)
     {
-        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "variable_id is NULL (%s:%u)", __FILE__, __LINE__);
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "index is NULL (%s:%u)", __FILE__, __LINE__);
         return -1;
     }
 
@@ -707,7 +1333,7 @@ LIBHARP_API int harp_product_get_variable_id_by_name(const harp_product *product
     {
         if (strcmp(product->variable[i]->name, name) == 0)
         {
-            *variable_id = i;
+            *index = i;
             return 0;
         }
     }
@@ -920,337 +1546,6 @@ LIBHARP_API int harp_product_verify(const harp_product *product)
     return 0;
 }
 
-/** @} */
-
-int harp_product_rearrange_dimension(harp_product *product, harp_dimension_type dimension_type, long num_dim_elements,
-                                     const long *dim_element_ids)
-{
-    int i;
-
-    if (dimension_type == harp_dimension_independent)
-    {
-        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "cannot rearrange '%s' dimension (%s:%u)",
-                       harp_get_dimension_type_name(harp_dimension_independent), __FILE__, __LINE__);
-        return -1;
-    }
-
-    if (product->dimension[dimension_type] == 0)
-    {
-        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "product does not depend on dimension '%s' (%s:%u)",
-                       harp_get_dimension_type_name(dimension_type), __FILE__, __LINE__);
-        return -1;
-    }
-
-    if (dim_element_ids == NULL)
-    {
-        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "dim_element_ids is NULL (%s:%u)", __FILE__, __LINE__);
-        return -1;
-    }
-
-    if (num_dim_elements == 0)
-    {
-        /* If the new length of the dimension to be rearranged is zero, return an empty product. */
-        harp_product_remove_all_variables(product);
-        return 0;
-    }
-
-    for (i = 0; i < product->num_variables; i++)
-    {
-        harp_variable *variable = product->variable[i];
-        int j;
-
-        for (j = 0; j < variable->num_dimensions; j++)
-        {
-            if (variable->dimension_type[j] != dimension_type)
-            {
-                continue;
-            }
-
-            if (harp_variable_rearrange_dimension(variable, j, num_dim_elements, dim_element_ids) != 0)
-            {
-                return -1;
-            }
-        }
-    }
-
-    product->dimension[dimension_type] = num_dim_elements;
-
-    return 0;
-}
-
-/* Filter data of a variable in one dimension.
- * This function removes for all variables all elements in the given dimension where \a mask is set to 0.
- * The size of \a mask should correspond to the length of the given dimension.
- * It is an error to provide a list of \a mask values that only contain zeros (i.e. filter out all elements).
- *
- * Input:
- *    product        Pointer to product for which the variables should have their data filtered.
- *    dimension_type Dimension to filter.
- *    mask           An array containing true/false (1/0) values on whether to keep an element or not.
- */
-int harp_product_filter_dimension(harp_product *product, harp_dimension_type dimension_type, const uint8_t *mask)
-{
-    long masked_dimension_length;
-    int i;
-
-    if (dimension_type == harp_dimension_independent)
-    {
-        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "cannot filter '%s' dimension (%s:%u)",
-                       harp_get_dimension_type_name(harp_dimension_independent), __FILE__, __LINE__);
-        return -1;
-    }
-
-    if (product->dimension[dimension_type] == 0)
-    {
-        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "product does not depend on dimension '%s'",
-                       harp_get_dimension_type_name(dimension_type));
-        return -1;
-    }
-
-    if (mask == NULL)
-    {
-        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "mask is NULL (%s:%u)", __FILE__, __LINE__);
-        return -1;
-    }
-
-    masked_dimension_length = 0;
-    for (i = 0; i < product->dimension[dimension_type]; i++)
-    {
-        if (mask[i])
-        {
-            masked_dimension_length++;
-        }
-    }
-
-    if (masked_dimension_length == 0)
-    {
-        /* If the new length of the dimension to be filtered is zero, return an empty product. */
-        harp_product_remove_all_variables(product);
-        return 0;
-    }
-
-    for (i = 0; i < product->num_variables; i++)
-    {
-        harp_variable *variable = product->variable[i];
-        int j;
-
-        for (j = 0; j < variable->num_dimensions; j++)
-        {
-            if (variable->dimension_type[j] != dimension_type)
-            {
-                continue;
-            }
-
-            if (harp_variable_filter_dimension(variable, j, mask) != 0)
-            {
-                return -1;
-            }
-        }
-    }
-
-    product->dimension[dimension_type] = masked_dimension_length;
-
-    return 0;
-}
-
-/* Remove the specified dimension from the product.
- * All variables that depend on the specified dimension will be removed from the product.
- *
- * Input:
- *    product        Product to operate on.
- *    dimension_type The dimension that should be removed.
- */
-int harp_product_remove_dimension(harp_product *product, harp_dimension_type dimension_type)
-{
-    int i;
-
-    if (dimension_type == harp_dimension_independent)
-    {
-        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "cannot remove '%s' dimension (%s:%u)",
-                       harp_get_dimension_type_name(harp_dimension_independent), __FILE__, __LINE__);
-        return -1;
-    }
-
-    if (product->dimension[dimension_type] == 0)
-    {
-        /* Product does not depend on dimensions to be removed, so nothing has to be done. */
-        return 0;
-    }
-
-    i = 0;
-    while (i < product->num_variables)
-    {
-        harp_variable *variable = product->variable[i];
-
-        if (!harp_variable_has_dimension_type(variable, dimension_type))
-        {
-            i++;
-            continue;
-        }
-
-        if (harp_product_remove_variable(product, variable) != 0)
-        {
-            return -1;
-        }
-    }
-    assert(product->dimension[dimension_type] == 0);
-
-    return 0;
-}
-
-/** Remove all variables from a product.
- * \param product Product from which variables should be removed.
- */
-void harp_product_remove_all_variables(harp_product *product)
-{
-    if (product->variable != NULL)
-    {
-        int i;
-
-        for (i = 0; i < product->num_variables; i++)
-        {
-            harp_variable_delete(product->variable[i]);
-        }
-
-        free(product->variable);
-    }
-
-    memset(product->dimension, 0, HARP_NUM_DIM_TYPES * sizeof(long));
-    product->num_variables = 0;
-    product->variable = NULL;
-}
-
-/**
- * Determine the datetime range covered by the product. Start and stop datetimes are returned as the (fractional) number
- * of days since 2000.
- *
- * \param  product        Product to compute the datetime range of.
- * \param  datetime_start Pointer to the location where the start datetime of the product will be stored. If NULL, the
- *   start datetime will not be stored.
- * \param  datetime_stop  Pointer to the location where the stop datetime of the product will be stored. If NULL, the
- *   stop datetime will not be stored.
- * \return
- *   \arg \c 0, Success.
- *   \arg \c -1, Error occurred (check #harp_errno).
- */
-int harp_product_get_datetime_range(const harp_product *product, double *datetime_start, double *datetime_stop)
-{
-    harp_dimension_type dimension_type[1] = { harp_dimension_time };
-    harp_variable *mid_datetime = NULL;
-    harp_variable *datetime;
-    long i;
-
-    if (datetime_start != NULL)
-    {
-        double start = harp_plusinf();
-
-        if (harp_product_get_derived_variable(product, "datetime_start", "days since 2000-01-01", 1, dimension_type,
-                                              &datetime) != 0)
-        {
-            if (harp_product_get_derived_variable(product, "datetime", "days since 2000-01-01", 1, dimension_type,
-                                                  &datetime) != 0)
-            {
-                return -1;
-            }
-            mid_datetime = datetime;
-        }
-        if (harp_variable_convert_data_type(datetime, harp_type_double) != 0)
-        {
-            harp_variable_delete(datetime);
-            return -1;
-        }
-
-        for (i = 0; i < datetime->num_elements; i++)
-        {
-            const double value = datetime->data.double_data[i];
-
-            if (harp_isnan(value) || value < datetime->valid_min.double_data || value > datetime->valid_max.double_data)
-            {
-                continue;
-            }
-
-            if (value < start)
-            {
-                start = value;
-            }
-        }
-
-        if (harp_isplusinf(start) || start < datetime->valid_min.double_data || start > datetime->valid_max.double_data)
-        {
-            harp_variable_delete(datetime);
-            harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "cannot determine valid start value for datetime range");
-            return -1;
-        }
-
-        *datetime_start = start;
-
-        if (mid_datetime == NULL)
-        {
-            harp_variable_delete(datetime);
-        }
-    }
-
-    if (datetime_stop != NULL)
-    {
-        double stop = harp_mininf();
-
-        if (harp_product_get_derived_variable(product, "datetime_stop", "days since 2000-01-01", 1, dimension_type,
-                                              &datetime) != 0)
-        {
-            if (mid_datetime != NULL)
-            {
-                datetime = mid_datetime;
-            }
-            else if (harp_product_get_derived_variable(product, "datetime", "days since 2000-01-01", 1, dimension_type,
-                                                       &datetime) != 0)
-            {
-                return -1;
-            }
-        }
-        if (harp_variable_convert_data_type(datetime, harp_type_double) != 0)
-        {
-            harp_variable_delete(datetime);
-            return -1;
-        }
-
-        for (i = 0; i < datetime->num_elements; i++)
-        {
-            const double value = datetime->data.double_data[i];
-
-            if (harp_isnan(value) || value < datetime->valid_min.double_data || value > datetime->valid_max.double_data)
-            {
-                continue;
-            }
-
-            if (value > stop)
-            {
-                stop = value;
-            }
-        }
-
-        if (harp_ismininf(stop) || stop < datetime->valid_min.double_data || stop > datetime->valid_max.double_data)
-        {
-            harp_variable_delete(datetime);
-            harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "cannot determine valid stop value for datetime range");
-            return -1;
-        }
-
-        *datetime_stop = stop;
-
-        if (mid_datetime == NULL)
-        {
-            harp_variable_delete(datetime);
-        }
-    }
-
-    if (mid_datetime != NULL)
-    {
-        harp_variable_delete(mid_datetime);
-    }
-
-    return 0;
-}
-
 /** Print a harp_product struct using the specified print function.
  * \param product Product to print.
  * \param show_attributes Whether or not to print the attributes of variables.
@@ -1262,6 +1557,11 @@ LIBHARP_API void harp_product_print(const harp_product *product, int show_attrib
 {
     int i;
 
+    if (product == NULL)
+    {
+        print("NULL\n");
+        return;
+    }
     print("dimensions:\n");
     for (i = 0; i < HARP_NUM_DIM_TYPES; i++)
     {
@@ -1312,7 +1612,8 @@ LIBHARP_API void harp_product_print(const harp_product *product, int show_attrib
  * dimension type and that none of the variables in the product will depend on the given dimension type anymore.
  *
  * Any variables that depend more than once on the given dimension type will be removed from the product.
- * The index and collocation_index variables will be removed if present.
+ * If the length of the flattend dimensions does not equal 1 then the index and collocation_index variables will be
+ * removed if present.
  * Variables that had the given dimension type but were time independent are first made time dependent before
  * flattening the dimension.
  *
@@ -1339,19 +1640,22 @@ LIBHARP_API int harp_product_flatten_dimension(harp_product *product, harp_dimen
         return 0;
     }
 
-    /* remove index and collocation_index variables if they exist */
-    if (harp_product_get_variable_by_name(product, "index", &var) != -1)
+    if (dim_length != 1)
     {
-        if (harp_product_remove_variable(product, var) != 0)
+        /* remove index and collocation_index variables if they exist */
+        if (harp_product_has_variable(product, "index"))
         {
-            return -1;
+            if (harp_product_remove_variable_by_name(product, "index") != 0)
+            {
+                return -1;
+            }
         }
-    }
-    if (harp_product_get_variable_by_name(product, "collocation_index", &var) != -1)
-    {
-        if (harp_product_remove_variable(product, var) != 0)
+        if (harp_product_has_variable(product, "collocation_index"))
         {
-            return -1;
+            if (harp_product_remove_variable_by_name(product, "collocation_index") != 0)
+            {
+                return -1;
+            }
         }
     }
 
@@ -1375,7 +1679,7 @@ LIBHARP_API int harp_product_flatten_dimension(harp_product *product, harp_dimen
 
         if (count == 0)
         {
-            if (var->dimension_type[0] == harp_dimension_time)
+            if (var->num_dimensions > 0 && var->dimension_type[0] == harp_dimension_time)
             {
                 /* add the dimension to be flattened in the right place; this effectively extends time appropriately */
                 if (harp_variable_add_dimension(var, 1, dimension_type, dim_length) != 0)
@@ -1450,3 +1754,5 @@ LIBHARP_API int harp_product_flatten_dimension(harp_product *product, harp_dimen
 
     return 0;
 }
+
+/** @} */

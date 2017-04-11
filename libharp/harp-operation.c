@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "harp-operation.h"
@@ -119,6 +130,39 @@ static void derive_variable_args_delete(harp_derive_variable_args *args)
         if (args->unit != NULL)
         {
             free(args->unit);
+        }
+
+        free(args);
+    }
+}
+
+static void derive_smoothed_column_collocated_args_delete(harp_derive_smoothed_column_collocated_args *args)
+{
+    if (args != NULL)
+    {
+        if (args->variable_name != NULL)
+        {
+            free(args->variable_name);
+        }
+        if (args->unit != NULL)
+        {
+            free(args->unit);
+        }
+        if (args->axis_variable_name != NULL)
+        {
+            free(args->axis_variable_name);
+        }
+        if (args->axis_unit != NULL)
+        {
+            free(args->axis_unit);
+        }
+        if (args->collocation_result != NULL)
+        {
+            free(args->collocation_result);
+        }
+        if (args->dataset_dir != NULL)
+        {
+            free(args->dataset_dir);
         }
 
         free(args);
@@ -243,6 +287,24 @@ static void point_distance_filter_args_delete(harp_point_distance_filter_args *a
     }
 }
 
+static void point_in_area_filter_args_delete(harp_point_in_area_filter_args *args)
+{
+    if (args != NULL)
+    {
+        if (args->latitude_unit != NULL)
+        {
+            free(args->latitude_unit);
+        }
+
+        if (args->longitude_unit != NULL)
+        {
+            free(args->longitude_unit);
+        }
+
+        free(args);
+    }
+}
+
 static void regrid_args_delete(harp_regrid_args *args)
 {
     if (args != NULL)
@@ -280,6 +342,24 @@ static void regrid_collocated_args_delete(harp_regrid_collocated_args *args)
         free(args);
     }
 }
+
+static void rename_args_delete(harp_rename_args *args)
+{
+    if (args != NULL)
+    {
+        if (args->variable_name != NULL)
+        {
+            free(args->variable_name);
+        }
+        if (args->new_variable_name != NULL)
+        {
+            free(args->new_variable_name);
+        }
+
+        free(args);
+    }
+}
+
 
 static void smooth_collocated_args_delete(harp_smooth_collocated_args *args)
 {
@@ -372,6 +452,23 @@ static void valid_range_filter_args_delete(harp_valid_range_filter_args *args)
         if (args->variable_name != NULL)
         {
             free(args->variable_name);
+        }
+
+        free(args);
+    }
+}
+
+static void wrap_args_delete(harp_wrap_args *args)
+{
+    if (args != NULL)
+    {
+        if (args->variable_name != NULL)
+        {
+            free(args->variable_name);
+        }
+        if (args->unit != NULL)
+        {
+            free(args->unit);
         }
 
         free(args);
@@ -607,6 +704,68 @@ static int derive_variable_args_new(const char *variable_name, int num_dimension
             harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not duplicate string) (%s:%u)", __FILE__,
                            __LINE__);
             derive_variable_args_delete(args);
+            return -1;
+        }
+    }
+
+    *new_args = args;
+    return 0;
+}
+
+static int derive_smoothed_column_collocated_args_new(const char *variable_name, int num_dimensions,
+                                                      const harp_dimension_type *dimension_type, const char *unit,
+                                                      const char *axis_variable_name, const char *axis_unit,
+                                                      const char *collocation_result, const char target_dataset,
+                                                      const char *dataset_dir,
+                                                      harp_derive_smoothed_column_collocated_args **new_args)
+{
+    harp_derive_smoothed_column_collocated_args *args;
+    int i;
+
+    assert(variable_name != NULL);
+    assert(axis_variable_name != NULL);
+    assert(axis_unit != NULL);
+    assert(collocation_result != NULL);
+    assert(dataset_dir != NULL);
+
+    args = (harp_derive_smoothed_column_collocated_args *)malloc(sizeof(harp_derive_smoothed_column_collocated_args));
+    if (args == NULL)
+    {
+        harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not allocate %lu bytes) (%s:%u)",
+                       sizeof(harp_derive_smoothed_column_collocated_args), __FILE__, __LINE__);
+        return -1;
+    }
+    args->variable_name = NULL;
+    args->num_dimensions = num_dimensions;
+    args->unit = NULL;
+    args->axis_variable_name = strdup(axis_variable_name);
+    args->axis_unit = strdup(axis_unit);
+    args->collocation_result = strdup(collocation_result);
+    args->dataset_dir = strdup(dataset_dir);
+    args->target_dataset = target_dataset;
+
+    args->variable_name = strdup(variable_name);
+    if (args->variable_name == NULL)
+    {
+        harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not duplicate string) (%s:%u)", __FILE__,
+                       __LINE__);
+        derive_smoothed_column_collocated_args_delete(args);
+        return -1;
+    }
+
+    for (i = 0; i < num_dimensions; i++)
+    {
+        args->dimension_type[i] = dimension_type[i];
+    }
+
+    if (unit != NULL)
+    {
+        args->unit = strdup(unit);
+        if (args->unit == NULL)
+        {
+            harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not duplicate string) (%s:%u)", __FILE__,
+                           __LINE__);
+            derive_smoothed_column_collocated_args_delete(args);
             return -1;
         }
     }
@@ -893,6 +1052,51 @@ static int point_distance_filter_args_new(double latitude, const char *latitude_
     return 0;
 }
 
+static int point_in_area_filter_args_new(double latitude, const char *latitude_unit, double longitude,
+                                         const char *longitude_unit, harp_point_in_area_filter_args **new_args)
+{
+    harp_point_in_area_filter_args *args;
+
+    args = (harp_point_in_area_filter_args *)malloc(sizeof(harp_point_in_area_filter_args));
+    if (args == NULL)
+    {
+        harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not allocate %lu bytes) (%s:%u)",
+                       sizeof(harp_point_distance_filter_args), __FILE__, __LINE__);
+        return -1;
+    }
+    args->latitude = latitude;
+    args->latitude_unit = NULL;
+    args->longitude = longitude;
+    args->longitude_unit = NULL;
+
+    if (latitude_unit != NULL)
+    {
+        args->latitude_unit = strdup(latitude_unit);
+        if (args->latitude_unit == NULL)
+        {
+            harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not duplicate string) (%s:%u)", __FILE__,
+                           __LINE__);
+            point_in_area_filter_args_delete(args);
+            return -1;
+        }
+    }
+
+    if (longitude_unit != NULL)
+    {
+        args->longitude_unit = strdup(longitude_unit);
+        if (args->longitude_unit == NULL)
+        {
+            harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not duplicate string) (%s:%u)", __FILE__,
+                           __LINE__);
+            point_in_area_filter_args_delete(args);
+            return -1;
+        }
+    }
+
+    *new_args = args;
+    return 0;
+}
+
 static int regrid_args_new(harp_dimension_type dimension_type, const char *axis_variable_name, const char *axis_unit,
                            long num_values, double *values, harp_regrid_args **new_args)
 {
@@ -956,6 +1160,29 @@ static int regrid_collocated_args_new(harp_dimension_type dimension_type, const 
     args->collocation_result = strdup(collocation_result);
     args->dataset_dir = strdup(dataset_dir);
     args->target_dataset = target_dataset;
+
+    *new_args = args;
+    return 0;
+}
+
+static int rename_args_new(const char *variable_name, const char *new_variable_name, harp_rename_args **new_args)
+{
+    harp_rename_args *args;
+
+    assert(variable_name != NULL);
+    assert(new_variable_name != NULL);
+
+    args = (harp_rename_args *)malloc(sizeof(harp_rename_args));
+    if (args == NULL)
+    {
+        harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not allocate %lu bytes) (%s:%u)",
+                       sizeof(harp_rename_args), __FILE__, __LINE__);
+        return -1;
+    }
+    args->variable_name = strdup(variable_name);
+    assert(args->variable_name != NULL);
+    args->new_variable_name = strdup(new_variable_name);
+    assert(args->new_variable_name != NULL);
 
     *new_args = args;
     return 0;
@@ -1160,6 +1387,46 @@ static int valid_range_filter_args_new(const char *variable_name, harp_valid_ran
     return 0;
 }
 
+static int wrap_args_new(const char *variable_name, const char *unit, double min, double max, harp_wrap_args **new_args)
+{
+    harp_wrap_args *args;
+
+    args = (harp_wrap_args *)malloc(sizeof(harp_wrap_args));
+    if (args == NULL)
+    {
+        harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not allocate %lu bytes) (%s:%u)",
+                       sizeof(harp_wrap_args), __FILE__, __LINE__);
+        return -1;
+    }
+    args->variable_name = NULL;
+    args->unit = NULL;
+    args->min = min;
+    args->max = max;
+
+    args->variable_name = strdup(variable_name);
+    if (args->variable_name == NULL)
+    {
+        harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not duplicate string) (%s:%u)", __FILE__,
+                       __LINE__);
+        wrap_args_delete(args);
+        return -1;
+    }
+    if (unit != NULL)
+    {
+        args->unit = strdup(unit);
+        if (args->unit == NULL)
+        {
+            harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not duplicate string) (%s:%u)", __FILE__,
+                           __LINE__);
+            wrap_args_delete(args);
+            return -1;
+        }
+    }
+
+    *new_args = args;
+    return 0;
+}
+
 static int area_mask_covers_area_filter_args_copy(const harp_area_mask_covers_area_filter_args *args,
                                                   harp_area_mask_covers_area_filter_args **new_args)
 {
@@ -1207,6 +1474,16 @@ static int derive_variable_args_copy(const harp_derive_variable_args *args, harp
                                     new_args);
 }
 
+static int derive_smoothed_column_collocated_args_copy(const harp_derive_smoothed_column_collocated_args *args,
+                                                       harp_derive_smoothed_column_collocated_args **new_args)
+{
+    assert(args != NULL);
+    return derive_smoothed_column_collocated_args_new(args->variable_name, args->num_dimensions, args->dimension_type,
+                                                      args->unit, args->axis_variable_name, args->axis_unit,
+                                                      args->collocation_result, args->target_dataset, args->dataset_dir,
+                                                      new_args);
+}
+
 static int exclude_variable_args_copy(const harp_exclude_variable_args *args, harp_exclude_variable_args **new_args)
 {
     assert(args != NULL);
@@ -1247,6 +1524,14 @@ static int point_distance_filter_args_copy(const harp_point_distance_filter_args
                                           args->distance, args->distance_unit, new_args);
 }
 
+static int point_in_area_filter_args_copy(const harp_point_in_area_filter_args *args,
+                                          harp_point_in_area_filter_args **new_args)
+{
+    assert(args != NULL);
+    return point_in_area_filter_args_new(args->latitude, args->latitude_unit, args->longitude, args->longitude_unit,
+                                         new_args);
+}
+
 static int regrid_args_copy(const harp_regrid_args *args, harp_regrid_args **new_args)
 {
     assert(args != NULL);
@@ -1259,6 +1544,12 @@ static int regrid_collocated_args_copy(const harp_regrid_collocated_args *args, 
     assert(args != NULL);
     return regrid_collocated_args_new(args->dimension_type, args->axis_variable_name, args->axis_unit,
                                       args->collocation_result, args->target_dataset, args->dataset_dir, new_args);
+}
+
+static int rename_args_copy(const harp_rename_args *args, harp_rename_args **new_args)
+{
+    assert(args != NULL);
+    return rename_args_new(args->variable_name, args->new_variable_name, new_args);
 }
 
 static int smooth_collocated_args_copy(const harp_smooth_collocated_args *args, harp_smooth_collocated_args **new_args)
@@ -1289,6 +1580,12 @@ static int valid_range_filter_args_copy(const harp_valid_range_filter_args *args
 {
     assert(args != NULL);
     return valid_range_filter_args_new(args->variable_name, new_args);
+}
+
+static int wrap_args_copy(const harp_wrap_args *args, harp_wrap_args **new_args)
+{
+    assert(args != NULL);
+    return wrap_args_new(args->variable_name, args->unit, args->min, args->max, new_args);
 }
 
 int harp_operation_new(harp_operation_type type, void *args, harp_operation **new_operation)
@@ -1335,6 +1632,9 @@ static void args_delete(harp_operation_type operation_type, void *args)
         case harp_operation_derive_variable:
             derive_variable_args_delete((harp_derive_variable_args *)args);
             break;
+        case harp_operation_derive_smoothed_column_collocated:
+            derive_smoothed_column_collocated_args_delete((harp_derive_smoothed_column_collocated_args *)args);
+            break;
         case harp_operation_exclude_variable:
             exclude_variable_args_delete((harp_exclude_variable_args *)args);
             break;
@@ -1353,11 +1653,17 @@ static void args_delete(harp_operation_type operation_type, void *args)
         case harp_operation_point_distance_filter:
             point_distance_filter_args_delete((harp_point_distance_filter_args *)args);
             break;
+        case harp_operation_point_in_area_filter:
+            point_in_area_filter_args_delete((harp_point_in_area_filter_args *)args);
+            break;
         case harp_operation_regrid:
             regrid_args_delete((harp_regrid_args *)args);
             break;
         case harp_operation_regrid_collocated:
             regrid_collocated_args_delete((harp_regrid_collocated_args *)args);
+            break;
+        case harp_operation_rename:
+            rename_args_delete((harp_rename_args *)args);
             break;
         case harp_operation_smooth_collocated:
             smooth_collocated_args_delete((harp_smooth_collocated_args *)args);
@@ -1371,9 +1677,9 @@ static void args_delete(harp_operation_type operation_type, void *args)
         case harp_operation_valid_range_filter:
             valid_range_filter_args_delete((harp_valid_range_filter_args *)args);
             break;
-        default:
-            assert(0);
-            exit(1);
+        case harp_operation_wrap:
+            wrap_args_delete((harp_wrap_args *)args);
+            break;
     }
 }
 
@@ -1415,6 +1721,10 @@ static int args_copy(harp_operation_type operation_type, const void *args, void 
         case harp_operation_derive_variable:
             return derive_variable_args_copy((const harp_derive_variable_args *)args,
                                              (harp_derive_variable_args **)new_args);
+        case harp_operation_derive_smoothed_column_collocated:
+            return derive_smoothed_column_collocated_args_copy
+                ((const harp_derive_smoothed_column_collocated_args *)args,
+                 (harp_derive_smoothed_column_collocated_args **)new_args);
         case harp_operation_exclude_variable:
             return exclude_variable_args_copy((harp_exclude_variable_args *)args,
                                               (harp_exclude_variable_args **)new_args);
@@ -1431,11 +1741,16 @@ static int args_copy(harp_operation_type operation_type, const void *args, void 
         case harp_operation_point_distance_filter:
             return point_distance_filter_args_copy((const harp_point_distance_filter_args *)args,
                                                    (harp_point_distance_filter_args **)new_args);
+        case harp_operation_point_in_area_filter:
+            return point_in_area_filter_args_copy((const harp_point_in_area_filter_args *)args,
+                                                  (harp_point_in_area_filter_args **)new_args);
         case harp_operation_regrid:
             return regrid_args_copy((harp_regrid_args *)args, (harp_regrid_args **)new_args);
         case harp_operation_regrid_collocated:
             return regrid_collocated_args_copy((harp_regrid_collocated_args *)args,
                                                (harp_regrid_collocated_args **)new_args);
+        case harp_operation_rename:
+            return rename_args_copy((harp_rename_args *)args, (harp_rename_args **)new_args);
         case harp_operation_smooth_collocated:
             return smooth_collocated_args_copy((harp_smooth_collocated_args *)args,
                                                (harp_smooth_collocated_args **)new_args);
@@ -1448,6 +1763,8 @@ static int args_copy(harp_operation_type operation_type, const void *args, void 
         case harp_operation_valid_range_filter:
             return valid_range_filter_args_copy((const harp_valid_range_filter_args *)args,
                                                 (harp_valid_range_filter_args **)new_args);
+        case harp_operation_wrap:
+            return wrap_args_copy((const harp_wrap_args *)args, (harp_wrap_args **)new_args);
     }
 
     return -1;
@@ -1627,6 +1944,32 @@ int harp_derive_variable_new(const char *variable_name, int num_dimensions, cons
     return 0;
 }
 
+int harp_derive_smoothed_column_collocated_new(const char *variable_name, int num_dimensions,
+                                               const harp_dimension_type *dimension_type, const char *unit,
+                                               const char *axis_variable_name, const char *axis_unit,
+                                               const char *collocation_result, const char target_dataset,
+                                               const char *dataset_dir, harp_operation **new_operation)
+{
+    harp_derive_smoothed_column_collocated_args *args;
+    harp_operation *operation;
+
+    if (derive_smoothed_column_collocated_args_new(variable_name, num_dimensions, dimension_type, unit,
+                                                   axis_variable_name, axis_unit, collocation_result, target_dataset,
+                                                   dataset_dir, &args) != 0)
+    {
+        return -1;
+    }
+
+    if (harp_operation_new(harp_operation_derive_smoothed_column_collocated, args, &operation) != 0)
+    {
+        derive_smoothed_column_collocated_args_delete(args);
+        return -1;
+    }
+
+    *new_operation = operation;
+    return 0;
+}
+
 int harp_exclude_variable_new(int num_variables, const char **variable_name, harp_operation **new_operation)
 {
     harp_exclude_variable_args *args;
@@ -1752,6 +2095,27 @@ int harp_point_distance_filter_new(double latitude, const char *latitude_unit, d
     return 0;
 }
 
+int harp_point_in_area_filter_new(double latitude, const char *latitude_unit, double longitude,
+                                  const char *longitude_unit, harp_operation **new_operation)
+{
+    harp_point_in_area_filter_args *args;
+    harp_operation *operation;
+
+    if (point_in_area_filter_args_new(latitude, latitude_unit, longitude, longitude_unit, &args) != 0)
+    {
+        return -1;
+    }
+
+    if (harp_operation_new(harp_operation_point_in_area_filter, args, &operation) != 0)
+    {
+        point_in_area_filter_args_delete(args);
+        return -1;
+    }
+
+    *new_operation = operation;
+    return 0;
+}
+
 int harp_regrid_new(harp_dimension_type dimension_type, const char *axis_variable_name, const char *axis_unit,
                     long num_values, double *values, harp_operation **new_operation)
 {
@@ -1789,6 +2153,26 @@ int harp_regrid_collocated_new(harp_dimension_type dimension_type, const char *a
     if (harp_operation_new(harp_operation_regrid_collocated, args, &operation) != 0)
     {
         regrid_collocated_args_delete(args);
+        return -1;
+    }
+
+    *new_operation = operation;
+    return 0;
+}
+
+int harp_rename_new(const char *variable_name, const char *new_variable_name, harp_operation **new_operation)
+{
+    harp_rename_args *args;
+    harp_operation *operation;
+
+    if (rename_args_new(variable_name, new_variable_name, &args) != 0)
+    {
+        return -1;
+    }
+
+    if (harp_operation_new(harp_operation_rename, args, &operation) != 0)
+    {
+        rename_args_delete(args);
         return -1;
     }
 
@@ -1881,6 +2265,26 @@ int harp_valid_range_filter_new(const char *variable_name, harp_operation **new_
     return 0;
 }
 
+int harp_wrap_new(const char *variable_name, const char *unit, double min, double max, harp_operation **new_operation)
+{
+    harp_wrap_args *args;
+    harp_operation *operation;
+
+    if (wrap_args_new(variable_name, unit, min, max, &args) != 0)
+    {
+        return -1;
+    }
+
+    if (harp_operation_new(harp_operation_wrap, args, &operation) != 0)
+    {
+        wrap_args_delete(args);
+        return -1;
+    }
+
+    *new_operation = operation;
+    return 0;
+}
+
 int harp_operation_get_variable_name(const harp_operation *operation, const char **variable_name)
 {
     switch (operation->type)
@@ -1926,6 +2330,7 @@ int harp_operation_is_dimension_filter(const harp_operation *operation)
         case harp_operation_longitude_range_filter:
         case harp_operation_membership_filter:
         case harp_operation_point_distance_filter:
+        case harp_operation_point_in_area_filter:
         case harp_operation_string_comparison_filter:
         case harp_operation_string_membership_filter:
         case harp_operation_valid_range_filter:

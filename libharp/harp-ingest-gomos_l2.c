@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "coda.h"
@@ -673,7 +684,7 @@ int harp_ingestion_module_gomos_l2_init(void)
                                    "from the external model", 2, model_options);
 
     description = "profile data";
-    product_definition = harp_ingestion_register_product(module, "GOMOS_NL_L2", description, read_dimensions);
+    product_definition = harp_ingestion_register_product(module, "GOMOS_L2", description, read_dimensions);
     description = "GOMOS Level 2 products only contain a single profile; all measured profile points will be provided "
         "in reverse order (from low altitude to high altitude) in the profile";
     harp_product_definition_add_mapping(product_definition, description, NULL);
@@ -945,7 +956,8 @@ int harp_ingestion_module_gomos_l2_init(void)
                                                                      harp_type_double, 2, dimension_type, NULL,
                                                                      description, "K", NULL, read_temperature);
     path = "/nl_geolocation[]/local_temp";
-    harp_variable_definition_add_mapping(variable_definition, "temperature=local (default)", NULL, path, NULL);
+    harp_variable_definition_add_mapping(variable_definition, "temperature=local or temperature unset", NULL, path,
+                                         NULL);
     path = "/nl_geolocation[]/tangent_temp";
     harp_variable_definition_add_mapping(variable_definition, "temperature=model", NULL, path, NULL);
 
@@ -956,7 +968,8 @@ int harp_ingestion_module_gomos_l2_init(void)
                                                                      description, "K", exclude_temperature_std,
                                                                      read_temperature_std);
     path = "/nl_geolocation[]/local_temp_std";
-    harp_variable_definition_add_mapping(variable_definition, "temperature=local (default)", NULL, path, NULL);
+    harp_variable_definition_add_mapping(variable_definition, "temperature=local or temperature unset", NULL, path,
+                                         NULL);
 
     /* number_density */
     description = "air density";
@@ -964,7 +977,7 @@ int harp_ingestion_module_gomos_l2_init(void)
                                                                      harp_type_double, 2, dimension_type, NULL,
                                                                      description, "molec/cm3", exclude_air, read_air);
     path = "/nl_local_species_density[]/air";
-    harp_variable_definition_add_mapping(variable_definition, "air=local (default)", NULL, path, NULL);
+    harp_variable_definition_add_mapping(variable_definition, "air=local or air unset", NULL, path, NULL);
     path = "/nl_geolocation[]/tangent_density";
     harp_variable_definition_add_mapping(variable_definition, "air=model", "CODA product version > 0", path, NULL);
 
@@ -975,10 +988,10 @@ int harp_ingestion_module_gomos_l2_init(void)
                                                                      2, dimension_type, NULL, description, "molec/cm3",
                                                                      exclude_air_std, read_air_std);
     path = "/nl_local_species_density[]/air_std";
-    harp_variable_definition_add_mapping(variable_definition, "air=local (default)", "CODA product version < 2", path,
-                                         description_std_rel);
-    harp_variable_definition_add_mapping(variable_definition, "air=local (default)", "CODA product version >= 2", path,
-                                         description_std_abs);
+    harp_variable_definition_add_mapping(variable_definition, "air=local or air unset", "CODA product version < 2",
+                                         path, description_std_rel);
+    harp_variable_definition_add_mapping(variable_definition, "air=local or air unset", "CODA product version >= 2",
+                                         path, description_std_abs);
 
     /* number_density_validity */
     description = "PCD (product confidence data) value for the local air density";
@@ -987,7 +1000,7 @@ int harp_ingestion_module_gomos_l2_init(void)
                                                                      2, dimension_type, NULL, description, NULL,
                                                                      exclude_air_std, read_air_validity);
     path = "/nl_local_species_density[]/pcd[3]";
-    harp_variable_definition_add_mapping(variable_definition, "air=local (default)", NULL, path, NULL);
+    harp_variable_definition_add_mapping(variable_definition, "air=local or air unset", NULL, path, NULL);
 
     /* sensor_altitude */
     description = "altitude of the satellite";
@@ -1018,8 +1031,8 @@ int harp_ingestion_module_gomos_l2_init(void)
     harp_variable_definition_add_mapping(variable_definition, NULL, NULL, path, NULL);
 
     /* flag_illumination_condition */
-    description = "illumination condition for the profile: 'dark', 'bright', 'twilight', 'strailight', or "
-        "'twilight/strailight'";
+    description = "illumination condition for the profile: 'dark', 'bright', 'twilight', 'straylight', or "
+        "'twilight/straylight'";
     variable_definition = harp_ingestion_register_variable_sample_read(product_definition,
                                                                        "flag_illumination_condition", harp_type_string,
                                                                        1, dimension_type, NULL, description, NULL, NULL,

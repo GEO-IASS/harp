@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "harp-ingestion.h"
@@ -105,7 +116,8 @@ static int product_definition_has_mapping_description(const harp_product_definit
     return 0;
 }
 
-static int generate_product_definition(const char *filename, const harp_product_definition *product_definition)
+static int generate_product_definition(const char *filename, const harp_ingestion_module *module,
+                                       const harp_product_definition *product_definition)
 {
     FILE *fout;
     int i;
@@ -189,6 +201,60 @@ static int generate_product_definition(const char *filename, const harp_product_
         fputc('\n', fout);
     }
 
+    if (module->num_option_definitions > 0)
+    {
+        fputc('\n', fout);
+        fputs("Ingestion options\n", fout);
+        fputs("-----------------\n", fout);
+        fprintf(fout, "The table below lists the available ingestion options for ``%s`` products.\n\n", module->name);
+        fputs(".. csv-table::\n", fout);
+        fputs("   :widths: 15 25 60\n", fout);
+        fputs("   :header-rows: 1\n\n", fout);
+        fputs("   \"option name\", \"legal values\", \"description\"\n", fout);
+
+        for (j = 0; j < module->num_option_definitions; j++)
+        {
+            harp_ingestion_option_definition *option_definition = module->option_definition[j];
+
+            fnputc(3, ' ', fout);
+            fputc('"', fout);
+            fputs(option_definition->name, fout);
+            fputc('"', fout);
+            fputs(", ", fout);
+
+            fputc('"', fout);
+            if (option_definition->num_allowed_values > 0)
+            {
+                int k;
+
+                for (k = 0; k < option_definition->num_allowed_values; k++)
+                {
+                    fputs(option_definition->allowed_value[k], fout);
+                    if (k + 1 < option_definition->num_allowed_values)
+                    {
+                        fputs(", ", fout);
+                    }
+                }
+            }
+            fputc('"', fout);
+            fputs(", ", fout);
+
+            fputc('"', fout);
+            if (option_definition->description != NULL)
+            {
+                fputs(option_definition->description, fout);
+            }
+            fputc('"', fout);
+            fputc('\n', fout);
+        }
+        fputc('\n', fout);
+
+        if (product_definition->ingestion_option != NULL)
+        {
+            fprintf(fout, "This definition is only applicable when: %s\n", product_definition->ingestion_option);
+        }
+    }
+
     if (product_definition_has_mapping_description(product_definition))
     {
         int column_width[3] = { 0 };
@@ -197,11 +263,11 @@ static int generate_product_definition(const char *filename, const harp_product_
         fputc('\n', fout);
         fputs("Mapping description\n", fout);
         fputs("-------------------\n", fout);
-        fputs("The table below details where and how each variable was retrieved from the input product.\n\n", fout);
         if (product_definition->mapping_description != NULL)
         {
             fprintf(fout, "%s\n\n", product_definition->mapping_description);
         }
+        fputs("The table below details where and how each variable was retrieved from the input product.\n\n", fout);
 
         for (i = 0; i < product_definition->num_variable_definitions; i++)
         {
@@ -446,7 +512,15 @@ static int generate_product_group(FILE *fout, const char *product_group, int num
         const harp_ingestion_module *module = ingestion_module[i];
 
         fnputc(3, ' ', fout);
-        fprintf(fout, "\":ref:`%s`\", ", module->name);
+        if (module->num_product_definitions == 1 && strcmp(module->product_definition[0]->name, module->name) == 0)
+        {
+            /* don't print details when we only have one conversion (whose name equals that of the module) */
+            fprintf(fout, "\":doc:`%s`\", ", module->product_definition[0]->name);
+        }
+        else
+        {
+            fprintf(fout, "\":ref:`%s`\", ", module->name);
+        }
 
         fputc('"', fout);
         if (module->product_class != NULL && module->product_type != NULL)
@@ -478,6 +552,12 @@ static int generate_product_group(FILE *fout, const char *product_group, int num
     {
         const harp_ingestion_module *module = ingestion_module[i];
         int j;
+
+        if (module->num_product_definitions == 1 && strcmp(module->product_definition[0]->name, module->name) == 0)
+        {
+            /* skip printing details if we already have a direct link to the conversion (see above) */
+            continue;
+        }
 
         fprintf(fout, ".. _%s:\n\n", module->name);
         fprintf(fout, "%s\n", module->name);
@@ -545,15 +625,7 @@ static int generate_product_group(FILE *fout, const char *product_group, int num
 
                     for (k = 0; k < option_definition->num_allowed_values; k++)
                     {
-                        if (k == 0)
-                        {
-                            fprintf(fout, "**%s**", option_definition->allowed_value[k]);
-                        }
-                        else
-                        {
-                            fputs(option_definition->allowed_value[k], fout);
-                        }
-
+                        fputs(option_definition->allowed_value[k], fout);
                         if (k + 1 < option_definition->num_allowed_values)
                         {
                             fputs(", ", fout);
@@ -742,7 +814,7 @@ LIBHARP_API int harp_doc_export_ingestion_definitions(const char *path)
             }
 
             sprintf(filename, "%s/%s.rst", path, product_definition->name);
-            if (generate_product_definition(filename, product_definition) != 0)
+            if (generate_product_definition(filename, ingestion_module, product_definition) != 0)
             {
                 free(filename);
                 return -1;

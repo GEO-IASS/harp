@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "coda.h"
@@ -1143,7 +1154,7 @@ static int parse_option_corrected_no2_columnn(ingest_info *info, const harp_inge
 
     if (harp_ingestion_options_get_option(options, "corrected_no2_column", &value) == 0)
     {
-        info->corrected_no2 = (strcmp(value, "true") == 0);
+        info->corrected_no2 = 1;
     }
 
     return 0;
@@ -1707,7 +1718,7 @@ static void register_common_variables(harp_product_definition *product_definitio
     path = "/TOTAL_COLUMNS/NO2_Corr[]";
     harp_variable_definition_add_mapping(variable_definition, "corrected_no2_column=true", NULL, path, NULL);
     path = "/TOTAL_COLUMNS/NO2[]";
-    harp_variable_definition_add_mapping(variable_definition, "corrected_no2_column=false (default)", NULL, path, NULL);
+    harp_variable_definition_add_mapping(variable_definition, "corrected_no2_column unset (default)", NULL, path, NULL);
 
     /* NO2_column_number_density_uncertainty */
     description = "uncertainty of the NO2 column number density";
@@ -1719,7 +1730,7 @@ static void register_common_variables(harp_product_definition *product_definitio
     harp_variable_definition_add_mapping(variable_definition, "corrected_no2_column=true", NULL, NULL, description);
     path = "/TOTAL_COLUMNS/NO2_Error[], /TOTAL_COLUMNS/NO2[]";
     description = "derived from the relative error in percent as: NO2_Error[] * 0.01 * NO2[]";
-    harp_variable_definition_add_mapping(variable_definition, "corrected_no2_column=false (default)", NULL, path,
+    harp_variable_definition_add_mapping(variable_definition, "corrected_no2_column unset (default)", NULL, path,
                                          description);
 
     /* tropospheric_NO2_column_number_density */
@@ -2133,13 +2144,13 @@ static void register_scan_variables(harp_product_definition *product_definition,
 
 static void register_common_options(harp_ingestion_module *module)
 {
-    const char *corrected_no2_column_option_values[2] = { "false", "true" };
+    const char *corrected_no2_column_option_values[2] = { "true" };
     const char *description;
 
     /* clipped_cloud_fraction ingestion option */
     description = "ingest the NO2 total vertical column density corrected for tropospheric contribution (instead of "
         "the uncorrected NO2 total vertical column density)";
-    harp_ingestion_register_option(module, "corrected_no2_column", description, 2, corrected_no2_column_option_values);
+    harp_ingestion_register_option(module, "corrected_no2_column", description, 1, corrected_no2_column_option_values);
 }
 
 static void register_o3mnto_product(void)
@@ -2147,7 +2158,7 @@ static void register_o3mnto_product(void)
     harp_ingestion_module *module;
     harp_product_definition *product_definition;
 
-    module = harp_ingestion_register_module_coda("GOME2_L2_O3MNTO", "GOME-2", "O3MSAF", "O3MNTO",
+    module = harp_ingestion_register_module_coda("GOME2_L2_O3MNTO", "GOME-2", "ACSAF", "O3MNTO",
                                                  "GOME2 near-real-time total column trace gas product", ingestion_init,
                                                  ingestion_done);
     register_common_options(module);
@@ -2163,7 +2174,7 @@ static void register_o3moto_product(void)
     harp_ingestion_module *module;
     harp_product_definition *product_definition;
 
-    module = harp_ingestion_register_module_coda("GOME2_L2_O3MOTO", "GOME-2", "O3MSAF", "O3MOTO",
+    module = harp_ingestion_register_module_coda("GOME2_L2_O3MOTO", "GOME-2", "ACSAF", "O3MOTO",
                                                  "GOME2 offline total column trace gas product", ingestion_init,
                                                  ingestion_done);
     register_common_options(module);

@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "coda.h"
@@ -925,12 +936,12 @@ int harp_ingestion_module_s5p_l1b_init(void)
     description = "Sentinel-5P L1b UVN irradiance spectra";
     module = harp_ingestion_register_module_coda("S5P_L1B_IR_UVN", "Sentinel-5P", "Sentinel5P", "L1B_IR_UVN",
                                                  description, ingestion_init_s5p_l1b_ir, ingestion_done);
-    harp_ingestion_register_option(module, "band", "spectral band to ingest", 6, band_option_values);
+    harp_ingestion_register_option(module, "band", "spectral band to ingest (default=1)", 6, band_option_values);
 
     product_definition =
         harp_ingestion_register_product(module, "S5P_L1B_IR_UVN_BD1", "irradiance spectra (band 1, UVN module)",
                                         read_dimensions);
-    harp_product_definition_add_mapping(product_definition, NULL, "band=1");
+    harp_product_definition_add_mapping(product_definition, NULL, "band=1 or band unset");
     register_irradiance_product_variables(product_definition, "BAND1_IRRADIANCE");
 
     product_definition =
@@ -967,12 +978,12 @@ int harp_ingestion_module_s5p_l1b_init(void)
     description = "Sentinel-5P L1b SWIR irradiance spectra";
     module = harp_ingestion_register_module_coda("S5P_L1B_IR_SIR", "Sentinel-5P", "Sentinel5P", "L1B_IR_SIR",
                                                  description, ingestion_init_s5p_l1b_ir, ingestion_done);
-    harp_ingestion_register_option(module, "band", "spectral band to ingest", 2, &band_option_values[6]);
+    harp_ingestion_register_option(module, "band", "spectral band to ingest (default=7)", 2, &band_option_values[6]);
 
     product_definition =
         harp_ingestion_register_product(module, "S5P_L1B_IR_SIR_BD7", "irradiance spectra (band 7, SWIR module)",
                                         read_dimensions);
-    harp_product_definition_add_mapping(product_definition, NULL, "band=7");
+    harp_product_definition_add_mapping(product_definition, NULL, "band=7 or band unset");
     register_irradiance_product_variables(product_definition, "BAND7_IRRADIANCE");
 
     product_definition =

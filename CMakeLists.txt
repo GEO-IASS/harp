@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(HARP)
 
-set(VERSION 0.4)
+set(VERSION 0.5)
 set(HARP_VERSION \"${VERSION}\")
 set(CPACK_PACKAGE_VERSION_MAJOR 0)
 set(CPACK_PACKAGE_VERSION_MINOR 2)
@@ -10,8 +10,8 @@ set(CPACK_PACKAGE_VERSION_MINOR 2)
 set(CPACK_PACKAGE_VERSION ${VERSION})
 
 # Set dynamic library version
-set(LIBHARP_CURRENT 3)
-set(LIBHARP_REVISION 1)
+set(LIBHARP_CURRENT 4)
+set(LIBHARP_REVISION 0)
 set(LIBHARP_AGE 0)
 math(EXPR LIBHARP_MAJOR "${LIBHARP_CURRENT} - ${LIBHARP_AGE}")
 set(LIBHARP_MINOR ${LIBHARP_AGE})
@@ -256,9 +256,18 @@ set(LIBHARP_SOURCES
   libharp/harp-geometry-util.c
   libharp/harp-geometry-wgs84.c
   libharp/harp-geometry.h
+  libharp/harp-ingest-aeolus_l1b.c
+  libharp/harp-ingest-aeolus_l2a.c
+  libharp/harp-ingest-aeolus_l2b.c
+  libharp/harp-ingest-calipso_l2.c
+  libharp/harp-ingest-cci_l2_aerosol.c
+  libharp/harp-ingest-cci_l2_ghg.c
   libharp/harp-ingest-cci_l2_o3_lp.c
   libharp/harp-ingest-cci_l2_o3_np.c
   libharp/harp-ingest-cci_l2_o3_tc.c
+  libharp/harp-ingest-cci_l3_aerosol.c
+  libharp/harp-ingest-cci_l3_cloud.c
+  libharp/harp-ingest-cci_l3_ghg.c
   libharp/harp-ingest-cci_l3_o3_lp.c
   libharp/harp-ingest-cci_l3_o3_np.c
   libharp/harp-ingest-cci_l3_o3_tc.c
@@ -268,21 +277,33 @@ set(LIBHARP_SOURCES
   libharp/harp-ingest-geoms-mwr.c
   libharp/harp-ingest-geoms-ftir.c
   libharp/harp-ingest-geoms-uvvis-doas.c
+  libharp/harp-ingest-gome_l1.c
   libharp/harp-ingest-gome_l2.c
+  libharp/harp-ingest-gome2_l1.c
   libharp/harp-ingest-gome2_l2.c
+  libharp/harp-ingest-gomos_l1.c
   libharp/harp-ingest-gomos_l2.c
   libharp/harp-ingest-gosat_fts_l1b.c
   libharp/harp-ingest-gosat_fts_l2.c
   libharp/harp-ingest-hirdls_l2.c
+  libharp/harp-ingest-iasi_l1.c
   libharp/harp-ingest-iasi_l2.c
+  libharp/harp-ingest-mipas_l1.c
   libharp/harp-ingest-mipas_l2.c
   libharp/harp-ingest-mls_l2.c
+  libharp/harp-ingest-npp-suomi-crimss_l2.c
+  libharp/harp-ingest-npp-suomi-omps_profiles_l2.c
+  libharp/harp-ingest-npp-suomi-omps_totals_l2.c
+  libharp/harp-ingest-npp-suomi-viirs_l2.c
   libharp/harp-ingest-omi_l2.c
   libharp/harp-ingest-omi_l3.c
+  libharp/harp-ingest-osiris_l2.c
   libharp/harp-ingest-qa4ecv.c
+  libharp/harp-ingest-sciamachy_l1.c
   libharp/harp-ingest-sciamachy_l2.c
   libharp/harp-ingest-s5p_l1b.c
   libharp/harp-ingest-s5p_l2.c
+  libharp/harp-ingest-smr_l2.c
   libharp/harp-ingest-temis.c
   libharp/harp-ingest-tes_l2.c
   libharp/harp-ingestion.h
@@ -304,6 +325,7 @@ set(LIBHARP_SOURCES
   libharp/harp-program-execute.h
   libharp/harp-program-execute.c
   libharp/harp-sea-surface.c
+  libharp/harp-regrid.c
   libharp/harp-units.c
   libharp/harp-utils.c
   libharp/harp-variable.c
@@ -498,6 +520,15 @@ if(WIN32)
 endif(WIN32)
 install(TARGETS harpfilter DESTINATION bin)
 
+#  harpmerge
+add_executable(harpmerge tools/harpmerge/harpmerge.c)
+target_link_libraries(harpmerge harp ${CODA_LIBRARIES} ${HDF4_LIBRARIES} ${HDF5_LIBRARIES} ${MATHLIB})
+if(WIN32)
+  # Also set DLL compile flags
+  set_target_properties(harpmerge PROPERTIES COMPILE_FLAGS "-DLIBHARPDLL")
+endif(WIN32)
+install(TARGETS harpmerge DESTINATION bin)
+
 # python
 if(HARP_BUILD_PYTHON)
   find_package(PythonInterp)
@@ -543,20 +574,26 @@ function(add_codadef name)
   endif(CODADEF_DIR)
 endfunction(add_codadef)
 
+add_codadef(ACSAF)
+add_codadef(AEOLUS)
 add_codadef(AURA_HIRDLS)
 add_codadef(AURA_MLS)
 add_codadef(AURA_OMI)
 add_codadef(AURA_TES)
+add_codadef(CALIPSO)
 add_codadef(ECMWF)
 add_codadef(ENVISAT_GOMOS)
 add_codadef(ENVISAT_MIPAS)
 add_codadef(ENVISAT_SCIAMACHY)
 add_codadef(EPS)
 add_codadef(ERS_GOME)
+add_codadef(ESACCI_AEROSOL)
+add_codadef(ESACCI_CLOUD)
+add_codadef(ESACCI_GHG)
 add_codadef(ESACCI_OZONE)
 add_codadef(GEOMS)
 add_codadef(GOSAT)
-add_codadef(O3MSAF)
+add_codadef(NPP_SUOMI)
 add_codadef(ODIN_OSIRIS)
 add_codadef(ODIN_SMR)
 add_codadef(QA4ECV)

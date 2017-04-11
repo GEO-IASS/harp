@@ -8,9 +8,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>OMI_L2_OMUVB &mdash; HARP 0.4b documentation</title>
+  <title>OMI_L2_OMUVB &mdash; HARP 0.5b documentation</title>
   
 
+  
+  
   
   
 
@@ -32,7 +34,9 @@
   
 
   
-    <link rel="top" title="HARP 0.4b documentation" href="../index.html"/> 
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+    <link rel="top" title="HARP 0.5b documentation" href="../index.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -41,6 +45,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -60,7 +65,7 @@
             
             
               <div class="version">
-                0.4
+                0.5
               </div>
             
           
@@ -74,10 +79,13 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../dataformats.html">Data formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../algorithms.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../operations.html">Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Ingestion definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../libharp.html">C library</a></li>
@@ -95,8 +103,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">HARP</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">HARP</a>
+        
       </nav>
 
 
@@ -105,21 +115,38 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
-    <li>OMI_L2_OMUVB</li>
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>OMI_L2_OMUVB</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -130,7 +157,7 @@
 <div class="section" id="variables">
 <h2>Variables</h2>
 <p>The table below lists the variables that are present in the HARP product that results from an ingestion of <code class="docutils literal"><span class="pre">OMI_L2_OMUVB</span></code> data.</p>
-<table border="1" class="docutils">
+<table border="1" class="colwidths-given docutils">
 <colgroup>
 <col width="25%" />
 <col width="5%" />
@@ -192,8 +219,35 @@
 <tr class="row-odd"><td><strong>index</strong></td>
 <td>int32</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>zero-based index of the sample within the source product</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="ingestion-options">
+<h2>Ingestion options</h2>
+<p>The table below lists the available ingestion options for <code class="docutils literal"><span class="pre">OMI_L2_OMUVB</span></code> products.</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="15%" />
+<col width="25%" />
+<col width="60%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">option name</th>
+<th class="head">legal values</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>clear_sky</td>
+<td>true</td>
+<td>ingest clear sky surface UV irradiance</td>
+</tr>
+<tr class="row-odd"><td>wavelength</td>
+<td>305nm, 310nm, 324nm, 380nm</td>
+<td>wavelength for which to ingest the surface UV irradiance</td>
 </tr>
 </tbody>
 </table>
@@ -242,25 +296,25 @@
 </tr>
 <tr class="row-odd"><td rowspan="16"><strong>surface_irradiance</strong></td>
 <td><em>condition</em></td>
-<td>clear_sky=false (default) and wavelength=305nm</td>
+<td>clear_sky unset and wavelength=305nm</td>
 </tr>
 <tr class="row-even"><td><em>path</em></td>
 <td><strong>/HDFEOS/SWATHS/UVB/Data_Fields/Irradiance305[]</strong></td>
 </tr>
 <tr class="row-odd"><td><em>condition</em></td>
-<td>clear_sky=false (default) and wavelength=310nm</td>
+<td>clear_sky unset and wavelength=310nm</td>
 </tr>
 <tr class="row-even"><td><em>path</em></td>
 <td><strong>/HDFEOS/SWATHS/UVB/Data_Fields/Irradiance310[]</strong></td>
 </tr>
 <tr class="row-odd"><td><em>condition</em></td>
-<td>clear_sky=false (default) and wavelength=324nm</td>
+<td>clear_sky unset and wavelength=324nm</td>
 </tr>
 <tr class="row-even"><td><em>path</em></td>
 <td><strong>/HDFEOS/SWATHS/UVB/Data_Fields/Irradiance324[]</strong></td>
 </tr>
 <tr class="row-odd"><td><em>condition</em></td>
-<td>clear_sky=false (default) and wavelength=380nm</td>
+<td>clear_sky unset and wavelength=380nm</td>
 </tr>
 <tr class="row-even"><td><em>path</em></td>
 <td><strong>/HDFEOS/SWATHS/UVB/Data_Fields/Irradiance380[]</strong></td>
@@ -296,6 +350,9 @@
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
@@ -304,7 +361,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2015-2016 S&amp;T, The Netherlands.
+        &copy; Copyright 2015-2017 S&amp;T, The Netherlands.
 
     </p>
   </div> 
@@ -325,16 +382,17 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.4b',
+            VERSION:'0.5b',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  false
+            HAS_SOURCE:  false,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

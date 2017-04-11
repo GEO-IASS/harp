@@ -1,15 +1,58 @@
+* Added ingestion support for NPP-Suomi.
 
-* Added regrid() and smooth() operations.
+* Allow 'Conventions' global attribute to contain more than just a reference
+  to HARP.
+
+* Renamed O3MSAF codadef to ACSAF. When updating HARP, you should remove
+  any existing O3SMAF-*.codadef files from your installation directory.
+  Otherwise you will get 'detection rule for ... is shadowed by ... ' errors.
+
+* Fixed issue with TES TL2CH4L ingestion.
+
+* Updates to Aeolus, S5P, and QA4ECV product ingestions.
+
+0.5 2017-03-26
+~~~~~~~~~~~~~~
+
+* Changed Open Source licence of HARP from GPLv2 to BSD (3-Clause).
+
+* Changed all '-' to '_' in operation function names to make them identifiers.
+
+* Added harpmerge command line tool.
+
+* Added regrid(), rename(), smooth(), derive_smoothed_column(),
+  point_in_area(), and wrap() operations.
 
 * Removed the harpprofile command line tool. Its functionality is replaced by
   the regrid() and smooth() operations.
 
+* Renamed harp_product_regrid_vertical_with_collocated_dataset() to
+  harp_product_regrid_with_collocated_dataset() and
+  harp_product_smooth_vertical() to
+  harp_product_smooth_vertical_with_collocated_dataset()
+
 * Added vertical_unit parameter to harp_product_smooth_vertical() and
-  harp_product_regrid_vertical_with_collocated_dataset() functions.
+  harp_product_regrid_with_collocated_dataset() functions.
+
+* Replaced harp_product_regrid_vertical_with_axis_variable() with
+  harp_product_regrid_with_axis_variable(). It can now be used for other
+  dimensions too (except the time dimension).
+
+* Added harp_collocation_result_filter_for_collocation_indices(),
+  harp_product_get_smoothed_column(),
+  harp_product_get_smoothed_column_using_collocated_dataset(),
+  harp_product_remove_variable_by_name(), harp_variable_append(),
+  harp_product_append(), and harp_variable_smooth_vertical() functions.
+
+* Renamed harp_product_get_variable_id_by_name() to
+  harp_product_get_variable_index_by_name().
 
 * Python harp.import_product() and harp.ingest_product() functions now accept
   a list of filenames or a globbing pattern as parameter (which will return
   the result of harp.concatenate() on the imported/ingested products).
+
+* Automatically set CODA definition path for HARP Python interface
+  (path can be overruled with CODA_DEFINITION environment variable).
 
 * The parsing of the operations string has been rewritten using flex/yacc.
   This has fixed several issues related to the parsing and execution of
@@ -20,21 +63,43 @@
 * Fixed issue where vertical regridding to a common grid provided wrong
   results.
 
+* Fixed issue where interval interpolation for a pressure grid was not
+  using a log-linear interpolation.
+
 * Aligned order of latitude/longitude arguments in all functions to have
   latitude first and longitude second.
 
 * Added unit 'ppv' to the included udunits2-common.xml file.
 
+* Added variables for surface temperature, total water vapour content, and
+  total cloud cover to ECMWF GRIB ingestion.
+
 * The default internal units have been changes to SI (except for molar mass).
   All algorithms have been adapted accordingly.
 
-* Added variable conversions for apriori profiles.
+* Added variable conversions for: apriori profiles, column density from
+  mass density (including pm1/pm2.5/pm10).
+
+* Added support for AEOLUS L1b/L2a/L2b products.
+
+* Added support for Aerosol and GHG CCI L2/L3 products.
 
 * Added support for GEOMS FTIR C2H2 ingestion.
 
 * Added support for OMI OMCHOCHO ingestion.
 
+* Added support for additional TES L2 products.
+
 * Added support for QA4ECV NO2 and HCHO products.
+
+* Added support for GOME, GOME-2, GOMOS, MIPAS, IASI, SCIAMACHY L1 products.
+
+* Added support for ODIN OSIRIS and SMR L2 products.
+
+* Changed --list-conversions command line option to --list-derivations.
+  And added --list-derivations option to harpdump.
+
+* Use NC_64BIT_OFFSET when storing data to netcdf larger than 1GB.
 
 0.4 2016-10-16
 ~~~~~~~~~~~~~~

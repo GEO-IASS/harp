@@ -8,9 +8,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>harpdump &mdash; HARP 0.4b documentation</title>
+  <title>harpdump &mdash; HARP 0.5b documentation</title>
   
 
+  
+  
   
   
 
@@ -32,10 +34,12 @@
   
 
   
-    <link rel="top" title="HARP 0.4b documentation" href="index.html"/>
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+    <link rel="top" title="HARP 0.5b documentation" href="index.html"/>
         <link rel="up" title="Command line tools" href="tools.html"/>
         <link rel="next" title="harpfilter" href="harpfilter.html"/>
-        <link rel="prev" title="harpcheck" href="harpcheck.html"/> 
+        <link rel="prev" title="harpconvert" href="harpconvert.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -44,6 +48,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -63,7 +68,7 @@
             
             
               <div class="version">
-                0.4
+                0.5
               </div>
             
           
@@ -77,20 +82,24 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dataformats.html">Data formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="operations.html">Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ingestions/index.html">Ingestion definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="libharp.html">C library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="python.html">Python interface</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="tools.html">Command line tools</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="harpconvert.html">harpconvert</a></li>
 <li class="toctree-l2"><a class="reference internal" href="harpcheck.html">harpcheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="harpcollocate.html">harpcollocate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="harpconvert.html">harpconvert</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">harpdump</a></li>
 <li class="toctree-l2"><a class="reference internal" href="harpfilter.html">harpfilter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="harpcollocate.html">harpcollocate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="harpmerge.html">harpmerge</a></li>
 </ul>
 </li>
 </ul>
@@ -105,8 +114,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">HARP</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">HARP</a>
+        
       </nav>
 
 
@@ -115,23 +126,40 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
           <li><a href="tools.html">Command line tools</a> &raquo;</li>
-      
-    <li>harpdump</li>
+        
+      <li>harpdump</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -155,6 +183,11 @@
             <span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="o">--</span><span class="n">data</span><span class="p">:</span>
                 <span class="n">Show</span> <span class="n">data</span> <span class="n">values</span> <span class="k">for</span> <span class="n">each</span> <span class="n">variable</span><span class="o">.</span>
 
+    <span class="n">harpdump</span> <span class="o">--</span><span class="nb">list</span><span class="o">-</span><span class="n">derivations</span> <span class="p">[</span><span class="nb">input</span> <span class="n">product</span> <span class="n">file</span><span class="p">]</span>
+        <span class="n">List</span> <span class="nb">all</span> <span class="n">available</span> <span class="n">variable</span> <span class="n">conversions</span><span class="o">.</span> <span class="n">If</span> <span class="n">an</span> <span class="nb">input</span> <span class="n">product</span> <span class="n">file</span> <span class="ow">is</span>
+        <span class="n">specified</span><span class="p">,</span> <span class="n">limit</span> <span class="n">the</span> <span class="nb">list</span> <span class="n">to</span> <span class="n">variable</span> <span class="n">conversions</span> <span class="n">that</span> <span class="n">are</span> <span class="n">possible</span>
+        <span class="n">given</span> <span class="n">the</span> <span class="n">specified</span> <span class="n">product</span><span class="o">.</span>
+
     <span class="n">harpdump</span> <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>
         <span class="n">Show</span> <span class="n">help</span> <span class="p">(</span><span class="n">this</span> <span class="n">text</span><span class="p">)</span><span class="o">.</span>
 
@@ -166,15 +199,18 @@
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="harpfilter.html" class="btn btn-neutral float-right" title="harpfilter" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="harpfilter.html" class="btn btn-neutral float-right" title="harpfilter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="harpcheck.html" class="btn btn-neutral" title="harpcheck" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="harpconvert.html" class="btn btn-neutral" title="harpconvert" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -183,7 +219,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2015-2016 S&amp;T, The Netherlands.
+        &copy; Copyright 2015-2017 S&amp;T, The Netherlands.
 
     </p>
   </div> 
@@ -204,16 +240,17 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.4b',
+            VERSION:'0.5b',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  false
+            HAS_SOURCE:  false,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

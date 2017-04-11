@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "coda.h"
@@ -29,6 +40,8 @@
 
 #define SECONDS_FROM_1993_TO_2000 (220838400 + 5)
 
+/* TODO: add support lsm */
+
 /* The parameter id values and their link to GRIB1 table2Version/indicatorOfParameter and
  * GRIB2 discipline/parameterCategory/parameterNumber values are taken from
  * http://apps.ecmwf.int/codes/grib/param-db
@@ -39,7 +52,10 @@ typedef enum grib_parameter_enum
     grib_param_z,       /* 129: Geopotential [m2/s2] (at the surface: orography) */
     grib_param_t,       /* 130: Temperature [K] */
     grib_param_q,       /* 133: Specific humidity [kg/kg] */
+    grib_param_tcwv,    /* 137: Total column water vapour [kg/m2] */
     grib_param_lnsp,    /* 152: Logarithm of surface pressure [-] */
+    grib_param_tcc,     /* 164: Total cloud cover [-] */
+    grib_param_2t,      /* 167: 2 meter temperature [K] */
     grib_param_lsm,     /* 172: Land-sea mask [(0-1)] */
     grib_param_ch4,     /* 210062/217004: Methane [kg/kg] */
     grib_param_pm1,     /* 210072: Particulate matter d < 1 um [kg/m3] */
@@ -88,7 +104,10 @@ const char *param_name[NUM_GRIB_PARAMETERS] = {
     "z",
     "t",
     "q",
+    "tcwv",
     "lnsp",
+    "tcc",
+    "2t",
     "lsm",
     "ch4",
     "pm1",
@@ -135,7 +154,10 @@ int param_is_profile[NUM_GRIB_PARAMETERS] = {
     0,  /* z */
     1,  /* t */
     1,  /* q */
+    0,  /* tcwv */
     0,  /* lnsp */
+    0,  /* tcc */
+    0,  /* 2t */
     0,  /* lsm */
     1,  /* ch4 */
     0,  /* pm1 */
@@ -206,6 +228,7 @@ typedef struct ingest_info_struct
     uint32_t iDirectionIncrement;
     uint32_t jDirectionIncrement;
     uint32_t N;
+    int grid_grib_version;      /* GRIB version of message from which grid was taken */
     int is_gaussian;
 
     /* actual latitude/longitude axis values */
@@ -321,8 +344,14 @@ static grib_parameter get_grib1_parameter(int parameter_ref)
                     return grib_param_t;
                 case 133:
                     return grib_param_q;
+                case 137:
+                    return grib_param_tcwv;
                 case 152:
                     return grib_param_lnsp;
+                case 164:
+                    return grib_param_tcc;
+                case 167:
+                    return grib_param_2t;
                 case 172:
                     return grib_param_lsm;
             }
@@ -338,6 +367,10 @@ static grib_parameter get_grib1_parameter(int parameter_ref)
                     return grib_param_q;
                 case 152:
                     return grib_param_lnsp;
+                case 164:
+                    return grib_param_tcc;
+                case 167:
+                    return grib_param_2t;
                 case 172:
                     return grib_param_lsm;
             }
@@ -351,6 +384,8 @@ static grib_parameter get_grib1_parameter(int parameter_ref)
                     return grib_param_t;
                 case 133:
                     return grib_param_q;
+                case 164:
+                    return grib_param_tcc;
             }
             break;
         case 171:
@@ -383,6 +418,12 @@ static grib_parameter get_grib1_parameter(int parameter_ref)
                     return grib_param_t;
                 case 133:
                     return grib_param_q;
+                case 137:
+                    return grib_param_tcwv;
+                case 164:
+                    return grib_param_tcc;
+                case 167:
+                    return grib_param_2t;
                 case 172:
                     return grib_param_lsm;
             }
@@ -396,6 +437,10 @@ static grib_parameter get_grib1_parameter(int parameter_ref)
                     return grib_param_t;
                 case 133:
                     return grib_param_q;
+                case 164:
+                    return grib_param_tcc;
+                case 167:
+                    return grib_param_2t;
                 case 172:
                     return grib_param_lsm;
             }
@@ -551,6 +596,15 @@ static grib_parameter get_grib2_parameter(int parameter_ref)
         case 192:
             switch (parameterCategory)
             {
+                case 128:
+                    switch (parameterNumber)
+                    {
+                        case 137:
+                            return grib_param_tcwv;
+                        case 164:
+                            return grib_param_tcc;
+                    }
+                    break;
                 case 210:
                     switch (parameterNumber)
                     {
@@ -783,6 +837,11 @@ static int read_q(void *user_data, harp_array data)
     return read_3d_grid_data((ingest_info *)user_data, grib_param_q, data);
 }
 
+static int read_tcwv(void *user_data, harp_array data)
+{
+    return read_2d_grid_data((ingest_info *)user_data, grib_param_tcwv, data);
+}
+
 static int read_lnsp(void *user_data, harp_array data)
 {
     ingest_info *info = (ingest_info *)user_data;
@@ -854,6 +913,16 @@ static int read_pressure_bounds(void *user_data, harp_array data)
     }
 
     return 0;
+}
+
+static int read_tcc(void *user_data, harp_array data)
+{
+    return read_2d_grid_data((ingest_info *)user_data, grib_param_tcc, data);
+}
+
+static int read_2t(void *user_data, harp_array data)
+{
+    return read_2d_grid_data((ingest_info *)user_data, grib_param_2t, data);
 }
 
 static int read_ch4(void *user_data, harp_array data)
@@ -1288,9 +1357,6 @@ static int get_reference_datetime(coda_cursor *cursor, int grib_version, ingest_
             info->is_forecast_datetime = 1;
             switch (unitOfTimeRange)
             {
-                case 0:        /* minute */
-                    scalefactor = 60;
-                    break;
                 case 1:        /* hour */
                     scalefactor = 60 * 60;
                     break;
@@ -1404,6 +1470,7 @@ static int get_lat_lon_grid(coda_cursor *cursor, int grib_version, ingest_info *
     uint32_t iDirectionIncrement = 0;
     uint32_t jDirectionIncrement = 0;
     uint32_t N = 0;
+    uint8_t scanningMode = 0;
     int is_gaussian = 0;
 
     if (grib_version == 1)
@@ -1480,6 +1547,12 @@ static int get_lat_lon_grid(coda_cursor *cursor, int grib_version, ingest_info *
         return -1;
     }
     coda_cursor_goto_parent(cursor);
+    if ((grib_version == 1 && (Ni == 65535 || Nj == 65535)) ||
+        (grib_version == 2 && (Ni == 4294967295 || Nj == 4294967295)))
+    {
+        harp_set_error(HARP_ERROR_INGESTION, "reduced Gaussian grids are not supported");
+        return -1;
+    }
 
     if (coda_cursor_goto_record_field_by_name(cursor, "latitudeOfFirstGridPoint") != 0)
     {
@@ -1561,6 +1634,22 @@ static int get_lat_lon_grid(coda_cursor *cursor, int grib_version, ingest_info *
         }
     }
     coda_cursor_goto_parent(cursor);
+    if (coda_cursor_goto_record_field_by_name(cursor, "scanningMode") != 0)
+    {
+        harp_set_error(HARP_ERROR_CODA, NULL);
+        return -1;
+    }
+    if (coda_cursor_read_uint8(cursor, &scanningMode) != 0)
+    {
+        harp_set_error(HARP_ERROR_CODA, NULL);
+        return -1;
+    }
+    coda_cursor_goto_parent(cursor);
+    if (scanningMode != 0)
+    {
+        harp_set_error(HARP_ERROR_INGESTION, "unsupported scanningMode (%d) for grid", scanningMode);
+        return -1;
+    }
 
     if (grib_version == 1)
     {
@@ -1587,6 +1676,7 @@ static int get_lat_lon_grid(coda_cursor *cursor, int grib_version, ingest_info *
         info->jDirectionIncrement = jDirectionIncrement;
         info->N = N;
         info->is_gaussian = is_gaussian;
+        info->grid_grib_version = grib_version;
         info->num_longitudes = Ni;
         info->num_latitudes = Nj;
 
@@ -1654,19 +1744,51 @@ static int get_lat_lon_grid(coda_cursor *cursor, int grib_version, ingest_info *
             harp_set_error(HARP_ERROR_INGESTION, "not all lat/lon grids in the GRIB file use the same grid type");
             return -1;
         }
-        if (longitudeOfFirstGridPoint != info->longitudeOfFirstGridPoint ||
-            longitudeOfLastGridPoint != info->longitudeOfLastGridPoint ||
-            iDirectionIncrement != info->iDirectionIncrement)
+        if (info->grid_grib_version != grib_version)
         {
-            harp_set_error(HARP_ERROR_INGESTION, "not all longitude grids in the GRIB file are the same");
-            return -1;
+            /* since GRIB1 and GRIB2 use different resolutions we need to compare with a tollerance of 1000 */
+            if (fabs((double)(longitudeOfFirstGridPoint - info->longitudeOfFirstGridPoint)) > 1e3 ||
+                fabs((double)(longitudeOfLastGridPoint - info->longitudeOfLastGridPoint)) > 1e3 ||
+                fabs((double)(iDirectionIncrement - info->iDirectionIncrement)) > 1e3)
+            {
+                harp_set_error(HARP_ERROR_INGESTION, "not all longitude grids in the GRIB file are the same");
+                return -1;
+            }
+            if (fabs((double)(latitudeOfFirstGridPoint - info->latitudeOfFirstGridPoint)) > 1e3 ||
+                fabs((double)(latitudeOfLastGridPoint - info->latitudeOfLastGridPoint)) > 1e3 ||
+                fabs((double)(jDirectionIncrement - info->jDirectionIncrement)) > 1e3 || N != info->N)
+            {
+                harp_set_error(HARP_ERROR_INGESTION, "not all latitude grids in the GRIB file are the same");
+                return -1;
+            }
+            if (grib_version == 2)
+            {
+                /* prefer more accurate GRIB2 grid over that of less accurate GRIB1 grid */
+                info->latitudeOfFirstGridPoint = latitudeOfFirstGridPoint;
+                info->longitudeOfFirstGridPoint = longitudeOfFirstGridPoint;
+                info->latitudeOfLastGridPoint = latitudeOfLastGridPoint;
+                info->longitudeOfLastGridPoint = longitudeOfLastGridPoint;
+                info->iDirectionIncrement = iDirectionIncrement;
+                info->jDirectionIncrement = jDirectionIncrement;
+                info->grid_grib_version = grib_version;
+            }
         }
-        if (latitudeOfFirstGridPoint != info->latitudeOfFirstGridPoint ||
-            latitudeOfLastGridPoint != info->latitudeOfLastGridPoint ||
-            jDirectionIncrement != info->jDirectionIncrement || N != info->N)
+        else
         {
-            harp_set_error(HARP_ERROR_INGESTION, "not all latitude grids in the GRIB file are the same");
-            return -1;
+            if (longitudeOfFirstGridPoint != info->longitudeOfFirstGridPoint ||
+                longitudeOfLastGridPoint != info->longitudeOfLastGridPoint ||
+                iDirectionIncrement != info->iDirectionIncrement)
+            {
+                harp_set_error(HARP_ERROR_INGESTION, "not all longitude grids in the GRIB file are the same");
+                return -1;
+            }
+            if (latitudeOfFirstGridPoint != info->latitudeOfFirstGridPoint ||
+                latitudeOfLastGridPoint != info->latitudeOfLastGridPoint ||
+                jDirectionIncrement != info->jDirectionIncrement || N != info->N)
+            {
+                harp_set_error(HARP_ERROR_INGESTION, "not all latitude grids in the GRIB file are the same");
+                return -1;
+            }
         }
     }
 
@@ -2305,6 +2427,7 @@ static int ingest_info_new(coda_product *product, ingest_info **new_info)
     info->jDirectionIncrement = 0;
     info->N = 0;
     info->is_gaussian = 0;
+    info->grid_grib_version = 0;
     info->num_longitudes = 0;
     info->longitude = NULL;
     info->num_latitudes = 0;
@@ -2344,11 +2467,11 @@ static int ingestion_init(const harp_ingestion_module *module, coda_product *pro
 
     if (harp_ingestion_options_get_option(options, "ignore_time_for_z", &value) == 0)
     {
-        info->ignore_time_for_z = (strcmp(value, "true") == 0);
+        info->ignore_time_for_z = 1;
     }
     if (harp_ingestion_options_get_option(options, "ignore_duplicates", &value) == 0)
     {
-        info->ignore_duplicates = (strcmp(value, "true") == 0);
+        info->ignore_duplicates = 1;
     }
 
     if (coda_get_product_format(product, &format) != 0)
@@ -2369,114 +2492,124 @@ static int ingestion_init(const harp_ingestion_module *module, coda_product *pro
     return 0;
 }
 
-int exclude_wavelength(void *user_data)
+static int exclude_wavelength(void *user_data)
 {
     return harp_isnan(((ingest_info *)user_data)->wavelength);
 }
 
-int exclude_z(void *user_data)
+static int exclude_z(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_z];
 }
 
-int exclude_t(void *user_data)
+static int exclude_t(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_t];
 }
 
-int exclude_q(void *user_data)
+static int exclude_q(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_q];
 }
 
-int exclude_lnsp(void *user_data)
+static int exclude_tcwv(void *user_data)
+{
+    return !((ingest_info *)user_data)->has_parameter[grib_param_tcwv];
+}
+
+static int exclude_lnsp(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_lnsp];
 }
 
-int exclude_pressure(void *user_data)
+static int exclude_pressure(void *user_data)
 {
     ingest_info *info = (ingest_info *)user_data;
 
     return !info->has_parameter[grib_param_lnsp] || info->coordinate_values == NULL;
 }
 
-int exclude_lsm(void *user_data)
+static int exclude_tcc(void *user_data)
 {
-    return !((ingest_info *)user_data)->has_parameter[grib_param_lsm];
+    return !((ingest_info *)user_data)->has_parameter[grib_param_tcc];
 }
 
-int exclude_ch4(void *user_data)
+static int exclude_2t(void *user_data)
+{
+    return !((ingest_info *)user_data)->has_parameter[grib_param_2t];
+}
+
+static int exclude_ch4(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_ch4];
 }
 
-int exclude_pm1(void *user_data)
+static int exclude_pm1(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_pm1];
 }
 
-int exclude_pm2p5(void *user_data)
+static int exclude_pm2p5(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_pm2p5];
 }
 
-int exclude_pm10(void *user_data)
+static int exclude_pm10(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_pm10];
 }
 
-int exclude_no2(void *user_data)
+static int exclude_no2(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_no2];
 }
 
-int exclude_so2(void *user_data)
+static int exclude_so2(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_so2];
 }
 
-int exclude_co(void *user_data)
+static int exclude_co(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_co];
 }
 
-int exclude_hcho(void *user_data)
+static int exclude_hcho(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_hcho];
 }
 
-int exclude_tcno2(void *user_data)
+static int exclude_tcno2(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_tcno2];
 }
 
-int exclude_tcso2(void *user_data)
+static int exclude_tcso2(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_tcso2];
 }
 
-int exclude_tcco(void *user_data)
+static int exclude_tcco(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_tcco];
 }
 
-int exclude_tchcho(void *user_data)
+static int exclude_tchcho(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_tchcho];
 }
 
-int exclude_go3(void *user_data)
+static int exclude_go3(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_go3];
 }
 
-int exclude_gtco3(void *user_data)
+static int exclude_gtco3(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_gtco3];
 }
 
-int exclude_aod(void *user_data)
+static int exclude_aod(void *user_data)
 {
     ingest_info *info = (ingest_info *)user_data;
 
@@ -2504,102 +2637,102 @@ int exclude_aod(void *user_data)
     return 1;
 }
 
-int exclude_ssaod(void *user_data)
+static int exclude_ssaod(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_ssaod550];
 }
 
-int exclude_duaod(void *user_data)
+static int exclude_duaod(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_duaod550];
 }
 
-int exclude_omaod(void *user_data)
+static int exclude_omaod(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_omaod550];
 }
 
-int exclude_bcaod(void *user_data)
+static int exclude_bcaod(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_bcaod550];
 }
 
-int exclude_suaod(void *user_data)
+static int exclude_suaod(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_suaod550];
 }
 
-int exclude_hno3(void *user_data)
+static int exclude_hno3(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_hno3];
 }
 
-int exclude_pan(void *user_data)
+static int exclude_pan(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_pan];
 }
 
-int exclude_c5h8(void *user_data)
+static int exclude_c5h8(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_c5h8];
 }
 
-int exclude_no(void *user_data)
+static int exclude_no(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_no];
 }
 
-int exclude_oh(void *user_data)
+static int exclude_oh(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_oh];
 }
 
-int exclude_c2h6(void *user_data)
+static int exclude_c2h6(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_c2h6];
 }
 
-int exclude_c3h8(void *user_data)
+static int exclude_c3h8(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_c3h8];
 }
 
-int exclude_tc_ch4(void *user_data)
+static int exclude_tc_ch4(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_tc_ch4];
 }
 
-int exclude_tc_hno3(void *user_data)
+static int exclude_tc_hno3(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_tc_hno3];
 }
 
-int exclude_tc_pan(void *user_data)
+static int exclude_tc_pan(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_tc_pan];
 }
 
-int exclude_tc_c5h8(void *user_data)
+static int exclude_tc_c5h8(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_tc_c5h8];
 }
 
-int exclude_tc_no(void *user_data)
+static int exclude_tc_no(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_tc_no];
 }
 
-int exclude_tc_oh(void *user_data)
+static int exclude_tc_oh(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_tc_oh];
 }
 
-int exclude_tc_c2h6(void *user_data)
+static int exclude_tc_c2h6(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_tc_c2h6];
 }
 
-int exclude_tc_c3h8(void *user_data)
+static int exclude_tc_c3h8(void *user_data)
 {
     return !((ingest_info *)user_data)->has_parameter[grib_param_tc_c3h8];
 }
@@ -2607,8 +2740,16 @@ int exclude_tc_c3h8(void *user_data)
 static void add_value_variable_mapping(harp_variable_definition *variable_definition, const char *grib1_description,
                                        const char *grib2_description)
 {
-    harp_variable_definition_add_mapping(variable_definition, NULL, "GRIB1", "/[]/data/values[]", grib1_description);
-    harp_variable_definition_add_mapping(variable_definition, NULL, "GRIB2", "/[]/data[]/values[]", grib2_description);
+    if (grib1_description != NULL)
+    {
+        harp_variable_definition_add_mapping(variable_definition, NULL, "GRIB1", "/[]/data/values[]",
+                                             grib1_description);
+    }
+    if (grib2_description != NULL)
+    {
+        harp_variable_definition_add_mapping(variable_definition, NULL, "GRIB2", "/[]/data[]/values[]",
+                                             grib2_description);
+    }
 }
 
 int harp_ingestion_module_ecmwf_grib_init(void)
@@ -2621,7 +2762,7 @@ int harp_ingestion_module_ecmwf_grib_init(void)
     harp_ingestion_module *module;
     harp_product_definition *product_definition;
     harp_variable_definition *variable_definition;
-    const char *ignore_option_values[] = { "false", "true" };
+    const char *ignore_option_values[] = { "true" };
     const char *description;
     const char *path;
 
@@ -2630,11 +2771,11 @@ int harp_ingestion_module_ecmwf_grib_init(void)
 
     /* option to ignore the time value of the geopotential parameter */
     description = "ignore time for the geopotential parameter";
-    harp_ingestion_register_option(module, "ignore_time_for_z", description, 2, ignore_option_values);
+    harp_ingestion_register_option(module, "ignore_time_for_z", description, 1, ignore_option_values);
 
     /* option to ignore any duplicates  time check of geopotential parameter */
     description = "ignore duplicate GRIB messages (only first message occurence will be used)";
-    harp_ingestion_register_option(module, "ignore_duplicates", description, 2, ignore_option_values);
+    harp_ingestion_register_option(module, "ignore_duplicates", description, 1, ignore_option_values);
 
 
     /* ECMWF GRIB product */
@@ -2649,7 +2790,7 @@ int harp_ingestion_module_ecmwf_grib_init(void)
                                                                      1, dimension_type, NULL, description,
                                                                      "seconds since 2000-01-01", NULL, read_datetime);
 
-    description = "the time of the measurement converted from TAI93 to seconds since 2000-01-01T00:00:00";
+    description = "time of the measurement converted from TAI93 to seconds since 2000-01-01T00:00:00";
     path = "/[]/grib1/yearOfCentury, /[]/grib1/month, /[]/grib1/day, /[]/grib1/hour, /[]/grib1/minute, "
         "/[]/grib1/centuryOfReferenceTimeOfData";
     harp_variable_definition_add_mapping(variable_definition, NULL, "GRIB1", path, description);
@@ -2706,13 +2847,21 @@ int harp_ingestion_module_ecmwf_grib_init(void)
     add_value_variable_mapping(variable_definition, "(table,indicator) = (128,130), (160,130), (170,130), (180,130), "
                                "or (190,130)", "(discipline,category,number) = (0,0,0)");
 
-    /* q: Specificy humidity */
+    /* q: H2O_mass_mixing_ratio */
     description = "specific humidity";
     variable_definition = harp_ingestion_register_variable_full_read(product_definition, "H2O_mass_mixing_ratio",
                                                                      harp_type_float, 3, &dimension_type[1], NULL,
                                                                      description, "kg/kg", exclude_q, read_q);
     add_value_variable_mapping(variable_definition, "(table,indicator) = (128,133), (160,133), (170,133), (180,133), "
                                "or (190,133)", "(discipline,category,number) = (0,1,0)");
+
+    /* tcwv: H2O_column_density */
+    description = "total column water vapour";
+    variable_definition = harp_ingestion_register_variable_full_read(product_definition, "H2O_column_density",
+                                                                     harp_type_float, 2, &dimension_type[1], NULL,
+                                                                     description, "kg/m^2", exclude_tcwv, read_tcwv);
+    add_value_variable_mapping(variable_definition, "(table,indicator) = (128,137) or (180,137)",
+                               "(discipline,category,number) = (192,128,137)");
 
     /* lnsp: surface_pressure */
     description = "pressure at the surface";
@@ -2731,7 +2880,9 @@ int harp_ingestion_module_ecmwf_grib_init(void)
                                                                      read_pressure);
     description = "the coordinateValues contain [a(1), ..., a(N+1), b(1), ..., b(N+1)] coefficients for the N+1 "
         "vertical layer boundaries; p(N-i) = (a(i) + a(i+1) + (b(i) + b(i+1))lnsp)/2";
-    harp_variable_definition_add_mapping(variable_definition, NULL, NULL, "..../coordinateValues[]", description);
+    harp_variable_definition_add_mapping(variable_definition, NULL, "surface_pressure is available and at least one "
+                                         "parameter has vertical coordinate values", "..../coordinateValues[]",
+                                         description);
 
     /* pressure_bounds */
     description = "pressure_bounds";
@@ -2741,7 +2892,26 @@ int harp_ingestion_module_ecmwf_grib_init(void)
                                                                      exclude_pressure, read_pressure_bounds);
     description = "the coordinateValues contain [a(1), ..., a(N+1), b(1), ..., b(N+1)] coefficients for the N+1 "
         "vertical layer boundaries; p(N-i,1) = a(i) + b(i)lnsp; p(N-i,2) = a(i+1) + b(i+1)lnsp";
-    harp_variable_definition_add_mapping(variable_definition, NULL, NULL, "..../coordinateValues[]", description);
+    harp_variable_definition_add_mapping(variable_definition, NULL, "surface_pressure is available and at least one "
+                                         "parameter has vertical coordinate values", "..../coordinateValues[]",
+                                         description);
+
+    /* tcc: cloud_fraction */
+    description = "cloud fraction";
+    variable_definition = harp_ingestion_register_variable_full_read(product_definition, "cloud_fraction",
+                                                                     harp_type_float, 2, &dimension_type[1], NULL,
+                                                                     description, HARP_UNIT_DIMENSIONLESS, exclude_tcc,
+                                                                     read_tcc);
+    add_value_variable_mapping(variable_definition, "(table,indicator) = (128,164), (160,164), (170,164), (180,164), "
+                               "or (190,164)", "(discipline,category,number) = (192,128,164)");
+
+    /* 2t: surface_temperature */
+    description = "2 metre temperature";
+    variable_definition = harp_ingestion_register_variable_full_read(product_definition, "surface_temperature",
+                                                                     harp_type_float, 2, &dimension_type[1], NULL,
+                                                                     description, "K", exclude_2t, read_2t);
+    add_value_variable_mapping(variable_definition, "(table,indicator) = (128,167), (160,167), (180,167), or (190,167)",
+                               NULL);
 
     /* ch4: CH4_mass_mixing_ratio */
     description = "methane mass mixing ratio";

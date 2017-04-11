@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "harp-internal.h"
@@ -54,36 +65,46 @@ static void write_scalar(harp_scalar data, harp_data_type data_type, int (*print
     }
 }
 
-static void write_array(harp_array data, harp_data_type data_type, long num_elements, int (*print) (const char *, ...))
+static void write_array(harp_array data, harp_data_type data_type, long num_elements, long block_size,
+                        int (*print) (const char *, ...))
 {
-    long i;
+    long i, j, index;
 
-    for (i = 0; i < num_elements; i++)
+    index = 0;
+    for (i = 0; i < num_elements / block_size; i++)
     {
-        switch (data_type)
+        if (block_size > 1)
         {
-            case harp_type_int8:
-                print("%d", (int)data.int8_data[i]);
-                break;
-            case harp_type_int16:
-                print("%d", (int)data.int16_data[i]);
-                break;
-            case harp_type_int32:
-                print("%ld", (long)data.int32_data[i]);
-                break;
-            case harp_type_float:
-                print("%.16g", (double)data.float_data[i]);
-                break;
-            case harp_type_double:
-                print("%.16g", (double)data.double_data[i]);
-                break;
-            case harp_type_string:
-                print("\"%s\"", data.string_data[i]);
-                break;
+            print("\n  ");
         }
-        if (i < num_elements - 1)
+        for (j = 0; j < block_size; j++)
         {
-            print(", ");
+            switch (data_type)
+            {
+                case harp_type_int8:
+                    print("%d", (int)data.int8_data[index]);
+                    break;
+                case harp_type_int16:
+                    print("%d", (int)data.int16_data[index]);
+                    break;
+                case harp_type_int32:
+                    print("%ld", (long)data.int32_data[index]);
+                    break;
+                case harp_type_float:
+                    print("%.16g", (double)data.float_data[index]);
+                    break;
+                case harp_type_double:
+                    print("%.16g", (double)data.double_data[index]);
+                    break;
+                case harp_type_string:
+                    print("\"%s\"", data.string_data[index]);
+                    break;
+            }
+            if (index < num_elements - 1)
+            {
+                print(", ");
+            }
+            index++;
         }
     }
 }
@@ -122,6 +143,7 @@ int harp_variable_rearrange_dimension(harp_variable *variable, int dim_index, lo
     long filter_block_size;
     long i_increment;
     long i;
+    int needs_shuffle;
 
     /* The multidimensional array is split in three parts:
      *   num_elements = num_groups * dim[dim_index] * num_block_elements
@@ -154,6 +176,7 @@ int harp_variable_rearrange_dimension(harp_variable *variable, int dim_index, lo
         return -1;
     }
 
+    needs_shuffle = num_dim_elements != variable->dimension[dim_index];
     for (i = 0; i < num_dim_elements; i++)
     {
         if (dim_element_ids[i] < 0 || dim_element_ids[i] >= variable->dimension[dim_index])
@@ -163,6 +186,15 @@ int harp_variable_rearrange_dimension(harp_variable *variable, int dim_index, lo
                            i, dim_element_ids[i], variable->dimension[dim_index], __FILE__, __LINE__);
             return -1;
         }
+        if (dim_element_ids[i] != i)
+        {
+            needs_shuffle = 1;
+        }
+    }
+    if (!needs_shuffle)
+    {
+        /* all ellements are already in the right location, don't do anything */
+        return 0;
     }
 
     /* Calculate the number of times we have to reshuffle the indices (i.e. the product of the higher dimensions). */
@@ -304,10 +336,19 @@ int harp_variable_rearrange_dimension(harp_variable *variable, int dim_index, lo
             int is_cycle = 0;
             long k;
 
-            /* Skip this element if we already filled this block because of an earlier shuffle */
-            if (move_to_id[from_id] == to_id && moved[from_id])
+            if (move_to_id[from_id] == to_id)
             {
-                continue;
+                /* We already filled this block because of an earlier shuffle */
+                if (moved[from_id])
+                {
+                    continue;
+                }
+                /* The item is already in the right spot (and we don't have to duplicate strings) */
+                if (to_id == from_id)
+                {
+                    moved[from_id] = 1;
+                    continue;
+                }
             }
 
             /* Check if the data at the current position needs to be moved away first */
@@ -867,7 +908,6 @@ int harp_variable_remove_dimension(harp_variable *variable, int dim_index, long 
         return -1;
     }
 
-    variable->num_elements /= variable->dimension[dim_index];
     for (i = dim_index; i < variable->num_dimensions - 1; i++)
     {
         variable->dimension[i] = variable->dimension[i + 1];
@@ -1104,7 +1144,7 @@ LIBHARP_API int harp_variable_copy(const harp_variable *other_variable, harp_var
     }
     if (variable->data_type == harp_type_string)
     {
-        memset(variable->data.ptr, 0, (size_t)variable->num_elements * harp_get_size_for_type(variable->data_type));
+        memset(variable->data.ptr, 0, (size_t)variable->num_elements * harp_get_size_for_type(harp_type_string));
         for (i = 0; i < variable->num_elements; i++)
         {
             variable->data.string_data[i] = strdup(other_variable->data.string_data[i]);
@@ -1124,6 +1164,99 @@ LIBHARP_API int harp_variable_copy(const harp_variable *other_variable, harp_var
     }
 
     *new_variable = variable;
+    return 0;
+}
+
+/** Append one variable to another.
+ * Both variables need to have the 'time' dimension as first dimension.
+ * And all non-time dimensions need to be the same for both variables.
+ * \param variable Variable to which data should be appended.
+ * \param other_variable Variable that should be appended.
+ * \return
+ *   \arg \c 0, Success.
+ *   \arg \c -1, Error occurred (check #harp_errno).
+ */
+LIBHARP_API int harp_variable_append(harp_variable *variable, const harp_variable *other_variable)
+{
+    void *data;
+    long element_size;
+    long new_num_elements;
+    long i;
+
+    if (strcmp(variable->name, other_variable->name) != 0)
+    {
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "variables don't have the same name");
+        return -1;
+    }
+    if (variable->data_type != other_variable->data_type)
+    {
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "variables don't have the same datatype (%s)", variable->name);
+        return -1;
+    }
+    if (variable->num_dimensions != other_variable->num_dimensions)
+    {
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "variables don't have the same number of dimensions (%s)",
+                       variable->name);
+        return -1;
+    }
+    if (variable->num_dimensions == 0 || variable->dimension_type[0] != harp_dimension_time ||
+        other_variable->num_dimensions == 0 || other_variable->dimension_type[0] != harp_dimension_time)
+    {
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "variables need to be time dependent (%s)", variable->name);
+        return -1;
+    }
+
+    for (i = 1; i < variable->num_dimensions; i++)
+    {
+        if (variable->dimension_type[i] != other_variable->dimension_type[i])
+        {
+            harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "variables (%s) don't have the same type of dimensions",
+                           variable->name);
+            return -1;
+        }
+        if (variable->dimension[i] != other_variable->dimension[i])
+        {
+            harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "variables (%s) don't have the same dimension lengths",
+                           variable->name);
+            return -1;
+        }
+    }
+
+    element_size = harp_get_size_for_type(variable->data_type);
+    new_num_elements = variable->num_elements + other_variable->num_elements;
+    data = realloc(variable->data.ptr, (size_t)new_num_elements * element_size);
+    if (data == NULL)
+    {
+        harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not allocate %lu bytes) (%s:%u)",
+                       (size_t)new_num_elements * element_size, __FILE__, __LINE__);
+        return -1;
+    }
+    variable->data.ptr = data;
+
+    if (variable->data_type == harp_type_string)
+    {
+        memset(&variable->data.string_data[variable->num_elements], 0,
+               (size_t)other_variable->num_elements * element_size);
+        for (i = 0; i < other_variable->num_elements; i++)
+        {
+            variable->data.string_data[variable->num_elements + i] = strdup(other_variable->data.string_data[i]);
+            if (variable->data.string_data[variable->num_elements + i] == NULL)
+            {
+                harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not duplicate string) (%s:%u)", __FILE__,
+                               __LINE__);
+                return -1;
+            }
+        }
+    }
+    else
+    {
+        char *to_ptr = (char *)variable->data.ptr + variable->num_elements * element_size;
+
+        memcpy(to_ptr, other_variable->data.ptr, (size_t)other_variable->num_elements * element_size);
+    }
+    variable->dimension[0] += other_variable->dimension[0];
+    variable->num_elements += other_variable->num_elements;
+
     return 0;
 }
 
@@ -1803,16 +1936,21 @@ LIBHARP_API void harp_variable_print(harp_variable *variable, int show_attribute
     int i;
 
     print("    ");
+    if (variable == NULL)
+    {
+        print("NULL\n");
+        return;
+    }
     switch (variable->data_type)
     {
         case harp_type_int8:
-            print("byte");
+            print("int8");
             break;
         case harp_type_int16:
-            print("int");
+            print("int16");
             break;
         case harp_type_int32:
-            print("long");
+            print("int32");
             break;
         case harp_type_float:
             print("float");
@@ -1883,7 +2021,15 @@ LIBHARP_API void harp_variable_print_data(harp_variable *variable, int (*print) 
 {
     print("%s", variable->name);
     print(" = ");
-    write_array(variable->data, variable->data_type, variable->num_elements, print);
+    if (variable->num_dimensions <= 1)
+    {
+        write_array(variable->data, variable->data_type, variable->num_elements, 1, print);
+    }
+    else
+    {
+        write_array(variable->data, variable->data_type, variable->num_elements,
+                    variable->dimension[variable->num_dimensions - 1], print);
+    }
     print("\n\n");
 }
 

@@ -8,9 +8,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>SCIAMACHY_L2_NADIR_UV8_H2O &mdash; HARP 0.4b documentation</title>
+  <title>SCIAMACHY_L2_NADIR_UV8_H2O &mdash; HARP 0.5b documentation</title>
   
 
+  
+  
   
   
 
@@ -32,7 +34,9 @@
   
 
   
-    <link rel="top" title="HARP 0.4b documentation" href="../index.html"/> 
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+    <link rel="top" title="HARP 0.5b documentation" href="../index.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -41,6 +45,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -60,7 +65,7 @@
             
             
               <div class="version">
-                0.4
+                0.5
               </div>
             
           
@@ -74,10 +79,13 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../dataformats.html">Data formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../algorithms.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../operations.html">Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Ingestion definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../libharp.html">C library</a></li>
@@ -95,8 +103,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">HARP</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">HARP</a>
+        
       </nav>
 
 
@@ -105,21 +115,38 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
-    <li>SCIAMACHY_L2_NADIR_UV8_H2O</li>
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>SCIAMACHY_L2_NADIR_UV8_H2O</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -130,7 +157,7 @@
 <div class="section" id="variables">
 <h2>Variables</h2>
 <p>The table below lists the variables that are present in the HARP product that results from an ingestion of <code class="docutils literal"><span class="pre">SCIAMACHY_L2_NADIR_UV8_H2O</span></code> data.</p>
-<table border="1" class="docutils">
+<table border="1" class="colwidths-given docutils">
 <colgroup>
 <col width="25%" />
 <col width="5%" />
@@ -204,13 +231,13 @@
 <tr class="row-odd"><td><strong>scan_direction</strong></td>
 <td>string</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>scan direction for each measurement: &#8216;forward&#8217;, &#8216;backward&#8217;, or &#8216;mixed&#8217; (for a measurement that consisted of one or more forward and backward scans)</td>
 </tr>
 <tr class="row-even"><td><strong>cloud_fraction</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>average cloud fraction of footprint</td>
 </tr>
 <tr class="row-odd"><td><strong>H2O_column_number_density</strong></td>
@@ -228,17 +255,41 @@
 <tr class="row-odd"><td><strong>H2O_column_number_density_validity</strong></td>
 <td>int32</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>flag describing the H2O vertical column density</td>
 </tr>
 <tr class="row-even"><td><strong>index</strong></td>
 <td>int32</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>zero-based index of the sample within the source product</td>
 </tr>
 </tbody>
 </table>
+</div>
+<div class="section" id="ingestion-options">
+<h2>Ingestion options</h2>
+<p>The table below lists the available ingestion options for <code class="docutils literal"><span class="pre">SCIAMACHY_L2</span></code> products.</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="15%" />
+<col width="25%" />
+<col width="60%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">option name</th>
+<th class="head">legal values</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>dataset</td>
+<td>nad_uv0_o3, nad_uv1_no2, nad_uv3_bro, nad_uv4_h2co, nad_uv5_so2, nad_uv6_oclo, nad_uv7_so2, nad_uv8_h2o, nad_uv9_chocho, nad_ir0_h2o, nad_ir1_ch4, nad_ir2_n2o, nad_ir3_co, nad_ir4_co2, lim_uv0_o3, lim_uv1_no2, lim_uv3_bro, clouds_aerosol</td>
+<td>the dataset of the L2 product to ingest; each dataset is a combination of nadir/limb choice, retrieval window, and main quantity; option values are &#8216;nad_uv0_o3&#8217; (default), &#8216;nad_uv1_no2&#8217;, &#8216;nad_uv3_bro&#8217;,  &#8216;nad_uv4_h2co&#8217;, &#8216;nad_uv5_so2&#8217;, &#8216;nad_uv6_oclo&#8217;, &#8216;nad_uv7_so2&#8217;, &#8216;nad_uv8_h2o&#8217;, &#8216;nad_uv9_chocho&#8217;, &#8216;nad_ir0_h2o&#8217;, &#8216;nad_ir1_ch4&#8217;, &#8216;nad_ir2_n2o&#8217;, &#8216;nad_ir3_co&#8217;, &#8216;nad_ir4_co2&#8217;, &#8216;lim_uv0_o3&#8217;, &#8216;lim_uv1_no2&#8217;, &#8216;lim_uv3_bro&#8217;, &#8216;clouds_aerosol&#8217;</td>
+</tr>
+</tbody>
+</table>
+<p>This definition is only applicable when: dataset=nad_uv8_h2o</p>
 </div>
 <div class="section" id="mapping-description">
 <h2>Mapping description</h2>
@@ -483,6 +534,9 @@
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
@@ -491,7 +545,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2015-2016 S&amp;T, The Netherlands.
+        &copy; Copyright 2015-2017 S&amp;T, The Netherlands.
 
     </p>
   </div> 
@@ -512,16 +566,17 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.4b',
+            VERSION:'0.5b',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  false
+            HAS_SOURCE:  false,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

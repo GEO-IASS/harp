@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef HARP_INTERNAL_H
@@ -102,17 +113,6 @@ typedef struct harp_derived_variable_list_struct
 
 extern harp_derived_variable_list *harp_derived_variable_conversions;
 
-typedef enum harp_overlapping_scenario_enum
-{
-    harp_overlapping_scenario_no_overlap_b_a = 0,
-    harp_overlapping_scenario_no_overlap_a_b = 1,
-    harp_overlapping_scenario_overlap_a_equals_b = 2,
-    harp_overlapping_scenario_partial_overlap_a_b = 3,
-    harp_overlapping_scenario_partial_overlap_b_a = 4,
-    harp_overlapping_scenario_overlap_a_contains_b = 5,
-    harp_overlapping_scenario_overlap_b_contains_a = 6
-} harp_overlapping_scenario;
-
 /* Utility functions */
 long harp_parse_double(const char *buffer, long buffer_length, double *dst, int ignore_trailing_bytes);
 long harp_get_max_string_length(long num_strings, char **string_data);
@@ -152,10 +152,13 @@ int harp_variable_remove_dimension(harp_variable *variable, int dim_index, long 
 /* Products */
 int harp_product_rearrange_dimension(harp_product *product, harp_dimension_type dimension_type, long num_dim_elements,
                                      const long *dim_element_ids);
+int harp_product_sort_by_index(harp_product *product, const char *index_variable, long num_elements, int32_t *index);
 int harp_product_filter_dimension(harp_product *product, harp_dimension_type dimension_type, const uint8_t *mask);
 int harp_product_remove_dimension(harp_product *product, harp_dimension_type dimension_type);
 void harp_product_remove_all_variables(harp_product *product);
 int harp_product_get_datetime_range(const harp_product *product, double *datetime_start, double *datetime_stop);
+int harp_product_get_derived_bounds_for_grid(harp_product *product, harp_variable *grid, harp_variable **bounds);
+int harp_product_get_storage_size(const harp_product *product, int with_attributes, int64_t *size);
 
 /* Import */
 #ifdef HAVE_HDF4
@@ -205,9 +208,6 @@ int harp_derived_variable_list_add_conversion(harp_variable_conversion *conversi
 void harp_derived_variable_list_done(void);
 
 /* Analysis functions */
-int harp_determine_overlapping_scenario(double xmin_a, double xmax_a,
-                                        double xmin_b, double xmax_b,
-                                        harp_overlapping_scenario *new_overlapping_scenario);
 double harp_fraction_of_day_from_datetime(double datetime);
 double harp_fraction_of_year_from_datetime(double datetime);
 
@@ -277,6 +277,7 @@ double harp_wavelength_from_frequency(double frequency);
 double harp_wavelength_from_wavenumber(double wavenumber);
 double harp_wavenumber_from_frequency(double frequency);
 double harp_wavenumber_from_wavelength(double wavelength);
+double harp_wrap(double value, double min, double max);
 
 /* Interpolation */
 void harp_interpolate_find_index(long source_length, const double *source_grid, double target_grid_point, long *index);
@@ -295,14 +296,20 @@ void harp_interpolate_value_loglinear(long source_length, const double *source_g
 void harp_interpolate_array_loglinear(long source_length, const double *source_grid, const double *source_array,
                                       long target_length, const double *target_grid, int out_of_bound_flag,
                                       double *target_array);
-int harp_interval_interpolate_array_linear(long source_length, const double *source_grid_boundaries,
-                                           const double *source_array, long target_length,
-                                           const double *target_grid_boundaries, double *target_array);
+void harp_interval_interpolate_array_linear(long source_length, const double *source_grid_boundaries,
+                                            const double *source_array, long target_length,
+                                            const double *target_grid_boundaries, double *target_array);
 void harp_bounds_from_midpoints_linear(long num_midpoints, const double *midpoints, double *intervals);
 void harp_bounds_from_midpoints_loglinear(long num_midpoints, const double *midpoints, double *intervals);
 
+/* Collocation */
 int harp_collocation_result_shallow_copy(const harp_collocation_result *collocation_result,
                                          harp_collocation_result **new_result);
 void harp_collocation_result_shallow_delete(harp_collocation_result *collocation_result);
+
+int harp_collocation_result_get_filtered_product_a(harp_collocation_result *collocation_result,
+                                                   const char *source_product, harp_product **product);
+int harp_collocation_result_get_filtered_product_b(harp_collocation_result *collocation_result,
+                                                   const char *source_product, harp_product **product);
 
 #endif

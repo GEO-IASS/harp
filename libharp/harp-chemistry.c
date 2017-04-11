@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "harp-internal.h"
@@ -289,7 +300,7 @@ double harp_number_density_from_pressure_and_temperature(double pressure, double
 }
 
 /** Convert volume mixing ratio to number_density
- * \param volume_mixing_ratio volume mixing ratio [ppv]
+ * \param volume_mixing_ratio Volume mixing ratio [ppv]
  * \param number_density_air Number density of air [molec/cm3]
  * \return the number density [molec/m3]
  */
@@ -299,7 +310,7 @@ double harp_number_density_from_volume_mixing_ratio(double volume_mixing_ratio, 
 }
 
 /** Convert a density to a partial column using the altitude boundaries
- * This is a generic routine to convert adensitity to a partial column. It works for all cases where the conversion
+ * This is a generic routine to convert a densitity to a partial column. It works for all cases where the conversion
  * is a matter of multiplying the density by the altitude height to get the partial column value.
  * \param density Density profile [?/m]
  * \param altitude_bounds Lower and upper altitude [m] boundaries [2]
@@ -310,8 +321,31 @@ double harp_partial_column_from_density_and_altitude_bounds(double density, cons
     return density * fabs(altitude_bounds[1] - altitude_bounds[0]);
 }
 
+/** Convert volume mixing ration with pressure boundaries to a column number density
+ * This routine calculates an estimate of the altitude to derive the gravity at the center of the pressure boundaries
+ * \param volume_mixing_ratio Volume mixing ratio [ppv]
+ * \param latitude Latitude [degrees_north]
+ * \param molar_mass_air Molar mass of air [g/mol]
+ * \param pressure_bounds Lower and upper pressure [Pa] boundaries [2]
+ * \return the partial column [?]
+ */
+double harp_partial_column_number_density_from_volume_mixing_ratio(double volume_mixing_ratio, double latitude,
+                                                                   double molar_mass_air, const double *pressure_bounds)
+{
+    double g, p, z;
+
+    /* calculate gravity at a rough estimate of the height z (reflecting the center of the pressure bounds) */
+    p = exp(0.5 * (log(pressure_bounds[0]) + log(pressure_bounds[1])));
+    z = -(CONST_MOLAR_GAS * CONST_STD_TEMPERATURE) * log(p / CONST_STD_PRESSURE) /
+        (10e-3 * molar_mass_air * CONST_GRAV_ACCEL);
+    g = harp_gravity_from_latitude_and_height(latitude, z);
+
+    return -volume_mixing_ratio * CONST_NUM_AVOGADRO * (pressure_bounds[1] - pressure_bounds[0]) /
+        (10e-3 * molar_mass_air * g);
+}
+
 /** Convert volume mixing ratio to partial pressure
- * \param volume_mixing_ratio volume mixing ratio [ppv]
+ * \param volume_mixing_ratio Volume mixing ratio [ppv]
  * \param pressure Pressure [Pa]
  * \return the partial pressure [Pa]
  */

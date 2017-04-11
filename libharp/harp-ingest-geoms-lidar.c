@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "coda.h"
@@ -23,8 +34,12 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define MAX_NAME_LENGTH 80
+#define MAX_DESCRIPTION_LENGTH 100
 
 typedef struct ingest_info_struct
 {
@@ -190,6 +205,29 @@ static int read_o3_nd_ad_uncertainty(void *user_data, harp_array data)
                                 ((ingest_info *)user_data)->num_vertical, data);
 }
 
+static int read_nd_bs(void *user_data, harp_array data)
+{
+    return read_variable_double(user_data, "NUMBER_DENSITY_BACKSCATTER",
+                                ((ingest_info *)user_data)->num_vertical, data);
+}
+
+static int read_nd_bs_uncertainty(void *user_data, harp_array data)
+{
+    return read_variable_double(user_data, "NUMBER_DENSITY_BACKSCATTER_UNCERTAINTY_COMBINED_STANDARD",
+                                ((ingest_info *)user_data)->num_vertical, data);
+}
+
+static int read_temp_bs(void *user_data, harp_array data)
+{
+    return read_variable_double(user_data, "TEMPERATURE_BACKSCATTER", ((ingest_info *)user_data)->num_vertical, data);
+}
+
+static int read_temp_bs_uncertainty(void *user_data, harp_array data)
+{
+    return read_variable_double(user_data, "TEMPERATURE_BACKSCATTER_UNCERTAINTY_COMBINED_STANDARD",
+                                ((ingest_info *)user_data)->num_vertical, data);
+}
+
 static int read_pressure_ind(void *user_data, harp_array data)
 {
     return read_variable_double(user_data, "PRESSURE_INDEPENDENT", ((ingest_info *)user_data)->num_vertical, data);
@@ -216,17 +254,17 @@ static int get_product_definition(const harp_ingestion_module *module, coda_prod
 
     if (coda_cursor_set_product(&cursor, product) != 0)
     {
-        harp_set_error(HARP_ERROR_UNSUPPORTED_PRODUCT, NULL);
+        harp_set_error(HARP_ERROR_CODA, NULL);
         return -1;
     }
     if (coda_cursor_goto(&cursor, "@DATA_TEMPLATE") != 0)
     {
-        harp_set_error(HARP_ERROR_UNSUPPORTED_PRODUCT, NULL);
+        harp_set_error(HARP_ERROR_UNSUPPORTED_PRODUCT, "could not find DATA_TEMPLATE global attribute");
         return -1;
     }
     if (coda_cursor_read_string(&cursor, template_name, 100) != 0)
     {
-        harp_set_error(HARP_ERROR_UNSUPPORTED_PRODUCT, NULL);
+        harp_set_error(HARP_ERROR_CODA, NULL);
         return -1;
     }
 
@@ -239,7 +277,7 @@ static int get_product_definition(const harp_ingestion_module *module, coda_prod
         }
     }
 
-    harp_set_error(HARP_ERROR_UNSUPPORTED_PRODUCT, NULL);
+    harp_set_error(HARP_ERROR_UNSUPPORTED_PRODUCT, "GEOMS template '%s' not supported", template_name);
     return -1;
 }
 
@@ -334,23 +372,13 @@ static int ingestion_init(const harp_ingestion_module *module, coda_product *pro
     return 0;
 }
 
-int harp_ingestion_module_geoms_lidar_init(void)
+static void register_common_variables(harp_product_definition *product_definition, int with_temperature)
 {
-    harp_ingestion_module *module;
-    harp_product_definition *product_definition;
     harp_variable_definition *variable_definition;
-    harp_dimension_type dimension_type[2];
+    harp_dimension_type dimension_type[1];
     const char *description;
 
-    description = "GEOMS template for LIDAR ozone";
-    module = harp_ingestion_register_module_coda("GEOMS-TE-LIDAR-O3", "GEOMS", "GEOMS", "LIDAR_O3", description,
-                                                 ingestion_init, ingestion_done);
-
-    description = "GEOMS template for LIDAR ozone v003";
-    product_definition = harp_ingestion_register_product(module, "GEOMS-TE-LIDAR-O3-003", description, read_dimensions);
-
     dimension_type[0] = harp_dimension_time;
-    dimension_type[1] = harp_dimension_vertical;
 
     /* sensor_name */
     description = "name of the sensor";
@@ -412,6 +440,51 @@ int harp_ingestion_module_geoms_lidar_init(void)
                                                                      read_datetime_stop);
     harp_variable_definition_add_mapping(variable_definition, NULL, NULL, "/DATETIME.STOP", NULL);
 
+    dimension_type[0] = harp_dimension_vertical;
+
+    /* altitude */
+    description = "altitude of the measurement";
+    variable_definition = harp_ingestion_register_variable_full_read(product_definition, "altitude", harp_type_double,
+                                                                     1, dimension_type, NULL, description, "m", NULL,
+                                                                     read_altitude);
+    harp_variable_definition_add_mapping(variable_definition, NULL, NULL, "/ALTITUDE", NULL);
+
+    /* pressure */
+    description = "pressure profile from independent source";
+    variable_definition = harp_ingestion_register_variable_full_read(product_definition, "pressure", harp_type_double,
+                                                                     1, dimension_type, NULL, description, "hPa", NULL,
+                                                                     read_pressure_ind);
+    harp_variable_definition_add_mapping(variable_definition, NULL, NULL, "/PRESSURE_INDEPENDENT", NULL);
+
+    if (with_temperature)
+    {
+        /* temperature */
+        description = "temperature profile from independent source";
+        variable_definition = harp_ingestion_register_variable_full_read(product_definition, "temperature",
+                                                                         harp_type_double, 1, dimension_type, NULL,
+                                                                         description, "K", NULL, read_temperature_ind);
+        harp_variable_definition_add_mapping(variable_definition, NULL, NULL, "/TEMPERATURE_INDEPENDENT", NULL);
+    }
+}
+
+static int init_o3_product_definition(harp_ingestion_module *module, int version)
+{
+    harp_product_definition *product_definition;
+    harp_variable_definition *variable_definition;
+    harp_dimension_type dimension_type[2];
+    char product_name[MAX_NAME_LENGTH];
+    char product_description[MAX_DESCRIPTION_LENGTH];
+    const char *description;
+
+    snprintf(product_name, MAX_NAME_LENGTH, "GEOMS-TE-LIDAR-O3-%03d", version);
+    snprintf(product_description, MAX_DESCRIPTION_LENGTH, "GEOMS template for LIDAR ozone v%03d", version);
+    product_definition = harp_ingestion_register_product(module, product_name, product_description, read_dimensions);
+
+    dimension_type[0] = harp_dimension_time;
+    dimension_type[1] = harp_dimension_vertical;
+
+    register_common_variables(product_definition, 1);
+
     /* O3_number_density */
     description = "absorption differential O3 number density";
     variable_definition = harp_ingestion_register_variable_full_read(product_definition, "O3_number_density",
@@ -430,28 +503,78 @@ int harp_ingestion_module_geoms_lidar_init(void)
                                          "/O3.NUMBER.DENSITY_ABSORPTION.DIFFERENTIAL_UNCERTAINTY.COMBINED.STANDARD",
                                          NULL);
 
-    dimension_type[0] = harp_dimension_vertical;
+    return 0;
+}
 
-    /* altitude */
-    description = "altitude of the measurement";
-    variable_definition = harp_ingestion_register_variable_full_read(product_definition, "altitude", harp_type_double,
-                                                                     1, dimension_type, NULL, description, "m", NULL,
-                                                                     read_altitude);
-    harp_variable_definition_add_mapping(variable_definition, NULL, NULL, "/ALTITUDE", NULL);
+static int init_temperature_product_definition(harp_ingestion_module *module, int version)
+{
+    harp_product_definition *product_definition;
+    harp_variable_definition *variable_definition;
+    harp_dimension_type dimension_type[2];
+    char product_name[MAX_NAME_LENGTH];
+    char product_description[MAX_DESCRIPTION_LENGTH];
+    const char *description;
 
-    /* pressure */
-    description = "pressure profile to derive volume mixing ratio";
-    variable_definition = harp_ingestion_register_variable_full_read(product_definition, "pressure", harp_type_double,
-                                                                     1, dimension_type, NULL, description, "hPa", NULL,
-                                                                     read_pressure_ind);
-    harp_variable_definition_add_mapping(variable_definition, NULL, NULL, "/PRESSURE_INDEPENDENT", NULL);
+    snprintf(product_name, MAX_NAME_LENGTH, "GEOMS-TE-LIDAR-TEMPERATURE-%03d", version);
+    snprintf(product_description, MAX_DESCRIPTION_LENGTH, "GEOMS template for LIDAR temperature v%03d", version);
+    product_definition = harp_ingestion_register_product(module, product_name, product_description, read_dimensions);
+
+    dimension_type[0] = harp_dimension_time;
+    dimension_type[1] = harp_dimension_vertical;
+
+    register_common_variables(product_definition, 0);
 
     /* temperature */
-    description = "temperature profile to derive volume mixing ratio";
+    description = "backscatter temperature";
     variable_definition = harp_ingestion_register_variable_full_read(product_definition, "temperature",
-                                                                     harp_type_double, 1, dimension_type, NULL,
-                                                                     description, "K", NULL, read_temperature_ind);
-    harp_variable_definition_add_mapping(variable_definition, NULL, NULL, "/TEMPERATURE_INDEPENDENT", NULL);
+                                                                     harp_type_double, 2, dimension_type, NULL,
+                                                                     description, "K", NULL, read_temp_bs);
+    harp_variable_definition_add_mapping(variable_definition, NULL, NULL, "/TEMPERATURE_BACKSCATTER", NULL);
+
+    /* temperature_uncertainty */
+    description = "standard deviation of the backscatter temperature";
+    variable_definition = harp_ingestion_register_variable_full_read(product_definition,
+                                                                     "temperature_uncertainty", harp_type_double,
+                                                                     2, dimension_type, NULL, description, "K",
+                                                                     NULL, read_temp_bs_uncertainty);
+    harp_variable_definition_add_mapping(variable_definition, NULL, NULL,
+                                         "/TEMPERATURE_BACKSCATTER_UNCERTAINTY.COMBINED.STANDARD", NULL);
+
+    /* number_density */
+    description = "backscatter number density";
+    variable_definition = harp_ingestion_register_variable_full_read(product_definition, "number_density",
+                                                                     harp_type_double, 2, dimension_type, NULL,
+                                                                     description, "molec/m3", NULL, read_nd_bs);
+    harp_variable_definition_add_mapping(variable_definition, NULL, NULL, "/NUMBER.DENSITY_BACKSCATTER", NULL);
+
+    /* number_density_uncertainty */
+    description = "standard deviation of the backscatter number density";
+    variable_definition = harp_ingestion_register_variable_full_read(product_definition,
+                                                                     "number_density_uncertainty", harp_type_double,
+                                                                     2, dimension_type, NULL, description, "molec/m3",
+                                                                     NULL, read_nd_bs_uncertainty);
+    harp_variable_definition_add_mapping(variable_definition, NULL, NULL,
+                                         "/NUMBER.DENSITY_BACKSCATTER_UNCERTAINTY.COMBINED.STANDARD", NULL);
+
+    return 0;
+}
+
+int harp_ingestion_module_geoms_lidar_init(void)
+{
+    harp_ingestion_module *module;
+
+    module = harp_ingestion_register_module_coda("GEOMS-TE-LIDAR-O3", "GEOMS", "GEOMS", "LIDAR_O3",
+                                                 "GEOMS template for LIDAR ozone", ingestion_init, ingestion_done);
+
+    init_o3_product_definition(module, 3);
+    init_o3_product_definition(module, 4);
+
+    module = harp_ingestion_register_module_coda("GEOMS-TE-LIDAR-TEMPERATURE", "GEOMS", "GEOMS", "LIDAR_TEMPERATURE",
+                                                 "GEOMS template for LIDAR temperature", ingestion_init,
+                                                 ingestion_done);
+
+    init_temperature_product_definition(module, 3);
+    init_temperature_product_definition(module, 4);
 
     return 0;
 }

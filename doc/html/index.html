@@ -8,9 +8,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>HARP manual &mdash; HARP 0.4b documentation</title>
+  <title>HARP manual &mdash; HARP 0.5b documentation</title>
   
 
+  
+  
   
   
 
@@ -32,7 +34,9 @@
   
 
   
-    <link rel="top" title="HARP 0.4b documentation" href="#"/>
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+    <link rel="top" title="HARP 0.5b documentation" href="#"/>
         <link rel="next" title="Installation" href="install.html"/> 
 
   
@@ -42,6 +46,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -61,7 +66,7 @@
             
             
               <div class="version">
-                0.4
+                0.5
               </div>
             
           
@@ -75,10 +80,13 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dataformats.html">Data formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="operations.html">Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ingestions/index.html">Ingestion definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="libharp.html">C library</a></li>
@@ -96,8 +104,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="#">HARP</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">HARP</a>
+        
       </nav>
 
 
@@ -106,21 +116,38 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="#">Docs</a> &raquo;</li>
-      
-    <li>HARP manual</li>
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>HARP manual</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -148,14 +175,10 @@
 <li class="toctree-l2"><a class="reference internal" href="dataformats.html#collocation-result-file-format">Collocation result file format</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithms</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="algorithms.html#definitions">Definitions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="algorithms.html#common-formula">Common formula</a></li>
-<li class="toctree-l2"><a class="reference internal" href="algorithms.html#common-variable-conversions">Common variable conversions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="algorithms.html#axis-variable-conversions">Axis variable conversions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="algorithms.html#angle-variable-conversions">Angle variable conversions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="algorithms.html#atmospheric-variable-conversions">Atmospheric variable conversions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="algorithms.html#optical-variable-conversions">Optical variable conversions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="algorithms/definitions.html">Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithms/formula.html">Common formula</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithms/index.html#variable-conversions">Variable Conversions</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="operations.html">Operations</a><ul>
@@ -169,20 +192,28 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ingestions/index.html">Ingestion definitions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#aeolus-products">AEOLUS products</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#aerosol-cci-products">Aerosol CCI products</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#calipso-lidar-products">CALIPSO LIDAR products</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#cloud-cci-products">Cloud CCI products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#ecmwf-grib-products">ECMWF GRIB products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#geoms-products">GEOMS products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#gome-products">GOME products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#gome-2-products">GOME-2 products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#gomos-products">GOMOS products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#gosat-fts-products">GOSAT FTS products</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#green-house-gases-cci-products">Green House Gases CCI products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#hirdls-products">HIRDLS products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#iasi-products">IASI products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#mipas-products">MIPAS products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#mls-products">MLS products</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#npp-products">NPP products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#omi-products">OMI products</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#osiris-products">OSIRIS products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#ozone-cci-products">Ozone CCI products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#qa4ecv-products">QA4ECV products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#sciamachy-products">SCIAMACHY products</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#smr-products">SMR products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#sentinel-5p-products">Sentinel-5P products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#temis-products">TEMIS products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ingestions/index.html#tes-products">TES products</a></li>
@@ -202,11 +233,12 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tools.html">Command line tools</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="harpconvert.html">harpconvert</a></li>
 <li class="toctree-l2"><a class="reference internal" href="harpcheck.html">harpcheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="harpcollocate.html">harpcollocate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="harpconvert.html">harpconvert</a></li>
 <li class="toctree-l2"><a class="reference internal" href="harpdump.html">harpdump</a></li>
 <li class="toctree-l2"><a class="reference internal" href="harpfilter.html">harpfilter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="harpcollocate.html">harpcollocate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="harpmerge.html">harpmerge</a></li>
 </ul>
 </li>
 </ul>
@@ -214,9 +246,8 @@
 </div>
 <div class="section" id="what-is-harp">
 <h2>What is HARP?</h2>
-<p>HARP is a toolkit for ingesting, processing and inter-comparing satellite remote
-sensing data against correlative data. Correlative data can be either in-situ
-data, ground based remote sensing data or other satellite remote sensing data.
+<p>HARP is a toolkit for reading, processing and inter-comparing satellite remote
+sensing data, model data, in-situ data, and ground based remote sensing data.
 The toolkit is composed of:</p>
 <ul class="simple">
 <li>A set of <a class="reference internal" href="#command-line-tools"><span class="std std-ref">command line tools</span></a></li>
@@ -224,16 +255,15 @@ The toolkit is composed of:</p>
 </ul>
 <p>The main goal of HARP is to assist in the inter-comparison of data sets. By
 appropriately chaining calls to HARP command line tools one can pre-process
-satellite and correlative data such that the two datasets that need to be
-compared end up having the same temporal/spatial grid, same data
-format/structure, and same physical unit. At the end of the toolchain you will
-have a set of data files that can be directly compared in e.g. Python, IDL or
-MATLAB.</p>
+data sets such that two datasets that need to be compared end up having the
+same temporal/spatial grid, same data format/structure, and same physical unit.
+At the end of the toolchain you will have a set of data files that can be
+directly compared in e.g. Python, IDL or MATLAB.</p>
 <p>In order for the HARP command line tools to handle each others output the
-toolkit uses a its own <a class="reference internal" href="#data-formats"><span class="std std-ref">data format conventions</span></a> for
+toolkit uses its own <a class="reference internal" href="#data-formats"><span class="std std-ref">data format conventions</span></a> for
 intermediate files. The use of this harmonized formatting means that satellite
 products need to be converted first to HARP compliant files. Once in this
-format, further processing can take place.</p>
+format, further processing can be performed.</p>
 </div>
 <div class="section" id="data-formats">
 <span id="id1"></span><h2>Data formats</h2>
@@ -250,7 +280,7 @@ collocations, the <a class="reference internal" href="dataformats.html#collocati
 <div class="section" id="algorithms">
 <h2>Algorithms</h2>
 <p>HARP can perform a wide variety of operations on the data. A description of
-the algorithms as used in HARP can be found in the <a class="reference internal" href="algorithms.html"><span class="doc">Algorithms</span></a> section of the documentation.</p>
+the algorithms as used in HARP can be found in the <a class="reference internal" href="algorithms/index.html"><span class="doc">Algorithms</span></a> section of the documentation.</p>
 </div>
 <div class="section" id="operations">
 <h2>Operations</h2>
@@ -315,12 +345,15 @@ command line using:</p>
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>
@@ -330,7 +363,7 @@ command line using:</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2015-2016 S&amp;T, The Netherlands.
+        &copy; Copyright 2015-2017 S&amp;T, The Netherlands.
 
     </p>
   </div> 
@@ -351,16 +384,17 @@ command line using:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.4b',
+            VERSION:'0.5b',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  false
+            HAS_SOURCE:  false,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

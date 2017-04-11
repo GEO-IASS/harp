@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "coda.h"
@@ -67,15 +78,26 @@ static int init_cursors(ingest_info *info)
     if (info->band_id < 6)
     {
         wavenumber_path = "exposureAttribute/pointAttribute/RadiometricCorrectionInfo/spectrumObsWavelengthRange_SWIR";
+        if (coda_cursor_goto(&info->wavenumber_cursor, wavenumber_path) != 0)
+        {
+            if (coda_errno == CODA_ERROR_INVALID_NAME)
+            {
+                /* This is a night-time product (that only has a TIR */
+                /* band) so return an empty product (see issue 79).  */
+                return 1;
+            }
+            harp_set_error(HARP_ERROR_CODA, NULL);
+            return -1;
+        }
     }
     else
     {
         wavenumber_path = "exposureAttribute/pointAttribute/RadiometricCorrectionInfo/spectrumObsWavelengthRange_TIR";
-    }
-    if (coda_cursor_goto(&info->wavenumber_cursor, wavenumber_path) != 0)
-    {
-        harp_set_error(HARP_ERROR_CODA, NULL);
-        return -1;
+        if (coda_cursor_goto(&info->wavenumber_cursor, wavenumber_path) != 0)
+        {
+            harp_set_error(HARP_ERROR_CODA, NULL);
+            return -1;
+        }
     }
 
     switch (info->band_id)
@@ -94,6 +116,7 @@ static int init_cursors(ingest_info *info)
             break;
         default:
             radiance_path = "Spectrum/TIR/band4/obsWavelength";
+            break;
     }
     if (coda_cursor_goto(&info->radiance_cursor, radiance_path) != 0)
     {
@@ -433,6 +456,7 @@ static int ingestion_init(const harp_ingestion_module *module, coda_product *pro
                           const harp_ingestion_options *options, harp_product_definition **definition, void **user_data)
 {
     ingest_info *info;
+    int retval;
 
     info = malloc(sizeof(ingest_info));
     if (info == NULL)
@@ -450,15 +474,25 @@ static int ingestion_init(const harp_ingestion_module *module, coda_product *pro
         ingestion_done(info);
         return -1;
     }
-    if (init_cursors(info) != 0)
+    retval = init_cursors(info);
+    if (retval < 0)
     {
         ingestion_done(info);
         return -1;
     }
-    if (init_num_main(info) != 0)
+    else if (retval == 0)
     {
-        ingestion_done(info);
-        return -1;
+        if (init_num_main(info) != 0)
+        {
+            ingestion_done(info);
+            return -1;
+        }
+    }
+    else
+    {
+        /* This is a night-time product and we have selected a band     */
+        /* that does not exist, return an empty product (see issue 79). */
+        info->num_main = 0;
     }
 
     *definition = module->product_definition[info->band_id];
@@ -476,6 +510,7 @@ static harp_product_definition *register_radiance_product(harp_ingestion_module 
     const char *product_name;
     const char *product_description;
     const char *description;
+    const char *mapping_description;
     const char *path;
     const char *unit;
 
@@ -485,36 +520,44 @@ static harp_product_definition *register_radiance_product(harp_ingestion_module 
         case 0:
             product_name = "GOSAT_FTS_L1b_band1p";
             product_description = "band1-p spectra";
+            mapping_description = "band=1p or band unset";
             break;
         case 1:
             product_name = "GOSAT_FTS_L1b_band1s";
             product_description = "band1-s spectra";
+            mapping_description = "band=1s";
             break;
         case 2:
             product_name = "GOSAT_FTS_L1b_band2p";
             product_description = "band2-p spectra";
+            mapping_description = "band=2p";
             break;
         case 3:
             product_name = "GOSAT_FTS_L1b_band2s";
             product_description = "band2-s spectra";
+            mapping_description = "band=2s";
             break;
         case 4:
             product_name = "GOSAT_FTS_L1b_band3p";
             product_description = "band3-p spectra";
+            mapping_description = "band=3p";
             break;
         case 5:
             product_name = "GOSAT_FTS_L1b_band3s";
             product_description = "band3-s spectra";
+            mapping_description = "band=3s";
             break;
         case 6:
             product_name = "GOSAT_FTS_L1b_band4";
             product_description = "band4 spectra";
+            mapping_description = "band=4";
             break;
         default:
             assert(0);
             exit(1);
     }
     product_definition = harp_ingestion_register_product(module, product_name, product_description, read_dimensions);
+    harp_product_definition_add_mapping(product_definition, NULL, mapping_description);
 
     /* datetime */
     description = "start time of the measurement";
@@ -615,8 +658,8 @@ int harp_ingestion_module_gosat_fts_l1b_init(void)
 
     module = harp_ingestion_register_module_coda("GOSAT_FTS_L1b", "GOSAT FTS", "GOSAT", "L1B_FTS",
                                                  "GOSAT FTS Level 1b radiance spectra", ingestion_init, ingestion_done);
-    harp_ingestion_register_option(module, "band", "spectral band to ingest", ARRAY_SIZE(band_option_values),
-                                   band_option_values);
+    harp_ingestion_register_option(module, "band", "spectral band to ingest (default is 1p)",
+                                   ARRAY_SIZE(band_option_values), band_option_values);
 
     for (i = 0; i < (int)ARRAY_SIZE(band_option_values); i++)
     {

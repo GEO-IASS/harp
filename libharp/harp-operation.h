@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef HARP_OPERATION_H
@@ -32,18 +43,22 @@ typedef enum harp_operation_type_enum
     harp_operation_collocation_filter,
     harp_operation_comparison_filter,
     harp_operation_derive_variable,
+    harp_operation_derive_smoothed_column_collocated,
     harp_operation_exclude_variable,
     harp_operation_flatten,
     harp_operation_keep_variable,
     harp_operation_longitude_range_filter,
     harp_operation_membership_filter,
     harp_operation_point_distance_filter,
+    harp_operation_point_in_area_filter,
     harp_operation_regrid,
     harp_operation_regrid_collocated,
+    harp_operation_rename,
     harp_operation_smooth_collocated,
     harp_operation_string_comparison_filter,
     harp_operation_string_membership_filter,
     harp_operation_valid_range_filter,
+    harp_operation_wrap,
 } harp_operation_type;
 
 typedef struct harp_operation_struct
@@ -125,6 +140,19 @@ typedef struct harp_derive_variable_args_struct
     char *unit;
 } harp_derive_variable_args;
 
+typedef struct harp_derive_smoothed_column_collocated_args_struct
+{
+    char *variable_name;
+    int num_dimensions;
+    harp_dimension_type dimension_type[HARP_MAX_NUM_DIMS];
+    char *unit;
+    char *axis_variable_name;
+    char *axis_unit;
+    char *collocation_result;
+    char target_dataset;
+    char *dataset_dir;
+} harp_derive_smoothed_column_collocated_args;
+
 typedef struct harp_exclude_variable_args_struct
 {
     int num_variables;
@@ -169,6 +197,14 @@ typedef struct harp_point_distance_filter_args_struct
     char *distance_unit;
 } harp_point_distance_filter_args;
 
+typedef struct harp_point_in_area_filter_args_struct
+{
+    double latitude;
+    char *latitude_unit;
+    double longitude;
+    char *longitude_unit;
+} harp_point_in_area_filter_args;
+
 typedef struct harp_regrid_args_struct
 {
     harp_variable *axis_variable;
@@ -183,6 +219,12 @@ typedef struct harp_regrid_collocated_args_struct
     char target_dataset;
     char *dataset_dir;
 } harp_regrid_collocated_args;
+
+typedef struct harp_rename_args_struct
+{
+    char *variable_name;
+    char *new_variable_name;
+} harp_rename_args;
 
 typedef struct harp_smooth_collocated_args_struct
 {
@@ -216,6 +258,14 @@ typedef struct harp_valid_range_filter_args_struct
     char *variable_name;
 } harp_valid_range_filter_args;
 
+typedef struct harp_wrap_args_struct
+{
+    char *variable_name;
+    char *unit;
+    double min;
+    double max;
+} harp_wrap_args;
+
 /* Generic operation */
 int harp_operation_new(harp_operation_type type, void *args, harp_operation **new_operation);
 void harp_operation_delete(harp_operation *operation);
@@ -236,6 +286,11 @@ int harp_comparison_filter_new(const char *variable_name, harp_comparison_operat
                                const char *unit, harp_operation **new_operation);
 int harp_derive_variable_new(const char *variable_name, int num_dimensions, const harp_dimension_type *dimension_type,
                              const char *unit, harp_operation **new_operation);
+int harp_derive_smoothed_column_collocated_new(const char *variable_name, int num_dimensions,
+                                               const harp_dimension_type *dimension_type, const char *unit,
+                                               const char *axis_variable_name, const char *axis_unit,
+                                               const char *collocation_result, const char target_dataset,
+                                               const char *dataset_dir, harp_operation **new_operation);
 int harp_exclude_variable_new(int num_variables, const char **variable_name, harp_operation **new_operation);
 int harp_flatten_new(const harp_dimension_type dimension_type, harp_operation **new_operation);
 int harp_keep_variable_new(int num_variables, const char **variable_name, harp_operation **new_operation);
@@ -246,11 +301,14 @@ int harp_membership_filter_new(const char *variable_name, harp_membership_operat
 int harp_point_distance_filter_new(double latitude, const char *latitude_unit, double longitude,
                                    const char *longitude_unit, double distance, const char *distance_unit,
                                    harp_operation **operation);
+int harp_point_in_area_filter_new(double latitude, const char *latitude_unit, double longitude,
+                                  const char *longitude_unit, harp_operation **operation);
 int harp_regrid_new(harp_dimension_type dimension_type, const char *axis_variable_name, const char *axis_unit,
                     long num_values, double *values, harp_operation **new_operation);
 int harp_regrid_collocated_new(harp_dimension_type dimension_type, const char *axis_variable_name,
                                const char *axis_unit, const char *collocation_result, const char target_dataset,
                                const char *dataset_dir, harp_operation **new_operation);
+int harp_rename_new(const char *variable_name, const char *new_variable_name, harp_operation **new_operation);
 int harp_smooth_collocated_new(int num_variables, const char **variable_name, harp_dimension_type dimension_type,
                                const char *axis_variable_name, const char *axis_unit, const char *collocation_result,
                                const char target_dataset, const char *dataset_dir, harp_operation **new_operation);
@@ -259,5 +317,6 @@ int harp_string_comparison_filter_new(const char *variable_name, harp_comparison
 int harp_string_membership_filter_new(const char *variable_name, harp_membership_operator_type operator_type,
                                       int num_values, const char **value, harp_operation **new_operation);
 int harp_valid_range_filter_new(const char *variable_name, harp_operation **new_operation);
+int harp_wrap_new(const char *variable_name, const char *unit, double min, double max, harp_operation **new_operation);
 
 #endif

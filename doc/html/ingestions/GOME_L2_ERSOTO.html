@@ -8,9 +8,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>GOME_L2_ERSOTO &mdash; HARP 0.4b documentation</title>
+  <title>GOME_L2_ERSOTO &mdash; HARP 0.5b documentation</title>
   
 
+  
+  
   
   
 
@@ -32,7 +34,9 @@
   
 
   
-    <link rel="top" title="HARP 0.4b documentation" href="../index.html"/> 
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+    <link rel="top" title="HARP 0.5b documentation" href="../index.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -41,6 +45,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -60,7 +65,7 @@
             
             
               <div class="version">
-                0.4
+                0.5
               </div>
             
           
@@ -74,10 +79,13 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../dataformats.html">Data formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../algorithms.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../operations.html">Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Ingestion definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../libharp.html">C library</a></li>
@@ -95,8 +103,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">HARP</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">HARP</a>
+        
       </nav>
 
 
@@ -105,21 +115,38 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
-    <li>GOME_L2_ERSOTO</li>
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>GOME_L2_ERSOTO</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -130,7 +157,7 @@
 <div class="section" id="variables">
 <h2>Variables</h2>
 <p>The table below lists the variables that are present in the HARP product that results from an ingestion of <code class="docutils literal"><span class="pre">GOME_L2_ERSOTO</span></code> data.</p>
-<table border="1" class="docutils">
+<table border="1" class="colwidths-given docutils">
 <colgroup>
 <col width="25%" />
 <col width="5%" />
@@ -294,109 +321,109 @@
 <tr class="row-even"><td><strong>BrO_column_number_density_amf</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>BrO air mass factor</td>
 </tr>
 <tr class="row-odd"><td><strong>BrO_column_number_density_amf_uncertainty</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>uncertainty of the BrO air mass factor</td>
 </tr>
 <tr class="row-even"><td><strong>H2O_column_number_density_amf</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>H2O air mass factor</td>
 </tr>
 <tr class="row-odd"><td><strong>H2O_column_number_density_amf_uncertainty</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>uncertainty of the H2O air mass factor</td>
 </tr>
 <tr class="row-even"><td><strong>HCHO_column_number_density_amf</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>HCHO air mass factor</td>
 </tr>
 <tr class="row-odd"><td><strong>HCHO_column_number_density_amf_uncertainty</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>uncertainty of the HCHO air mass factor</td>
 </tr>
 <tr class="row-even"><td><strong>NO2_column_number_density_amf</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>NO2 air mass factor</td>
 </tr>
 <tr class="row-odd"><td><strong>NO2_column_number_density_amf_uncertainty</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>uncertainty of the NO2 air mass factor</td>
 </tr>
 <tr class="row-even"><td><strong>tropospheric_NO2_column_number_density_amf</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>tropospheric NO2 air mass factor</td>
 </tr>
 <tr class="row-odd"><td><strong>tropospheric_NO2_column_number_density_amf_uncertainty</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>uncertainty of the tropospheric NO2 air mass factor</td>
 </tr>
 <tr class="row-even"><td><strong>O3_column_number_density_amf</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>O3 air mass factor</td>
 </tr>
 <tr class="row-odd"><td><strong>O3_column_number_density_amf_uncertainty</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>uncertainty of the O3 air mass factor</td>
 </tr>
 <tr class="row-even"><td><strong>OClO_column_number_density_amf</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>OClO air mass factor</td>
 </tr>
 <tr class="row-odd"><td><strong>OClO_column_number_density_amf_uncertainty</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>uncertainty of the OClO air mass factor</td>
 </tr>
 <tr class="row-even"><td><strong>SO2_column_number_density_amf</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>SO2 air mass factor</td>
 </tr>
 <tr class="row-odd"><td><strong>SO2_column_number_density_amf_uncertainty</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>uncertainty of the SO2 air mass factor</td>
 </tr>
 <tr class="row-even"><td><strong>cloud_fraction</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>cloud fraction</td>
 </tr>
 <tr class="row-odd"><td><strong>cloud_fraction_uncertainty</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>uncertainty of the cloud fraction</td>
 </tr>
 <tr class="row-even"><td><strong>cloud_top_pressure</strong></td>
@@ -426,50 +453,73 @@
 <tr class="row-even"><td><strong>cloud_top_albedo</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>cloud top albedo</td>
 </tr>
 <tr class="row-odd"><td><strong>cloud_top_albedo_uncertainty</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>uncertainty of the cloud top albedo</td>
 </tr>
 <tr class="row-even"><td><strong>cloud_optical_depth</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>cloud optical depth</td>
 </tr>
 <tr class="row-odd"><td><strong>cloud_optical_depth_uncertainty</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>uncertainty of the cloud optical depth</td>
 </tr>
 <tr class="row-even"><td><strong>absorbing_aerosol_index</strong></td>
 <td>double</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>absorbing aerosol index</td>
 </tr>
 <tr class="row-odd"><td><strong>scan_subset_counter</strong></td>
 <td>int8</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>the relative index (0-3) of this measurement within a scan (forward + backward)</td>
 </tr>
 <tr class="row-even"><td><strong>scan_direction</strong></td>
 <td>string</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>scan direction for each measurement: &#8216;forward&#8217; or &#8216;backward&#8217;</td>
 </tr>
 <tr class="row-odd"><td><strong>index</strong></td>
 <td>int32</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>zero-based index of the sample within the source product</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="ingestion-options">
+<h2>Ingestion options</h2>
+<p>The table below lists the available ingestion options for <code class="docutils literal"><span class="pre">GOME_L2_ERSOTO</span></code> products.</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="15%" />
+<col width="25%" />
+<col width="60%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">option name</th>
+<th class="head">legal values</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>corrected_no2_column</td>
+<td>true</td>
+<td>ingest the NO2 total vertical column density corrected for tropospheric contribution (instead of the uncorrected NO2 total vertical column density)</td>
 </tr>
 </tbody>
 </table>
@@ -596,7 +646,7 @@
 <td><strong>/TOTAL_COLUMNS/NO2_Corr[]</strong></td>
 </tr>
 <tr class="row-even"><td><em>condition</em></td>
-<td>corrected_no2_column=false (default)</td>
+<td>corrected_no2_column unset (default)</td>
 </tr>
 <tr class="row-odd"><td><em>path</em></td>
 <td><strong>/TOTAL_COLUMNS/NO2[]</strong></td>
@@ -612,7 +662,7 @@
 <td>uncertainty information unavailable; this variable will not be present in the ingested product</td>
 </tr>
 <tr class="row-odd"><td><em>condition</em></td>
-<td>corrected_no2_column=false (default)</td>
+<td>corrected_no2_column unset (default)</td>
 </tr>
 <tr class="row-even"><td><em>path</em></td>
 <td><strong>/TOTAL_COLUMNS/NO2_Error[], /TOTAL_COLUMNS/NO2[]</strong></td>
@@ -1059,6 +1109,9 @@
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
@@ -1067,7 +1120,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2015-2016 S&amp;T, The Netherlands.
+        &copy; Copyright 2015-2017 S&amp;T, The Netherlands.
 
     </p>
   </div> 
@@ -1088,16 +1141,17 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.4b',
+            VERSION:'0.5b',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  false
+            HAS_SOURCE:  false,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

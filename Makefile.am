@@ -27,7 +27,7 @@ uninstall-hook: $(UNINSTALL_HOOK_TARGETS)
 
 # programs
 
-bin_PROGRAMS = harpcheck harpcollocate harpconvert harpfilter harpdump
+bin_PROGRAMS = harpcheck harpcollocate harpconvert harpdump harpfilter harpmerge
 noinst_PROGRAMS = findtypedef
 
 # libraries (+ related files)
@@ -89,9 +89,18 @@ libharp_la_SOURCES = \
 	libharp/harp-geometry-util.c \
 	libharp/harp-geometry-wgs84.c \
 	libharp/harp-geometry.h \
+	libharp/harp-ingest-aeolus_l1b.c \
+	libharp/harp-ingest-aeolus_l2a.c \
+	libharp/harp-ingest-aeolus_l2b.c \
+	libharp/harp-ingest-calipso_l2.c \
+	libharp/harp-ingest-cci_l2_aerosol.c \
+	libharp/harp-ingest-cci_l2_ghg.c \
 	libharp/harp-ingest-cci_l2_o3_lp.c \
 	libharp/harp-ingest-cci_l2_o3_np.c \
 	libharp/harp-ingest-cci_l2_o3_tc.c \
+	libharp/harp-ingest-cci_l3_aerosol.c \
+	libharp/harp-ingest-cci_l3_cloud.c \
+	libharp/harp-ingest-cci_l3_ghg.c \
 	libharp/harp-ingest-cci_l3_o3_lp.c \
 	libharp/harp-ingest-cci_l3_o3_np.c \
 	libharp/harp-ingest-cci_l3_o3_tc.c \
@@ -101,21 +110,33 @@ libharp_la_SOURCES = \
 	libharp/harp-ingest-geoms-mwr.c \
 	libharp/harp-ingest-geoms-ftir.c \
 	libharp/harp-ingest-geoms-uvvis-doas.c \
+	libharp/harp-ingest-gome_l1.c \
 	libharp/harp-ingest-gome_l2.c \
+	libharp/harp-ingest-gome2_l1.c \
 	libharp/harp-ingest-gome2_l2.c \
+	libharp/harp-ingest-gomos_l1.c \
 	libharp/harp-ingest-gomos_l2.c \
 	libharp/harp-ingest-gosat_fts_l1b.c \
 	libharp/harp-ingest-gosat_fts_l2.c \
 	libharp/harp-ingest-hirdls_l2.c \
+	libharp/harp-ingest-iasi_l1.c \
 	libharp/harp-ingest-iasi_l2.c \
+	libharp/harp-ingest-mipas_l1.c \
 	libharp/harp-ingest-mipas_l2.c \
 	libharp/harp-ingest-mls_l2.c \
+	libharp/harp-ingest-npp-suomi-crimss_l2.c \
+	libharp/harp-ingest-npp-suomi-omps_profiles_l2.c \
+	libharp/harp-ingest-npp-suomi-omps_totals_l2.c \
+	libharp/harp-ingest-npp-suomi-viirs_l2.c \
 	libharp/harp-ingest-omi_l2.c \
 	libharp/harp-ingest-omi_l3.c \
+	libharp/harp-ingest-osiris_l2.c \
 	libharp/harp-ingest-qa4ecv.c \
+	libharp/harp-ingest-sciamachy_l1.c \
 	libharp/harp-ingest-sciamachy_l2.c \
 	libharp/harp-ingest-s5p_l1b.c \
 	libharp/harp-ingest-s5p_l2.c \
+	libharp/harp-ingest-smr_l2.c \
 	libharp/harp-ingest-temis.c \
 	libharp/harp-ingest-tes_l2.c \
 	libharp/harp-ingestion.h \
@@ -138,6 +159,7 @@ libharp_la_SOURCES = \
 	libharp/harp-program.c \
 	libharp/harp-program-execute.h \
 	libharp/harp-program-execute.c \
+	libharp/harp-regrid.c \
 	libharp/harp-sea-surface.c \
 	libharp/harp-units.c \
 	libharp/harp-utils.c \
@@ -204,6 +226,12 @@ INDENTFILES += $(harpdump_SOURCES)
 harpfilter_SOURCES = tools/harpfilter/harpfilter.c
 harpfilter_LDADD = libharp.la
 INDENTFILES += $(harpfilter_SOURCES)
+
+# harpmerge
+
+harpmerge_SOURCES = tools/harpmerge/harpmerge.c
+harpmerge_LDADD = libharp.la
+INDENTFILES += $(harpmerge_SOURCES)
 
 # libnetcdf
 
@@ -329,20 +357,26 @@ endif
 
 # *** product definition files ***
 
+ACSAF_DEFINITION_FILE = ACSAF-@CODADEF_VERSION_ACSAF@.codadef
+AEOLUS_DEFINITION_FILE = AEOLUS-@CODADEF_VERSION_AEOLUS@.codadef
 AURA_HIRDLS_DEFINITION_FILE = AURA_HIRDLS-@CODADEF_VERSION_AURA_HIRDLS@.codadef
 AURA_MLS_DEFINITION_FILE = AURA_MLS-@CODADEF_VERSION_AURA_MLS@.codadef
 AURA_OMI_DEFINITION_FILE = AURA_OMI-@CODADEF_VERSION_AURA_OMI@.codadef
 AURA_TES_DEFINITION_FILE = AURA_TES-@CODADEF_VERSION_AURA_TES@.codadef
+CALIPSO_DEFINITION_FILE = CALIPSO-@CODADEF_VERSION_CALIPSO@.codadef
 ECMWF_DEFINITION_FILE = ECMWF-@CODADEF_VERSION_ECMWF@.codadef
 ENVISAT_GOMOS_DEFINITION_FILE = ENVISAT_GOMOS-@CODADEF_VERSION_ENVISAT_GOMOS@.codadef
 ENVISAT_MIPAS_DEFINITION_FILE = ENVISAT_MIPAS-@CODADEF_VERSION_ENVISAT_MIPAS@.codadef
 ENVISAT_SCIAMACHY_DEFINITION_FILE = ENVISAT_SCIAMACHY-@CODADEF_VERSION_ENVISAT_SCIAMACHY@.codadef
 EPS_DEFINITION_FILE = EPS-@CODADEF_VERSION_EPS@.codadef
 ERS_GOME_DEFINITION_FILE = ERS_GOME-@CODADEF_VERSION_ERS_GOME@.codadef
+ESACCI_AEROSOL_DEFINITION_FILE = ESACCI_AEROSOL-@CODADEF_VERSION_ESACCI_AEROSOL@.codadef
+ESACCI_CLOUD_DEFINITION_FILE = ESACCI_CLOUD-@CODADEF_VERSION_ESACCI_CLOUD@.codadef
+ESACCI_GHG_DEFINITION_FILE = ESACCI_GHG-@CODADEF_VERSION_ESACCI_GHG@.codadef
 ESACCI_OZONE_DEFINITION_FILE = ESACCI_OZONE-@CODADEF_VERSION_ESACCI_OZONE@.codadef
 GEOMS_DEFINITION_FILE = GEOMS-@CODADEF_VERSION_GEOMS@.codadef
 GOSAT_DEFINITION_FILE = GOSAT-@CODADEF_VERSION_GOSAT@.codadef
-O3MSAF_DEFINITION_FILE = O3MSAF-@CODADEF_VERSION_O3MSAF@.codadef
+NPP_SUOMI_DEFINITION_FILE = NPP_SUOMI-@CODADEF_VERSION_NPP_SUOMI@.codadef
 ODIN_OSIRIS_DEFINITION_FILE = ODIN_OSIRIS-@CODADEF_VERSION_ODIN_OSIRIS@.codadef
 ODIN_SMR_DEFINITION_FILE = ODIN_SMR-@CODADEF_VERSION_ODIN_SMR@.codadef
 QA4ECV_DEFINITION_FILE = QA4ECV-@CODADEF_VERSION_QA4ECV@.codadef
@@ -350,20 +384,26 @@ SENTINEL5P_DEFINITION_FILE = Sentinel5P-@CODADEF_VERSION_Sentinel5P@.codadef
 TEMIS_DEFINITION_FILE = TEMIS-@CODADEF_VERSION_TEMIS@.codadef
 
 DEFINITION_FILES = \
+	definitions/$(ACSAF_DEFINITION_FILE) \
+	definitions/$(AEOLUS_DEFINITION_FILE) \
 	definitions/$(AURA_HIRDLS_DEFINITION_FILE) \
 	definitions/$(AURA_MLS_DEFINITION_FILE) \
 	definitions/$(AURA_OMI_DEFINITION_FILE) \
 	definitions/$(AURA_TES_DEFINITION_FILE) \
+	definitions/$(CALIPSO_DEFINITION_FILE) \
 	definitions/$(ECMWF_DEFINITION_FILE) \
 	definitions/$(ENVISAT_GOMOS_DEFINITION_FILE) \
 	definitions/$(ENVISAT_MIPAS_DEFINITION_FILE) \
 	definitions/$(ENVISAT_SCIAMACHY_DEFINITION_FILE) \
 	definitions/$(EPS_DEFINITION_FILE) \
 	definitions/$(ERS_GOME_DEFINITION_FILE) \
+	definitions/$(ESACCI_AEROSOL_DEFINITION_FILE) \
+	definitions/$(ESACCI_CLOUD_DEFINITION_FILE) \
+	definitions/$(ESACCI_GHG_DEFINITION_FILE) \
 	definitions/$(ESACCI_OZONE_DEFINITION_FILE) \
 	definitions/$(GEOMS_DEFINITION_FILE) \
 	definitions/$(GOSAT_DEFINITION_FILE) \
-	definitions/$(O3MSAF_DEFINITION_FILE) \
+	definitions/$(NPP_SUOMI_DEFINITION_FILE) \
 	definitions/$(ODIN_OSIRIS_DEFINITION_FILE) \
 	definitions/$(ODIN_SMR_DEFINITION_FILE) \
 	definitions/$(QA4ECV_DEFINITION_FILE) \
@@ -374,6 +414,24 @@ EXTRA_DIST += $(DEFINITION_FILES) codadef.sh
 MAINTAINERCLEANFILES += $(DEFINITION_FILES)
 
 nobase_pkgdata_DATA = $(DEFINITION_FILES)
+
+definitions/$(ACSAF_DEFINITION_FILE):
+	test -d definitions || $(mkinstalldirs) definitions
+	@$(srcdir)/codadef.sh $(srcdir)/definitions/ACSAF definitions
+	@if test ! -f definitions/$(ACSAF_DEFINITION_FILE) ; then \
+	  echo definitions/$(ACSAF_DEFINITION_FILE) not created. ; \
+	  echo run './config.status --recheck' to update the .codadef version reference. ; \
+	  exit 1 ; \
+	 fi
+
+definitions/$(AEOLUS_DEFINITION_FILE):
+	test -d definitions || $(mkinstalldirs) definitions
+	@$(srcdir)/codadef.sh $(srcdir)/definitions/AEOLUS definitions
+	@if test ! -f definitions/$(AEOLUS_DEFINITION_FILE) ; then \
+	  echo definitions/$(AEOLUS_DEFINITION_FILE) not created. ; \
+	  echo run './config.status --recheck' to update the .codadef version reference. ; \
+	  exit 1 ; \
+	 fi
 
 definitions/$(AURA_HIRDLS_DEFINITION_FILE):
 	test -d definitions || $(mkinstalldirs) definitions
@@ -407,6 +465,15 @@ definitions/$(AURA_TES_DEFINITION_FILE):
 	@$(srcdir)/codadef.sh $(srcdir)/definitions/AURA_TES definitions
 	@if test ! -f definitions/$(AURA_TES_DEFINITION_FILE) ; then \
 	  echo definitions/$(AURA_TES_DEFINITION_FILE) not created. ; \
+	  echo run './config.status --recheck' to update the .codadef version reference. ; \
+	  exit 1 ; \
+	 fi
+
+definitions/$(CALIPSO_DEFINITION_FILE):
+	test -d definitions || $(mkinstalldirs) definitions
+	@$(srcdir)/codadef.sh $(srcdir)/definitions/CALIPSO definitions
+	@if test ! -f definitions/$(CALIPSO_DEFINITION_FILE) ; then \
+	  echo definitions/$(CALIPSO_DEFINITION_FILE) not created. ; \
 	  echo run './config.status --recheck' to update the .codadef version reference. ; \
 	  exit 1 ; \
 	 fi
@@ -465,6 +532,33 @@ definitions/$(ERS_GOME_DEFINITION_FILE):
 	  exit 1 ; \
 	 fi
 
+definitions/$(ESACCI_AEROSOL_DEFINITION_FILE):
+	test -d definitions || $(mkinstalldirs) definitions
+	@$(srcdir)/codadef.sh $(srcdir)/definitions/ESACCI_AEROSOL definitions
+	@if test ! -f definitions/$(ESACCI_AEROSOL_DEFINITION_FILE) ; then \
+	  echo definitions/$(ESACCI_AEROSOL_DEFINITION_FILE) not created. ; \
+	  echo run './config.status --recheck' to update the .codadef version reference. ; \
+	  exit 1 ; \
+	 fi
+
+definitions/$(ESACCI_CLOUD_DEFINITION_FILE):
+	test -d definitions || $(mkinstalldirs) definitions
+	@$(srcdir)/codadef.sh $(srcdir)/definitions/ESACCI_CLOUD definitions
+	@if test ! -f definitions/$(ESACCI_CLOUD_DEFINITION_FILE) ; then \
+	  echo definitions/$(ESACCI_CLOUD_DEFINITION_FILE) not created. ; \
+	  echo run './config.status --recheck' to update the .codadef version reference. ; \
+	  exit 1 ; \
+	 fi
+
+definitions/$(ESACCI_GHG_DEFINITION_FILE):
+	test -d definitions || $(mkinstalldirs) definitions
+	@$(srcdir)/codadef.sh $(srcdir)/definitions/ESACCI_GHG definitions
+	@if test ! -f definitions/$(ESACCI_GHG_DEFINITION_FILE) ; then \
+	  echo definitions/$(ESACCI_GHG_DEFINITION_FILE) not created. ; \
+	  echo run './config.status --recheck' to update the .codadef version reference. ; \
+	  exit 1 ; \
+	 fi
+
 definitions/$(ESACCI_OZONE_DEFINITION_FILE):
 	test -d definitions || $(mkinstalldirs) definitions
 	@$(srcdir)/codadef.sh $(srcdir)/definitions/ESACCI_OZONE definitions
@@ -492,11 +586,11 @@ definitions/$(GOSAT_DEFINITION_FILE):
 	  exit 1 ; \
 	 fi
 
-definitions/$(O3MSAF_DEFINITION_FILE):
+definitions/$(NPP_SUOMI_DEFINITION_FILE):
 	test -d definitions || $(mkinstalldirs) definitions
-	@$(srcdir)/codadef.sh $(srcdir)/definitions/O3MSAF definitions
-	@if test ! -f definitions/$(O3MSAF_DEFINITION_FILE) ; then \
-	  echo definitions/$(O3MSAF_DEFINITION_FILE) not created. ; \
+	@$(srcdir)/codadef.sh $(srcdir)/definitions/NPP_SUOMI definitions
+	@if test ! -f definitions/$(NPP_SUOMI_DEFINITION_FILE) ; then \
+	  echo definitions/$(NPP_SUOMI_DEFINITION_FILE) not created. ; \
 	  echo run './config.status --recheck' to update the .codadef version reference. ; \
 	  exit 1 ; \
 	 fi
@@ -573,13 +667,60 @@ include harpdoc.mk
 DOCFILES = $(HARP_DOCFILES)
 
 RSTFILES = \
-	doc/algorithms.rst \
+	doc/algorithms/common.rst \
+	doc/algorithms/definitions.rst \
+	doc/algorithms/derivations/aerosol_extinction_coefficient.rst \
+	doc/algorithms/derivations/aerosol_optical_depth.rst \
+	doc/algorithms/derivations/altitude.rst \
+	doc/algorithms/derivations/altitude_bounds.rst \
+	doc/algorithms/derivations/column_mass_density.rst \
+	doc/algorithms/derivations/column_mass_mixing_ratio.rst \
+	doc/algorithms/derivations/column_number_density.rst \
+	doc/algorithms/derivations/column_volume_mixing_ratio.rst \
+	doc/algorithms/derivations/datetime.rst \
+	doc/algorithms/derivations/datetime_length.rst \
+	doc/algorithms/derivations/datetime_start.rst \
+	doc/algorithms/derivations/datetime_stop.rst \
+	doc/algorithms/derivations/frequency.rst \
+	doc/algorithms/derivations/geopotential.rst \
+	doc/algorithms/derivations/geopotential_height.rst \
+	doc/algorithms/derivations/latitude.rst \
+	doc/algorithms/derivations/latitude_bounds.rst \
+	doc/algorithms/derivations/longitude.rst \
+	doc/algorithms/derivations/longitude_bounds.rst \
+	doc/algorithms/derivations/mass_density.rst \
+	doc/algorithms/derivations/mass_mixing_ratio.rst \
+	doc/algorithms/derivations/molar_mass.rst \
+	doc/algorithms/derivations/number_density.rst \
+	doc/algorithms/derivations/partial_pressure.rst \
+	doc/algorithms/derivations/pressure.rst \
+	doc/algorithms/derivations/pressure_bounds.rst \
+	doc/algorithms/derivations/relative_azimuth_angle.rst \
+	doc/algorithms/derivations/relative_humidity.rst \
+	doc/algorithms/derivations/scattering_angle.rst \
+	doc/algorithms/derivations/sensor_azimuth_angle.rst \
+	doc/algorithms/derivations/sensor_elevation_angle.rst \
+	doc/algorithms/derivations/sensor_zenith_angle.rst \
+	doc/algorithms/derivations/solar_azimuth_angle.rst \
+	doc/algorithms/derivations/solar_elevation_angle.rst \
+	doc/algorithms/derivations/solar_zenith_angle.rst \
+	doc/algorithms/derivations/temperature.rst \
+	doc/algorithms/derivations/viewing_azimuth_angle.rst \
+	doc/algorithms/derivations/viewing_elevation_angle.rst \
+	doc/algorithms/derivations/viewing_zenith_angle.rst \
+	doc/algorithms/derivations/virtual_temperature.rst \
+	doc/algorithms/derivations/volume_mixing_ratio.rst \
+	doc/algorithms/derivations/wavelength.rst \
+	doc/algorithms/derivations/wavenumber.rst \
+	doc/algorithms/formula.rst \
+	doc/algorithms/index.rst \
 	doc/dataformats.rst \
 	doc/harpcheck.rst \
 	doc/harpcollocate.rst \
 	doc/harpconvert.rst \
 	doc/harpdump.rst \
 	doc/harpfilter.rst \
+	doc/harpmerge.rst \
 	doc/index.rst \
 	doc/libharp.rst \
 	doc/libharp_collocation.rst \
@@ -621,8 +762,10 @@ harp_doc: harpconvert libharp/harp.h doc/Doxyfile
 	  if test "x$(srcdir)" != "x$(builddir)" ; then \
 	    cp $(srcdir)/doc/conf.py doc ; \
 	    cp -r $(srcdir)/doc/static doc ; \
+	    $(mkinstalldirs) doc/algorithms ; \
+	    $(mkinstalldirs) doc/algorithms/derivations ; \
 	    for file in $(RSTFILES) ; do \
-	      cp $(srcdir)/$$file doc ; \
+	      cp $(srcdir)/$$file $$file ; \
 	    done ; \
 	  fi ; \
 	  $(SPHINXBUILD) -a -b html -d doctrees doc $(srcdir)/doc/html ; \

@@ -1,5 +1,5 @@
 # autoconf file for HARP
-AC_INIT([harp],[0.4])
+AC_INIT([harp],[0.5])
 AC_CONFIG_AUX_DIR([.])
 AM_INIT_AUTOMAKE(foreign subdir-objects 1.10 -Wall)
 
@@ -169,8 +169,8 @@ AC_CONFIG_FILES([doc/Doxyfile])
 #    increment age.
 # 6. If any interfaces have been removed or changed since the last public
 #    release, then set age to 0.
-LIBHARP_CURRENT=3
-LIBHARP_REVISION=1
+LIBHARP_CURRENT=4
+LIBHARP_REVISION=0
 LIBHARP_AGE=0
 AC_SUBST(LIBHARP_CURRENT)
 AC_SUBST(LIBHARP_REVISION)
@@ -186,20 +186,26 @@ AC_DEFINE_UNQUOTED(HARP_FORMAT_VERSION_MINOR, [$HARP_FORMAT_VERSION_MINOR], [Cur
 AC_DEFINE_UNQUOTED(HARP_CONVENTION, ["HARP-$HARP_FORMAT_VERSION_MAJOR.$HARP_FORMAT_VERSION_MINOR"], [String to use in netCDF Conventions attribute])
 
 # codadef versions
+ST_CODADEF_VERSION([$srcdir/definitions],[ACSAF])
+ST_CODADEF_VERSION([$srcdir/definitions],[AEOLUS])
 ST_CODADEF_VERSION([$srcdir/definitions],[AURA_HIRDLS])
 ST_CODADEF_VERSION([$srcdir/definitions],[AURA_MLS])
 ST_CODADEF_VERSION([$srcdir/definitions],[AURA_OMI])
 ST_CODADEF_VERSION([$srcdir/definitions],[AURA_TES])
+ST_CODADEF_VERSION([$srcdir/definitions],[CALIPSO])
 ST_CODADEF_VERSION([$srcdir/definitions],[ECMWF])
 ST_CODADEF_VERSION([$srcdir/definitions],[ENVISAT_GOMOS])
 ST_CODADEF_VERSION([$srcdir/definitions],[ENVISAT_MIPAS])
 ST_CODADEF_VERSION([$srcdir/definitions],[ENVISAT_SCIAMACHY])
 ST_CODADEF_VERSION([$srcdir/definitions],[EPS])
 ST_CODADEF_VERSION([$srcdir/definitions],[ERS_GOME])
+ST_CODADEF_VERSION([$srcdir/definitions],[ESACCI_AEROSOL])
+ST_CODADEF_VERSION([$srcdir/definitions],[ESACCI_CLOUD])
+ST_CODADEF_VERSION([$srcdir/definitions],[ESACCI_GHG])
 ST_CODADEF_VERSION([$srcdir/definitions],[ESACCI_OZONE])
 ST_CODADEF_VERSION([$srcdir/definitions],[GEOMS])
 ST_CODADEF_VERSION([$srcdir/definitions],[GOSAT])
-ST_CODADEF_VERSION([$srcdir/definitions],[O3MSAF])
+ST_CODADEF_VERSION([$srcdir/definitions],[NPP_SUOMI])
 ST_CODADEF_VERSION([$srcdir/definitions],[ODIN_OSIRIS])
 ST_CODADEF_VERSION([$srcdir/definitions],[ODIN_SMR])
 ST_CODADEF_VERSION([$srcdir/definitions],[QA4ECV])

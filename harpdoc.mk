@@ -22,7 +22,7 @@ HARP_DOCFILES = \
 	doc/html/_static/fonts/fontawesome-webfont.svg \
 	doc/html/_static/fonts/fontawesome-webfont.ttf \
 	doc/html/_static/fonts/fontawesome-webfont.woff \
-	doc/html/_static/jquery-1.11.1.js \
+	doc/html/_static/jquery-3.1.0.js \
 	doc/html/_static/jquery.js \
 	doc/html/_static/js/modernizr.min.js \
 	doc/html/_static/js/theme.js \
@@ -35,7 +35,53 @@ HARP_DOCFILES = \
 	doc/html/_static/up-pressed.png \
 	doc/html/_static/up.png \
 	doc/html/_static/websupport.js \
-	doc/html/algorithms.html \
+	doc/html/algorithms/common.html \
+	doc/html/algorithms/definitions.html \
+	doc/html/algorithms/derivations/aerosol_extinction_coefficient.html \
+	doc/html/algorithms/derivations/aerosol_optical_depth.html \
+	doc/html/algorithms/derivations/altitude.html \
+	doc/html/algorithms/derivations/altitude_bounds.html \
+	doc/html/algorithms/derivations/column_mass_density.html \
+	doc/html/algorithms/derivations/column_mass_mixing_ratio.html \
+	doc/html/algorithms/derivations/column_number_density.html \
+	doc/html/algorithms/derivations/column_volume_mixing_ratio.html \
+	doc/html/algorithms/derivations/datetime.html \
+	doc/html/algorithms/derivations/datetime_length.html \
+	doc/html/algorithms/derivations/datetime_start.html \
+	doc/html/algorithms/derivations/datetime_stop.html \
+	doc/html/algorithms/derivations/frequency.html \
+	doc/html/algorithms/derivations/geopotential.html \
+	doc/html/algorithms/derivations/geopotential_height.html \
+	doc/html/algorithms/derivations/latitude.html \
+	doc/html/algorithms/derivations/latitude_bounds.html \
+	doc/html/algorithms/derivations/longitude.html \
+	doc/html/algorithms/derivations/longitude_bounds.html \
+	doc/html/algorithms/derivations/mass_density.html \
+	doc/html/algorithms/derivations/mass_mixing_ratio.html \
+	doc/html/algorithms/derivations/molar_mass.html \
+	doc/html/algorithms/derivations/number_density.html \
+	doc/html/algorithms/derivations/partial_pressure.html \
+	doc/html/algorithms/derivations/pressure.html \
+	doc/html/algorithms/derivations/pressure_bounds.html \
+	doc/html/algorithms/derivations/relative_azimuth_angle.html \
+	doc/html/algorithms/derivations/relative_humidity.html \
+	doc/html/algorithms/derivations/scattering_angle.html \
+	doc/html/algorithms/derivations/sensor_azimuth_angle.html \
+	doc/html/algorithms/derivations/sensor_elevation_angle.html \
+	doc/html/algorithms/derivations/sensor_zenith_angle.html \
+	doc/html/algorithms/derivations/solar_azimuth_angle.html \
+	doc/html/algorithms/derivations/solar_elevation_angle.html \
+	doc/html/algorithms/derivations/solar_zenith_angle.html \
+	doc/html/algorithms/derivations/temperature.html \
+	doc/html/algorithms/derivations/viewing_azimuth_angle.html \
+	doc/html/algorithms/derivations/viewing_elevation_angle.html \
+	doc/html/algorithms/derivations/viewing_zenith_angle.html \
+	doc/html/algorithms/derivations/virtual_temperature.html \
+	doc/html/algorithms/derivations/volume_mixing_ratio.html \
+	doc/html/algorithms/derivations/wavelength.html \
+	doc/html/algorithms/derivations/wavenumber.html \
+	doc/html/algorithms/formula.html \
+	doc/html/algorithms/index.html \
 	doc/html/dataformats.html \
 	doc/html/genindex.html \
 	doc/html/harpcheck.html \
@@ -43,8 +89,37 @@ HARP_DOCFILES = \
 	doc/html/harpconvert.html \
 	doc/html/harpdump.html \
 	doc/html/harpfilter.html \
+	doc/html/harpmerge.html \
 	doc/html/index.html \
+	doc/html/ingestions/AEOLUS_L1B_Mie.html \
+	doc/html/ingestions/AEOLUS_L1B_Mie_Observation.html \
+	doc/html/ingestions/AEOLUS_L1B_Rayleigh.html \
+	doc/html/ingestions/AEOLUS_L1B_Rayleigh_Observation.html \
+	doc/html/ingestions/AEOLUS_L2A_SCA.html \
+	doc/html/ingestions/AEOLUS_L2B_Mie.html \
+	doc/html/ingestions/AEOLUS_L2B_Rayleigh.html \
+	doc/html/ingestions/CALIPSO_L2_CAL_LID_ALay.html \
+	doc/html/ingestions/CALIPSO_L2_CAL_LID_APro.html \
+	doc/html/ingestions/CALIPSO_L2_CAL_LID_CLay.html \
+	doc/html/ingestions/CALIPSO_L2_CAL_LID_CPro.html \
+	doc/html/ingestions/CALIPSO_L2_CAL_LID_MLay.html \
 	doc/html/ingestions/ECMWF_GRIB.html \
+	doc/html/ingestions/ESACCI_AEROSOL_L2_AATSR.html \
+	doc/html/ingestions/ESACCI_AEROSOL_L2_ATSR2.html \
+	doc/html/ingestions/ESACCI_AEROSOL_L2_IASI.html \
+	doc/html/ingestions/ESACCI_AEROSOL_L2_MERIS_ALAMO.html \
+	doc/html/ingestions/ESACCI_AEROSOL_L3_AATSR.html \
+	doc/html/ingestions/ESACCI_AEROSOL_L3_ATSR2.html \
+	doc/html/ingestions/ESACCI_AEROSOL_L3_GOMOS_AERGOM.html \
+	doc/html/ingestions/ESACCI_AEROSOL_L3_IASI.html \
+	doc/html/ingestions/ESACCI_AEROSOL_L3_MERIS_ALAMO.html \
+	doc/html/ingestions/ESACCI_AEROSOL_L3_Multi_Sensor_AAI.html \
+	doc/html/ingestions/ESACCI_CLOUD_L3_Daily.html \
+	doc/html/ingestions/ESACCI_CLOUD_L3_Monthly.html \
+	doc/html/ingestions/ESACCI_GHG_L2_EMMA.html \
+	doc/html/ingestions/ESACCI_GHG_L2_GOSAT.html \
+	doc/html/ingestions/ESACCI_GHG_L2_SCIAMACHY.html \
+	doc/html/ingestions/ESACCI_GHG_L3_Obs4MIPs.html \
 	doc/html/ingestions/ESACCI_OZONE_L2_LP.html \
 	doc/html/ingestions/ESACCI_OZONE_L2_NP.html \
 	doc/html/ingestions/ESACCI_OZONE_L2_TC.html \
@@ -101,6 +176,9 @@ HARP_DOCFILES = \
 	doc/html/ingestions/GEOMS-TE-FTIR-002-OCS.html \
 	doc/html/ingestions/GEOMS-TE-FTIR-002-SF6.html \
 	doc/html/ingestions/GEOMS-TE-LIDAR-O3-003.html \
+	doc/html/ingestions/GEOMS-TE-LIDAR-O3-004.html \
+	doc/html/ingestions/GEOMS-TE-LIDAR-TEMPERATURE-003.html \
+	doc/html/ingestions/GEOMS-TE-LIDAR-TEMPERATURE-004.html \
 	doc/html/ingestions/GEOMS-TE-MWR-001-CO.html \
 	doc/html/ingestions/GEOMS-TE-MWR-001-ClO.html \
 	doc/html/ingestions/GEOMS-TE-MWR-001-H2O.html \
@@ -224,12 +302,20 @@ HARP_DOCFILES = \
 	doc/html/ingestions/GEOMS-TE-UVVIS-DOAS-ZENITH-GAS-007-O3.html \
 	doc/html/ingestions/GEOMS-TE-UVVIS-DOAS-ZENITH-GAS-007-OClO.html \
 	doc/html/ingestions/GEOMS-TE-UVVIS-DOAS-ZENITH-GAS-007-SO2.html \
+	doc/html/ingestions/GOME2_L1_irradiance.html \
+	doc/html/ingestions/GOME2_L1_radiance.html \
+	doc/html/ingestions/GOME2_L1_sun_reference.html \
+	doc/html/ingestions/GOME2_L1_transmission.html \
 	doc/html/ingestions/GOME2_L2_O3MNTO.html \
 	doc/html/ingestions/GOME2_L2_O3MOTO.html \
+	doc/html/ingestions/GOME_L1_EXTRACTED.html \
+	doc/html/ingestions/GOME_L1_EXTRACTED_sun_reference.html \
 	doc/html/ingestions/GOME_L2.html \
 	doc/html/ingestions/GOME_L2_ERSNTO.html \
 	doc/html/ingestions/GOME_L2_ERSOTO.html \
-	doc/html/ingestions/GOMOS_NL_L2.html \
+	doc/html/ingestions/GOMOS_L1_LIMB.html \
+	doc/html/ingestions/GOMOS_L1_TRANSMISSION.html \
+	doc/html/ingestions/GOMOS_L2.html \
 	doc/html/ingestions/GOSAT_FTS_L1b_band1p.html \
 	doc/html/ingestions/GOSAT_FTS_L1b_band1s.html \
 	doc/html/ingestions/GOSAT_FTS_L1b_band2p.html \
@@ -240,8 +326,10 @@ HARP_DOCFILES = \
 	doc/html/ingestions/GOSAT_FTS_L2_CH4_TC.html \
 	doc/html/ingestions/GOSAT_FTS_L2_CO2_TC.html \
 	doc/html/ingestions/HIRDLS_L2.html \
+	doc/html/ingestions/IASI_L1.html \
 	doc/html/ingestions/IASI_L2.html \
-	doc/html/ingestions/MIPAS_NL_L2.html \
+	doc/html/ingestions/MIPAS_L1.html \
+	doc/html/ingestions/MIPAS_L2.html \
 	doc/html/ingestions/MLS_L2_BRO.html \
 	doc/html/ingestions/MLS_L2_CH3CN.html \
 	doc/html/ingestions/MLS_L2_CH3Cl.html \
@@ -262,6 +350,20 @@ HARP_DOCFILES = \
 	doc/html/ingestions/MLS_L2_RHI.html \
 	doc/html/ingestions/MLS_L2_SO2.html \
 	doc/html/ingestions/MLS_L2_T.html \
+	doc/html/ingestions/NPP_SUOMI_L2_CRIMSS_EDR_MOISTURE.html \
+	doc/html/ingestions/NPP_SUOMI_L2_CRIMSS_EDR_PRESSURE.html \
+	doc/html/ingestions/NPP_SUOMI_L2_CRIMSS_EDR_TEMPERATURE.html \
+	doc/html/ingestions/NPP_SUOMI_L2_OMPS_EDR_OONP.html \
+	doc/html/ingestions/NPP_SUOMI_L2_OMPS_EDR_OOTC.html \
+	doc/html/ingestions/NPP_SUOMI_L2_OMPS_IP_IMOP.html \
+	doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VAOO.html \
+	doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VCBH.html \
+	doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VCCL.html \
+	doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VCDT.html \
+	doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VCEP.html \
+	doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VCTH.html \
+	doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VCTP.html \
+	doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VCTT.html \
 	doc/html/ingestions/OMI_L2_OMAERUV.html \
 	doc/html/ingestions/OMI_L2_OMBRO.html \
 	doc/html/ingestions/OMI_L2_OMCHOCHO.html \
@@ -279,6 +381,11 @@ HARP_DOCFILES = \
 	doc/html/ingestions/OMI_L3_OMDOAO3e.html \
 	doc/html/ingestions/OMI_L3_OMTO3d.html \
 	doc/html/ingestions/OMI_L3_OMTO3e.html \
+	doc/html/ingestions/OSIRIS_L2_Aerosol_MART.html \
+	doc/html/ingestions/OSIRIS_L2_NO2_MART.html \
+	doc/html/ingestions/OSIRIS_L2_NO2_OE.html \
+	doc/html/ingestions/OSIRIS_L2_O3_MART.html \
+	doc/html/ingestions/OSIRIS_L2_O3_OE.html \
 	doc/html/ingestions/QA4ECV_L2_HCHO.html \
 	doc/html/ingestions/QA4ECV_L2_NO2.html \
 	doc/html/ingestions/S5P_L1B_IR_SIR_BD7.html \
@@ -299,14 +406,18 @@ HARP_DOCFILES = \
 	doc/html/ingestions/S5P_L1B_RA_BD8.html \
 	doc/html/ingestions/S5P_L2_AER_AI.html \
 	doc/html/ingestions/S5P_L2_CH4.html \
-	doc/html/ingestions/S5P_L2_CLOUD.html \
+	doc/html/ingestions/S5P_L2_CLOUD_CAL.html \
+	doc/html/ingestions/S5P_L2_CLOUD_CRB.html \
 	doc/html/ingestions/S5P_L2_CO.html \
 	doc/html/ingestions/S5P_L2_FRESCO.html \
 	doc/html/ingestions/S5P_L2_HCHO.html \
 	doc/html/ingestions/S5P_L2_NO2.html \
 	doc/html/ingestions/S5P_L2_O3.html \
 	doc/html/ingestions/S5P_L2_O3_PR.html \
+	doc/html/ingestions/S5P_L2_O3_TPR.html \
 	doc/html/ingestions/S5P_L2_SO2.html \
+	doc/html/ingestions/SCIAMACHY_L1c.html \
+	doc/html/ingestions/SCIAMACHY_L1c_sun_reference.html \
 	doc/html/ingestions/SCIAMACHY_L2_CLOUDS_AEROSOL.html \
 	doc/html/ingestions/SCIAMACHY_L2_LIMB_UV0_O3.html \
 	doc/html/ingestions/SCIAMACHY_L2_LIMB_UV1_NO2.html \
@@ -325,12 +436,26 @@ HARP_DOCFILES = \
 	doc/html/ingestions/SCIAMACHY_L2_NADIR_UV7_SO2.html \
 	doc/html/ingestions/SCIAMACHY_L2_NADIR_UV8_H2O.html \
 	doc/html/ingestions/SCIAMACHY_L2_NADIR_UV9_CHOCHO.html \
+	doc/html/ingestions/SMR_L2.html \
 	doc/html/ingestions/TEMIS_o3field.html \
 	doc/html/ingestions/TEMIS_o3mean.html \
+	doc/html/ingestions/TES_L2_CH3OH_Nadir.html \
+	doc/html/ingestions/TES_L2_CH4_Limb.html \
 	doc/html/ingestions/TES_L2_CH4_Nadir.html \
+	doc/html/ingestions/TES_L2_CO2_Nadir.html \
 	doc/html/ingestions/TES_L2_CO_Nadir.html \
+	doc/html/ingestions/TES_L2_H2O_Limb.html \
 	doc/html/ingestions/TES_L2_H2O_Nadir.html \
+	doc/html/ingestions/TES_L2_HCOOH_Nadir.html \
+	doc/html/ingestions/TES_L2_HDO_Limb.html \
+	doc/html/ingestions/TES_L2_HDO_Nadir.html \
+	doc/html/ingestions/TES_L2_HNO3_Limb.html \
+	doc/html/ingestions/TES_L2_N2O_Nadir.html \
+	doc/html/ingestions/TES_L2_NH3_Nadir.html \
+	doc/html/ingestions/TES_L2_NO2_Limb.html \
+	doc/html/ingestions/TES_L2_O3_Limb.html \
 	doc/html/ingestions/TES_L2_O3_Nadir.html \
+	doc/html/ingestions/TES_L2_Temperature_Limb.html \
 	doc/html/ingestions/TES_L2_Temperature_Nadir.html \
 	doc/html/ingestions/index.html \
 	doc/html/install.html \
@@ -393,7 +518,7 @@ doc/html/_static/fonts/fontawesome-webfont.ttf:
 	$(MAKE) harp_doc
 doc/html/_static/fonts/fontawesome-webfont.woff:
 	$(MAKE) harp_doc
-doc/html/_static/jquery-1.11.1.js:
+doc/html/_static/jquery-3.1.0.js:
 	$(MAKE) harp_doc
 doc/html/_static/jquery.js:
 	$(MAKE) harp_doc
@@ -419,7 +544,99 @@ doc/html/_static/up.png:
 	$(MAKE) harp_doc
 doc/html/_static/websupport.js:
 	$(MAKE) harp_doc
-doc/html/algorithms.html:
+doc/html/algorithms/common.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/definitions.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/aerosol_extinction_coefficient.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/aerosol_optical_depth.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/altitude.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/altitude_bounds.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/column_mass_density.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/column_mass_mixing_ratio.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/column_number_density.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/column_volume_mixing_ratio.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/datetime.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/datetime_length.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/datetime_start.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/datetime_stop.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/frequency.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/geopotential.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/geopotential_height.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/latitude.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/latitude_bounds.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/longitude.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/longitude_bounds.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/mass_density.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/mass_mixing_ratio.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/molar_mass.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/number_density.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/partial_pressure.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/pressure.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/pressure_bounds.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/relative_azimuth_angle.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/relative_humidity.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/scattering_angle.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/sensor_azimuth_angle.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/sensor_elevation_angle.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/sensor_zenith_angle.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/solar_azimuth_angle.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/solar_elevation_angle.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/solar_zenith_angle.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/temperature.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/viewing_azimuth_angle.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/viewing_elevation_angle.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/viewing_zenith_angle.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/virtual_temperature.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/volume_mixing_ratio.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/wavelength.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/derivations/wavenumber.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/formula.html:
+	$(MAKE) harp_doc
+doc/html/algorithms/index.html:
 	$(MAKE) harp_doc
 doc/html/dataformats.html:
 	$(MAKE) harp_doc
@@ -435,9 +652,67 @@ doc/html/harpdump.html:
 	$(MAKE) harp_doc
 doc/html/harpfilter.html:
 	$(MAKE) harp_doc
+doc/html/harpmerge.html:
+	$(MAKE) harp_doc
 doc/html/index.html:
 	$(MAKE) harp_doc
+doc/html/ingestions/AEOLUS_L1B_Mie.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/AEOLUS_L1B_Mie_Observation.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/AEOLUS_L1B_Rayleigh.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/AEOLUS_L1B_Rayleigh_Observation.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/AEOLUS_L2A_SCA.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/AEOLUS_L2B_Mie.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/AEOLUS_L2B_Rayleigh.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/CALIPSO_L2_CAL_LID_ALay.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/CALIPSO_L2_CAL_LID_APro.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/CALIPSO_L2_CAL_LID_CLay.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/CALIPSO_L2_CAL_LID_CPro.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/CALIPSO_L2_CAL_LID_MLay.html:
+	$(MAKE) harp_doc
 doc/html/ingestions/ECMWF_GRIB.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_AEROSOL_L2_AATSR.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_AEROSOL_L2_ATSR2.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_AEROSOL_L2_IASI.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_AEROSOL_L2_MERIS_ALAMO.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_AEROSOL_L3_AATSR.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_AEROSOL_L3_ATSR2.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_AEROSOL_L3_GOMOS_AERGOM.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_AEROSOL_L3_IASI.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_AEROSOL_L3_MERIS_ALAMO.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_AEROSOL_L3_Multi_Sensor_AAI.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_CLOUD_L3_Daily.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_CLOUD_L3_Monthly.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_GHG_L2_EMMA.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_GHG_L2_GOSAT.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_GHG_L2_SCIAMACHY.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/ESACCI_GHG_L3_Obs4MIPs.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/ESACCI_OZONE_L2_LP.html:
 	$(MAKE) harp_doc
@@ -550,6 +825,12 @@ doc/html/ingestions/GEOMS-TE-FTIR-002-OCS.html:
 doc/html/ingestions/GEOMS-TE-FTIR-002-SF6.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/GEOMS-TE-LIDAR-O3-003.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/GEOMS-TE-LIDAR-O3-004.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/GEOMS-TE-LIDAR-TEMPERATURE-003.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/GEOMS-TE-LIDAR-TEMPERATURE-004.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/GEOMS-TE-MWR-001-CO.html:
 	$(MAKE) harp_doc
@@ -797,9 +1078,21 @@ doc/html/ingestions/GEOMS-TE-UVVIS-DOAS-ZENITH-GAS-007-OClO.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/GEOMS-TE-UVVIS-DOAS-ZENITH-GAS-007-SO2.html:
 	$(MAKE) harp_doc
+doc/html/ingestions/GOME2_L1_irradiance.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/GOME2_L1_radiance.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/GOME2_L1_sun_reference.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/GOME2_L1_transmission.html:
+	$(MAKE) harp_doc
 doc/html/ingestions/GOME2_L2_O3MNTO.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/GOME2_L2_O3MOTO.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/GOME_L1_EXTRACTED.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/GOME_L1_EXTRACTED_sun_reference.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/GOME_L2.html:
 	$(MAKE) harp_doc
@@ -807,7 +1100,11 @@ doc/html/ingestions/GOME_L2_ERSNTO.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/GOME_L2_ERSOTO.html:
 	$(MAKE) harp_doc
-doc/html/ingestions/GOMOS_NL_L2.html:
+doc/html/ingestions/GOMOS_L1_LIMB.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/GOMOS_L1_TRANSMISSION.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/GOMOS_L2.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/GOSAT_FTS_L1b_band1p.html:
 	$(MAKE) harp_doc
@@ -829,9 +1126,13 @@ doc/html/ingestions/GOSAT_FTS_L2_CO2_TC.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/HIRDLS_L2.html:
 	$(MAKE) harp_doc
+doc/html/ingestions/IASI_L1.html:
+	$(MAKE) harp_doc
 doc/html/ingestions/IASI_L2.html:
 	$(MAKE) harp_doc
-doc/html/ingestions/MIPAS_NL_L2.html:
+doc/html/ingestions/MIPAS_L1.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/MIPAS_L2.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/MLS_L2_BRO.html:
 	$(MAKE) harp_doc
@@ -873,6 +1174,34 @@ doc/html/ingestions/MLS_L2_SO2.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/MLS_L2_T.html:
 	$(MAKE) harp_doc
+doc/html/ingestions/NPP_SUOMI_L2_CRIMSS_EDR_MOISTURE.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/NPP_SUOMI_L2_CRIMSS_EDR_PRESSURE.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/NPP_SUOMI_L2_CRIMSS_EDR_TEMPERATURE.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/NPP_SUOMI_L2_OMPS_EDR_OONP.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/NPP_SUOMI_L2_OMPS_EDR_OOTC.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/NPP_SUOMI_L2_OMPS_IP_IMOP.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VAOO.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VCBH.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VCCL.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VCDT.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VCEP.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VCTH.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VCTP.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/NPP_SUOMI_L2_VIIRS_EDR_VCTT.html:
+	$(MAKE) harp_doc
 doc/html/ingestions/OMI_L2_OMAERUV.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/OMI_L2_OMBRO.html:
@@ -906,6 +1235,16 @@ doc/html/ingestions/OMI_L3_OMDOAO3e.html:
 doc/html/ingestions/OMI_L3_OMTO3d.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/OMI_L3_OMTO3e.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/OSIRIS_L2_Aerosol_MART.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/OSIRIS_L2_NO2_MART.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/OSIRIS_L2_NO2_OE.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/OSIRIS_L2_O3_MART.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/OSIRIS_L2_O3_OE.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/QA4ECV_L2_HCHO.html:
 	$(MAKE) harp_doc
@@ -947,7 +1286,9 @@ doc/html/ingestions/S5P_L2_AER_AI.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/S5P_L2_CH4.html:
 	$(MAKE) harp_doc
-doc/html/ingestions/S5P_L2_CLOUD.html:
+doc/html/ingestions/S5P_L2_CLOUD_CAL.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/S5P_L2_CLOUD_CRB.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/S5P_L2_CO.html:
 	$(MAKE) harp_doc
@@ -961,7 +1302,13 @@ doc/html/ingestions/S5P_L2_O3.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/S5P_L2_O3_PR.html:
 	$(MAKE) harp_doc
+doc/html/ingestions/S5P_L2_O3_TPR.html:
+	$(MAKE) harp_doc
 doc/html/ingestions/S5P_L2_SO2.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/SCIAMACHY_L1c.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/SCIAMACHY_L1c_sun_reference.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/SCIAMACHY_L2_CLOUDS_AEROSOL.html:
 	$(MAKE) harp_doc
@@ -999,17 +1346,45 @@ doc/html/ingestions/SCIAMACHY_L2_NADIR_UV8_H2O.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/SCIAMACHY_L2_NADIR_UV9_CHOCHO.html:
 	$(MAKE) harp_doc
+doc/html/ingestions/SMR_L2.html:
+	$(MAKE) harp_doc
 doc/html/ingestions/TEMIS_o3field.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/TEMIS_o3mean.html:
 	$(MAKE) harp_doc
+doc/html/ingestions/TES_L2_CH3OH_Nadir.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/TES_L2_CH4_Limb.html:
+	$(MAKE) harp_doc
 doc/html/ingestions/TES_L2_CH4_Nadir.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/TES_L2_CO2_Nadir.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/TES_L2_CO_Nadir.html:
 	$(MAKE) harp_doc
+doc/html/ingestions/TES_L2_H2O_Limb.html:
+	$(MAKE) harp_doc
 doc/html/ingestions/TES_L2_H2O_Nadir.html:
 	$(MAKE) harp_doc
+doc/html/ingestions/TES_L2_HCOOH_Nadir.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/TES_L2_HDO_Limb.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/TES_L2_HDO_Nadir.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/TES_L2_HNO3_Limb.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/TES_L2_N2O_Nadir.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/TES_L2_NH3_Nadir.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/TES_L2_NO2_Limb.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/TES_L2_O3_Limb.html:
+	$(MAKE) harp_doc
 doc/html/ingestions/TES_L2_O3_Nadir.html:
+	$(MAKE) harp_doc
+doc/html/ingestions/TES_L2_Temperature_Limb.html:
 	$(MAKE) harp_doc
 doc/html/ingestions/TES_L2_Temperature_Nadir.html:
 	$(MAKE) harp_doc

@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "harp-internal.h"
@@ -372,7 +383,7 @@ LIBHARP_API int harp_collocation_result_filter_for_source_product_b(harp_colloca
     long product_index;
     long i, j;
 
-    if (harp_dataset_get_index_from_source_product(collocation_result->dataset_a, source_product, &product_index) != 0)
+    if (harp_dataset_get_index_from_source_product(collocation_result->dataset_b, source_product, &product_index) != 0)
     {
         return -1;
     }
@@ -389,6 +400,113 @@ LIBHARP_API int harp_collocation_result_filter_for_source_product_b(harp_colloca
         }
     }
     return 0;
+}
+
+/* This function uses a binary search and assumes the collocation result to be sorted by collocation index */
+static int find_collocation_pair_for_collocation_index(harp_collocation_result *collocation_result,
+                                                       long collocation_index, long *index)
+{
+    long lower_index;
+    long upper_index;
+
+    lower_index = 0;
+    upper_index = collocation_result->num_pairs - 1;
+
+    while (upper_index >= lower_index)
+    {
+        /* Determine the index that splits the search space into two (approximately) equal halves. */
+        long pivot_index = lower_index + ((upper_index - lower_index) / 2);
+
+        /* If the pivot equals the key, terminate early. */
+        if (collocation_result->pair[pivot_index]->collocation_index == collocation_index)
+        {
+            *index = pivot_index;
+            return 0;
+        }
+
+        /* If the pivot is smaller than the key, search the upper sub array, otherwise search the lower sub array. */
+        if (collocation_result->pair[pivot_index]->collocation_index < collocation_index)
+        {
+            lower_index = pivot_index + 1;
+        }
+        else
+        {
+            upper_index = pivot_index - 1;
+        }
+    }
+
+    harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "cannot find collocation index %d in collocation results",
+                   collocation_index);
+    return -1;
+}
+
+/** Filter collocation result set for the specified list of collocation indices.
+ * The collocation result pairs will be sorted according to the order in the provided \a collocation_index parameter.
+ * If a collocation index cannot be found in the collocation_result set then an error will be thrown.
+ * \param collocation_result Result set that will be filtered in place.
+ * \param num_indices Number of items in the collocation_index parameter.
+ * \param collocation_index Array of collocation index values to match against the collocation_result set.
+ * \return
+ *   \arg \c 0, Success.
+ *   \arg \c -1, Error occurred (check #harp_errno).
+ */
+LIBHARP_API int harp_collocation_result_filter_for_collocation_indices(harp_collocation_result *collocation_result,
+                                                                       long num_indices, int32_t *collocation_index)
+{
+    harp_collocation_pair **pair = NULL;
+    long num_pairs = 0;
+    long i;
+
+    if (harp_collocation_result_sort_by_collocation_index(collocation_result) != 0)
+    {
+        return -1;
+    }
+
+    /* create a temporary array to store all pairs */
+    pair = malloc(collocation_result->num_pairs * sizeof(harp_collocation_pair *));
+    if (!pair)
+    {
+        harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not allocate %lu bytes) (%s:%u)",
+                       collocation_result->num_pairs * sizeof(harp_collocation_pair *), __FILE__, __LINE__);
+        return -1;
+    }
+
+    for (i = 0; i < num_indices; i++)
+    {
+        long index;
+        long j;
+
+        if (find_collocation_pair_for_collocation_index(collocation_result, collocation_index[i], &index) != 0)
+        {
+            goto error;
+        }
+        pair[num_pairs] = collocation_result->pair[index];
+        num_pairs++;
+        for (j = index + 1; j < collocation_result->num_pairs; j++)
+        {
+            collocation_result->pair[j - 1] = collocation_result->pair[j];
+        }
+        collocation_result->num_pairs--;
+    }
+
+    for (i = 0; i < collocation_result->num_pairs; i++)
+    {
+        collocation_pair_delete(collocation_result->pair[i]);
+    }
+    free(collocation_result->pair);
+    collocation_result->pair = pair;
+    collocation_result->num_pairs = num_pairs;
+
+    return 0;
+
+  error:
+    for (i = 0; i < num_pairs; i++)
+    {
+        collocation_pair_delete(pair[i]);
+    }
+    free(pair);
+
+    return -1;
 }
 
 /** Add collocation result entry to a result set
@@ -963,10 +1081,13 @@ LIBHARP_API int harp_collocation_result_write(const char *collocation_result_fil
 }
 
 /** Swap the columns of this collocation result inplace.
+ *
+ * This swaps datasets A and B (such that A becomes B and B becomes A).
+ * \param collocation_result Collocation result whose datasets should be swapped.
  */
 LIBHARP_API void harp_collocation_result_swap_datasets(harp_collocation_result *collocation_result)
 {
-    int i;
+    long i;
     harp_dataset *data_a;
 
     for (i = 0; i < collocation_result->num_pairs; i++)
@@ -980,13 +1101,17 @@ LIBHARP_API void harp_collocation_result_swap_datasets(harp_collocation_result *
     collocation_result->dataset_b = data_a;
 }
 
-/** Creates a shallow copy of a collocation result for filtering purposes */
+/**
+ * @}
+ */
+
+/* Creates a shallow copy of a collocation result for filtering purposes */
 int harp_collocation_result_shallow_copy(const harp_collocation_result *collocation_result,
                                          harp_collocation_result **new_result)
 {
     harp_collocation_result *result = NULL;
     harp_collocation_pair **pairs = NULL;
-    int i;
+    long i;
 
     /* allocate memory for the result struct */
     result = (harp_collocation_result *)malloc(sizeof(harp_collocation_result));
@@ -999,11 +1124,11 @@ int harp_collocation_result_shallow_copy(const harp_collocation_result *collocat
     }
 
     /* allocate memory for the pairs array */
-    pairs = malloc((size_t)collocation_result->num_pairs * sizeof(harp_collocation_pair));
+    pairs = malloc(collocation_result->num_pairs * sizeof(harp_collocation_pair *));
     if (!pairs)
     {
         harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not allocate %lu bytes) (%s:%u)",
-                       (size_t)collocation_result->num_pairs * sizeof(harp_collocation_pair), __FILE__, __LINE__);
+                       collocation_result->num_pairs * sizeof(harp_collocation_pair *), __FILE__, __LINE__);
         return -1;
     }
     result->pair = pairs;
@@ -1038,7 +1163,7 @@ void harp_collocation_result_shallow_delete(harp_collocation_result *collocation
     {
         if (collocation_result->pair != NULL)
         {
-            int i;
+            long i;
 
             for (i = 0; i < collocation_result->num_pairs; i++)
             {
@@ -1051,7 +1176,3 @@ void harp_collocation_result_shallow_delete(harp_collocation_result *collocation
         free(collocation_result);
     }
 }
-
-/**
- * @}
- */

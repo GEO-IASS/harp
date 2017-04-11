@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "harp-filter-collocation.h"
@@ -276,58 +287,39 @@ int harp_collocation_mask_import(const char *filename, harp_collocation_filter_t
     return 0;
 }
 
-int harp_filter_index(const harp_variable *index, harp_collocation_mask *collocation_mask,
-                      harp_dimension_mask *dimension_mask)
+/* find value in sorted array of values (returns 1 if found, 0 if not found) */
+static int find_collocation_pair_for_collocation_index(harp_collocation_mask *collocation_mask,
+                                                       long collocation_index, long *index)
 {
-    long i;
-    long j;
-    long count;
+    long lower_index;
+    long upper_index;
 
-    assert(index->num_dimensions == 1);
-    assert(dimension_mask->num_dimensions == 1 && dimension_mask->num_elements == index->num_elements);
+    lower_index = 0;
+    upper_index = collocation_mask->num_index_pairs - 1;
 
-    harp_collocation_mask_sort_by_index(collocation_mask);
-
-    i = 0;
-    j = 0;
-    count = 0;
-    while (i < collocation_mask->num_index_pairs && j < index->num_elements)
+    while (upper_index >= lower_index)
     {
-        if (collocation_mask->index_pair[i]->index < index->data.int32_data[j])
+        /* Determine the index that splits the search space into two (approximately) equal halves. */
+        long pivot_index = lower_index + ((upper_index - lower_index) / 2);
+
+        /* If the pivot equals the key, terminate early. */
+        if (collocation_mask->index_pair[pivot_index]->collocation_index == collocation_index)
         {
-            /* Measurement not present in product, ignore. */
-            i++;
+            *index = pivot_index;
+            return 1;
         }
-        else if (collocation_mask->index_pair[i]->index > index->data.int32_data[j])
+
+        /* If the pivot is smaller than the key, search the upper sub array, otherwise search the lower sub array. */
+        if (collocation_mask->index_pair[pivot_index]->collocation_index < collocation_index)
         {
-            /* Measurement not selected, or duplicate index in product. */
-            dimension_mask->mask[j] = 0;
-            j++;
+            lower_index = pivot_index + 1;
         }
         else
         {
-            if (dimension_mask->mask[j])
-            {
-                count++;
-            }
-
-            while (i < collocation_mask->num_index_pairs
-                   && collocation_mask->index_pair[i]->index == index->data.int32_data[j])
-            {
-                i++;
-            }
-
-            j++;
+            upper_index = pivot_index - 1;
         }
     }
 
-    while (j < index->num_elements)
-    {
-        dimension_mask->mask[j] = 0;
-        j++;
-    }
-
-    dimension_mask->masked_dimension_length = count;
     return 0;
 }
 
@@ -335,52 +327,27 @@ int harp_filter_collocation_index(const harp_variable *collocation_index, harp_c
                                   harp_dimension_mask *dimension_mask)
 {
     long i;
-    long j;
-    long count;
 
     assert(collocation_index->num_dimensions == 1);
     assert(dimension_mask->num_dimensions == 1 && dimension_mask->num_elements == collocation_index->num_elements);
 
     harp_collocation_mask_sort_by_collocation_index(collocation_mask);
 
-    i = 0;
-    j = 0;
-    count = 0;
-    while (i < collocation_mask->num_index_pairs && j < collocation_index->num_elements)
+    for (i = 0; i < collocation_index->num_elements; i++)
     {
-        if (collocation_mask->index_pair[i]->collocation_index < collocation_index->data.int32_data[j])
+        if (dimension_mask->mask[i])
         {
-            /* Measurement not present in product, ignore. */
-            i++;
-        }
-        else if (collocation_mask->index_pair[i]->collocation_index > collocation_index->data.int32_data[j])
-        {
-            /* Measurement not selected, or duplicate index in product. */
-            dimension_mask->mask[j] = 0;
-            j++;
-        }
-        else
-        {
-            if (dimension_mask->mask[j])
+            long index;
+
+            if (!find_collocation_pair_for_collocation_index(collocation_mask, collocation_index->data.int32_data[i],
+                                                             &index))
             {
-                count++;
+                dimension_mask->mask[i] = 0;
+                dimension_mask->masked_dimension_length--;
             }
-
-            j++;
         }
     }
 
-    while (j < collocation_index->num_elements)
-    {
-        if (dimension_mask->mask[j])
-        {
-            count++;
-        }
-
-        j++;
-    }
-
-    dimension_mask->masked_dimension_length = count;
     return 0;
 }
 
@@ -410,7 +377,26 @@ int harp_product_apply_collocation_mask(harp_collocation_mask *collocation_mask,
         harp_dimension_mask *dimension_mask;
         long dimension;
 
-        /* TODO: Check number of dimensions, dimension type, and data type. */
+        if (collocation_index->data_type != harp_type_int32)
+        {
+            harp_set_error(HARP_ERROR_OPERATION, "variable '%s' has wrong data type", collocation_index->name);
+            return -1;
+        }
+        if (collocation_index->num_dimensions != 1)
+        {
+            harp_set_error(HARP_ERROR_OPERATION, "variable '%s' has %d dimensions (expected 1)",
+                           collocation_index->name, collocation_index->num_dimensions);
+            return -1;
+        }
+
+        if (collocation_index->dimension_type[0] != harp_dimension_time)
+        {
+            harp_set_error(HARP_ERROR_OPERATION, "dimension 0 of variable '%s' is of type '%s' (expected '%s')",
+                           collocation_index->name, harp_get_dimension_type_name(collocation_index->dimension_type[0]),
+                           harp_get_dimension_type_name(harp_dimension_time));
+            return -1;
+        }
+
         dimension = product->dimension[harp_dimension_time];
         if (harp_dimension_mask_new(1, &dimension, &dimension_mask) != 0)
         {
@@ -443,8 +429,11 @@ int harp_product_apply_collocation_mask(harp_collocation_mask *collocation_mask,
         {
             return -1;
         }
-        assert(index->data_type == harp_type_int32);
-
+        if (index->data_type != harp_type_int32)
+        {
+            harp_set_error(HARP_ERROR_OPERATION, "variable '%s' has wrong data type", index->name);
+            return -1;
+        }
         if (index->num_dimensions != 1)
         {
             harp_set_error(HARP_ERROR_OPERATION, "variable '%s' has %d dimensions (expected 1)", index->name,
@@ -553,6 +542,101 @@ int harp_product_apply_collocation_mask(harp_collocation_mask *collocation_mask,
         }
         free(dimension_index);
     }
+
+    return 0;
+}
+
+static int get_collocated_product(harp_collocation_result *collocation_result, const char *source_product_b,
+                                  harp_product **product)
+{
+    harp_collocation_mask *mask;
+    harp_product_metadata *product_metadata;
+    harp_product *collocated_product;
+    harp_collocation_pair *pair;
+
+    if (harp_collocation_result_filter_for_source_product_b(collocation_result, source_product_b) != 0)
+    {
+        return -1;
+    }
+    if (collocation_result->num_pairs == 0)
+    {
+        *product = NULL;
+        return 0;
+    }
+    /* use product b reference from first pair to find and import product */
+    pair = collocation_result->pair[0];
+    product_metadata = collocation_result->dataset_b->metadata[pair->product_index_b];
+    if (product_metadata == NULL)
+    {
+        harp_set_error(HARP_ERROR_INVALID_ARGUMENT, "missing product metadata for product %s",
+                       collocation_result->dataset_b->source_product[pair->product_index_b]);
+        return -1;
+    }
+
+    if (harp_collocation_mask_from_result(collocation_result, harp_collocation_right, source_product_b, &mask) != 0)
+    {
+        return -1;
+    }
+
+    if (harp_import(product_metadata->filename, &collocated_product) != 0)
+    {
+        harp_set_error(HARP_ERROR_IMPORT, "could not import file %s", product_metadata->filename);
+        harp_collocation_mask_delete(mask);
+        return -1;
+    }
+
+    if (harp_product_apply_collocation_mask(mask, collocated_product) != 0)
+    {
+        harp_collocation_mask_delete(mask);
+        return -1;
+    }
+
+    harp_collocation_mask_delete(mask);
+    *product = collocated_product;
+
+    return 0;
+}
+
+int harp_collocation_result_get_filtered_product_a(harp_collocation_result *collocation_result,
+                                                   const char *source_product, harp_product **product)
+{
+    harp_collocation_result *result_copy;
+
+    if (harp_collocation_result_shallow_copy(collocation_result, &result_copy) != 0)
+    {
+        return -1;
+    }
+    /* swap datasets, so we can filter for product b */
+    harp_collocation_result_swap_datasets(result_copy);
+
+    if (get_collocated_product(result_copy, source_product, product) != 0)
+    {
+        harp_collocation_result_shallow_delete(result_copy);
+        return -1;
+    }
+
+    harp_collocation_result_shallow_delete(result_copy);
+
+    return 0;
+}
+
+int harp_collocation_result_get_filtered_product_b(harp_collocation_result *collocation_result,
+                                                   const char *source_product, harp_product **product)
+{
+    harp_collocation_result *result_copy;
+
+    if (harp_collocation_result_shallow_copy(collocation_result, &result_copy) != 0)
+    {
+        return -1;
+    }
+
+    if (get_collocated_product(result_copy, source_product, product) != 0)
+    {
+        harp_collocation_result_shallow_delete(result_copy);
+        return -1;
+    }
+
+    harp_collocation_result_shallow_delete(result_copy);
 
     return 0;
 }

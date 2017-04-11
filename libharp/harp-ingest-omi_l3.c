@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "coda.h"
@@ -549,13 +560,13 @@ static void register_datetime_variable(harp_product_definition *product_definiti
     const char *description;
     const char *path;
 
-    description = "Time of the measurement";
+    description = "time of the measurement";
     variable_definition = harp_ingestion_register_variable_full_read(product_definition, "datetime", harp_type_double,
                                                                      1, dimension_type, NULL, description,
                                                                      "seconds since 2000-01-01", NULL, read_datetime);
 
     path = "/HDFEOS/ADDITIONAL/FILE_ATTRIBUTES@TAI93At0zOfGranule";
-    description = "The time of the measurement converted from TAI93 to seconds since 2000-01-01T00:00:00";
+    description = "the time of the measurement converted from TAI93 to seconds since 2000-01-01T00:00:00";
     harp_variable_definition_add_mapping(variable_definition, NULL, NULL, path, description);
 }
 
@@ -571,7 +582,7 @@ static void register_longitude_variable(harp_product_definition *product_definit
                                                                      description, "degree_east", NULL, read_longitude);
     harp_variable_definition_set_valid_range_double(variable_definition, -180.0, 180.0);
 
-    description = "A uniformly increasing sequence on the interval (-180, 180)";
+    description = "a uniformly increasing sequence on the interval (-180, 180)";
     harp_variable_definition_add_mapping(variable_definition, NULL, NULL, path, description);
 }
 
@@ -581,13 +592,13 @@ static void register_latitude_variable(harp_product_definition *product_definiti
     harp_dimension_type dimension_type[1] = { harp_dimension_latitude };
     const char *description;
 
-    description = "Latitude of the grid cell mid-point (WGS84)";
+    description = "latitude of the grid cell mid-point (WGS84)";
     variable_definition = harp_ingestion_register_variable_full_read(product_definition, "latitude", harp_type_double,
                                                                      1, dimension_type, NULL, description,
                                                                      "degree_north", NULL, read_latitude);
     harp_variable_definition_set_valid_range_double(variable_definition, -90.0, 90.0);
 
-    description = "A uniformly increasing sequence on the interval (-90, 90)";
+    description = "a uniformly increasing sequence on the interval (-90, 90)";
     harp_variable_definition_add_mapping(variable_definition, NULL, NULL, path, description);
 }
 
@@ -617,7 +628,7 @@ static void register_omdoao3e_product(void)
     register_latitude_variable(product_definition, path);
 
     /* cloud_fraction */
-    description = "Cloud fraction";
+    description = "cloud fraction";
     variable_definition = harp_ingestion_register_variable_full_read(product_definition, "cloud_fraction",
                                                                      harp_type_double, 3, dimension_type, NULL,
                                                                      description, HARP_UNIT_DIMENSIONLESS, NULL,
@@ -626,7 +637,7 @@ static void register_omdoao3e_product(void)
     harp_variable_definition_add_mapping(variable_definition, NULL, NULL, path, NULL);
 
     /* cloud_fraction_uncertainty */
-    description = "Uncertainty of the cloud fraction";
+    description = "uncertainty of the cloud fraction";
     variable_definition = harp_ingestion_register_variable_full_read(product_definition, "cloud_fraction_uncertainty",
                                                                      harp_type_double, 3, dimension_type, NULL,
                                                                      description, HARP_UNIT_DIMENSIONLESS, NULL,
@@ -635,7 +646,7 @@ static void register_omdoao3e_product(void)
     harp_variable_definition_add_mapping(variable_definition, NULL, NULL, path, NULL);
 
     /* cloud_pressure */
-    description = "Cloud pressure";
+    description = "cloud pressure";
     variable_definition = harp_ingestion_register_variable_full_read(product_definition, "cloud_pressure",
                                                                      harp_type_double, 3, dimension_type, NULL,
                                                                      description, "hPa", NULL, read_cloud_pressure);
@@ -643,7 +654,7 @@ static void register_omdoao3e_product(void)
     harp_variable_definition_add_mapping(variable_definition, NULL, NULL, path, NULL);
 
     /* cloud_pressure_uncertainty */
-    description = "Uncertainty of the cloud pressure";
+    description = "uncertainty of the cloud pressure";
     variable_definition = harp_ingestion_register_variable_full_read(product_definition, "cloud_pressure_uncertainty",
                                                                      harp_type_double, 3, dimension_type, NULL,
                                                                      description, "hPa", NULL,
@@ -660,7 +671,7 @@ static void register_omdoao3e_product(void)
     harp_variable_definition_add_mapping(variable_definition, NULL, NULL, path, NULL);
 
     /* O3_column_number_density_uncertainty */
-    description = "Uncertainty of the O3 column number density";
+    description = "uncertainty of the O3 column number density";
     variable_definition = harp_ingestion_register_variable_full_read(product_definition,
                                                                      "O3_column_number_density_uncertainty",
                                                                      harp_type_double, 3, dimension_type, NULL,
@@ -707,7 +718,7 @@ static void register_omto3d_product(void)
     harp_variable_definition_add_mapping(variable_definition, NULL, NULL, path, NULL);
 
     /* cloud_fraction */
-    description = "Cloud fraction";
+    description = "cloud fraction";
     variable_definition = harp_ingestion_register_variable_full_read(product_definition, "cloud_fraction",
                                                                      harp_type_double, 3, dimension_type, NULL,
                                                                      description, HARP_UNIT_DIMENSIONLESS, NULL,
@@ -761,7 +772,7 @@ static void register_omto3e_product(void)
     harp_variable_definition_add_mapping(variable_definition, NULL, NULL, path, NULL);
 
     /* cloud_fraction */
-    description = "Cloud fraction";
+    description = "cloud fraction";
     variable_definition = harp_ingestion_register_variable_full_read(product_definition, "cloud_fraction",
                                                                      harp_type_double, 3, dimension_type, NULL,
                                                                      description, HARP_UNIT_DIMENSIONLESS, NULL,

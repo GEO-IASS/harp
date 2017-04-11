@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "harp-filter.h"
@@ -27,6 +38,11 @@ typedef struct point_distance_test_args_struct
     harp_spherical_point origin;
     double distance;
 } point_distance_test_args;
+
+typedef struct point_in_area_test_args_struct
+{
+    harp_spherical_point origin;
+} point_in_area_test_args;
 
 static void point_distance_test_args_delete(point_distance_test_args *args)
 {
@@ -114,6 +130,75 @@ int harp_point_distance_filter_predicate_new(const harp_point_distance_filter_ar
     if (harp_predicate_new(test_point_distance, predicate_args, point_distance_test_args_delete_func, &predicate) != 0)
     {
         point_distance_test_args_delete(predicate_args);
+        return -1;
+    }
+
+    *new_predicate = predicate;
+    return 0;
+}
+
+static void point_in_area_test_args_delete(point_in_area_test_args *args)
+{
+    if (args != NULL)
+    {
+        free(args);
+    }
+}
+
+static void point_in_area_test_args_delete_func(void *untyped_args)
+{
+    point_in_area_test_args_delete((point_in_area_test_args *)untyped_args);
+}
+
+static uint8_t test_point_in_area(void *untyped_args, const void *untyped_value)
+{
+    point_in_area_test_args *args = (point_in_area_test_args *)untyped_args;
+
+    return harp_spherical_polygon_contains_point((const harp_spherical_polygon *)untyped_value, &args->origin);
+}
+
+int harp_point_in_area_filter_predicate_new(const harp_point_in_area_filter_args *args, harp_predicate **new_predicate)
+{
+    harp_predicate *predicate;
+    point_in_area_test_args *predicate_args;
+    harp_spherical_point origin;
+
+    /* Convert location information to harp_spherical_point. */
+    origin.lat = args->latitude;
+    origin.lon = args->longitude;
+
+    if (args->latitude_unit != NULL && harp_unit_compare(args->latitude_unit, "degree_north") != 0)
+    {
+        if (harp_convert_unit(args->latitude_unit, "degree_north", 1, &origin.lat) != 0)
+        {
+            return -1;
+        }
+    }
+
+    if (args->longitude_unit != NULL && harp_unit_compare(args->longitude_unit, "degree_east") != 0)
+    {
+        if (harp_convert_unit(args->longitude_unit, "degree_east", 1, &origin.lon) != 0)
+        {
+            return -1;
+        }
+    }
+
+    harp_spherical_point_rad_from_deg(&origin);
+    harp_spherical_point_check(&origin);
+
+    predicate_args = (point_in_area_test_args *)malloc(sizeof(point_distance_test_args));
+    if (predicate_args == NULL)
+    {
+        harp_set_error(HARP_ERROR_OUT_OF_MEMORY, "out of memory (could not allocate %lu bytes) (%s:%u)",
+                       sizeof(point_in_area_test_args), __FILE__, __LINE__);
+        return -1;
+    }
+
+    predicate_args->origin = origin;
+
+    if (harp_predicate_new(test_point_in_area, predicate_args, point_in_area_test_args_delete_func, &predicate) != 0)
+    {
+        point_in_area_test_args_delete(predicate_args);
         return -1;
     }
 

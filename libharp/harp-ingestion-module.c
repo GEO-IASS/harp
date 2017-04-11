@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "harp-ingestion.h"
@@ -30,9 +41,18 @@
 static harp_ingestion_module_register *module_register = NULL;
 
 /* Module initialization functions (forward declarations). */
+int harp_ingestion_module_aeolus_l1b_init(void);
+int harp_ingestion_module_aeolus_l2a_init(void);
+int harp_ingestion_module_aeolus_l2b_init(void);
+int harp_ingestion_module_calipso_l2_init(void);
+int harp_ingestion_module_cci_l2_aerosol_init(void);
+int harp_ingestion_module_cci_l2_ghg_init(void);
 int harp_ingestion_module_cci_l2_o3_lp_init(void);
 int harp_ingestion_module_cci_l2_o3_np_init(void);
 int harp_ingestion_module_cci_l2_o3_tc_init(void);
+int harp_ingestion_module_cci_l3_aerosol_init(void);
+int harp_ingestion_module_cci_l3_cloud_init(void);
+int harp_ingestion_module_cci_l3_ghg_init(void);
 int harp_ingestion_module_cci_l3_o3_lp_init(void);
 int harp_ingestion_module_cci_l3_o3_np_init(void);
 int harp_ingestion_module_cci_l3_o3_tc_init(void);
@@ -42,21 +62,33 @@ int harp_ingestion_module_geoms_mwr_init(void);
 int harp_ingestion_module_geoms_lidar_init(void);
 int harp_ingestion_module_geoms_ftir_init(void);
 int harp_ingestion_module_geoms_uvvis_doas_init(void);
+int harp_ingestion_module_gome_l1_init(void);
 int harp_ingestion_module_gome_l2_init(void);
+int harp_ingestion_module_gome2_l1_init(void);
 int harp_ingestion_module_gome2_l2_init(void);
+int harp_ingestion_module_gomos_l1_init(void);
 int harp_ingestion_module_gomos_l2_init(void);
 int harp_ingestion_module_gosat_fts_l1b_init(void);
 int harp_ingestion_module_gosat_fts_l2_init(void);
 int harp_ingestion_module_hirdls_l2_init(void);
+int harp_ingestion_module_iasi_l1_init(void);
 int harp_ingestion_module_iasi_l2_init(void);
+int harp_ingestion_module_mipas_l1_init(void);
 int harp_ingestion_module_mipas_l2_init(void);
 int harp_ingestion_module_mls_l2_init(void);
+int harp_ingestion_module_npp_suomi_crimss_l2_init(void);
+int harp_ingestion_module_npp_suomi_omps_profiles_l2_init(void);
+int harp_ingestion_module_npp_suomi_omps_totals_l2_init(void);
+int harp_ingestion_module_npp_suomi_viirs_l2_init(void);
 int harp_ingestion_module_omi_l2_init(void);
 int harp_ingestion_module_omi_l3_init(void);
+int harp_ingestion_module_osiris_l2_init(void);
 int harp_ingestion_module_qa4ecv_init(void);
+int harp_ingestion_module_sciamachy_l1_init(void);
 int harp_ingestion_module_sciamachy_l2_init(void);
 int harp_ingestion_module_s5p_l1b_init(void);
 int harp_ingestion_module_s5p_l2_init(void);
+int harp_ingestion_module_smr_l2_init(void);
 int harp_ingestion_module_temis_init(void);
 int harp_ingestion_module_tes_l2_init(void);
 
@@ -64,9 +96,18 @@ int harp_ingestion_module_tes_l2_init(void);
 typedef int (module_init_func_t) (void);
 
 static module_init_func_t *module_init_func[] = {
+    harp_ingestion_module_aeolus_l1b_init,
+    harp_ingestion_module_aeolus_l2a_init,
+    harp_ingestion_module_aeolus_l2b_init,
+    harp_ingestion_module_calipso_l2_init,
+    harp_ingestion_module_cci_l2_aerosol_init,
+    harp_ingestion_module_cci_l2_ghg_init,
     harp_ingestion_module_cci_l2_o3_lp_init,
     harp_ingestion_module_cci_l2_o3_np_init,
     harp_ingestion_module_cci_l2_o3_tc_init,
+    harp_ingestion_module_cci_l3_aerosol_init,
+    harp_ingestion_module_cci_l3_cloud_init,
+    harp_ingestion_module_cci_l3_ghg_init,
     harp_ingestion_module_cci_l3_o3_lp_init,
     harp_ingestion_module_cci_l3_o3_np_init,
     harp_ingestion_module_cci_l3_o3_tc_init,
@@ -76,21 +117,33 @@ static module_init_func_t *module_init_func[] = {
     harp_ingestion_module_geoms_lidar_init,
     harp_ingestion_module_geoms_ftir_init,
     harp_ingestion_module_geoms_uvvis_doas_init,
+    harp_ingestion_module_gome_l1_init,
     harp_ingestion_module_gome_l2_init,
+    harp_ingestion_module_gome2_l1_init,
     harp_ingestion_module_gome2_l2_init,
+    harp_ingestion_module_gomos_l1_init,
     harp_ingestion_module_gomos_l2_init,
     harp_ingestion_module_gosat_fts_l1b_init,
     harp_ingestion_module_gosat_fts_l2_init,
     harp_ingestion_module_hirdls_l2_init,
+    harp_ingestion_module_iasi_l1_init,
     harp_ingestion_module_iasi_l2_init,
+    harp_ingestion_module_mipas_l1_init,
     harp_ingestion_module_mipas_l2_init,
     harp_ingestion_module_mls_l2_init,
+    harp_ingestion_module_npp_suomi_crimss_l2_init,
+    harp_ingestion_module_npp_suomi_omps_profiles_l2_init,
+    harp_ingestion_module_npp_suomi_omps_totals_l2_init,
+    harp_ingestion_module_npp_suomi_viirs_l2_init,
     harp_ingestion_module_omi_l2_init,
     harp_ingestion_module_omi_l3_init,
+    harp_ingestion_module_osiris_l2_init,
     harp_ingestion_module_qa4ecv_init,
+    harp_ingestion_module_sciamachy_l1_init,
     harp_ingestion_module_sciamachy_l2_init,
     harp_ingestion_module_s5p_l1b_init,
     harp_ingestion_module_s5p_l2_init,
+    harp_ingestion_module_smr_l2_init,
     harp_ingestion_module_temis_init,
     harp_ingestion_module_tes_l2_init
 };
@@ -174,7 +227,7 @@ static int variable_definition_new(const char *name, harp_data_type data_type, i
                                    int (*read_all) (void *user_data, harp_array data),
                                    int (*read_range) (void *user_data, long index_offset, long index_length,
                                                       harp_array data),
-                                   int (*get_max_range) (void *user_data),
+                                   long (*get_max_range) (void *user_data),
                                    int (*read_sample) (void *user_data, long index, harp_array data),
                                    harp_variable_definition **new_variable_definition)
 {
@@ -818,7 +871,7 @@ harp_variable_definition *harp_ingestion_register_variable_full_read
 harp_variable_definition *harp_ingestion_register_variable_range_read
     (harp_product_definition *product_definition, const char *name, harp_data_type data_type, int num_dimensions,
      const harp_dimension_type *dimension_type, const long *dimension, const char *description, const char *unit,
-     int (*exclude) (void *user_data), int (*get_max_range) (void *user_data),
+     int (*exclude) (void *user_data), long (*get_max_range) (void *user_data),
      int (*read_range) (void *user_data, long index_offset, long index_length, harp_array data))
 {
     harp_variable_definition *variable_definition;
@@ -968,11 +1021,27 @@ void harp_product_definition_add_mapping(harp_product_definition *product_defini
 {
     if (mapping_description != NULL)
     {
-        product_definition->mapping_description = strdup(mapping_description);
+        if (product_definition->mapping_description != NULL)
+        {
+            char *new_description;
+            long length;
+
+            /* append description */
+            length = strlen(product_definition->mapping_description) + strlen(mapping_description) + 1;
+            new_description = realloc(product_definition->mapping_description, length);
+            assert(new_description != NULL);
+            strcat(new_description, mapping_description);
+            product_definition->mapping_description = new_description;
+        }
+        else
+        {
+            product_definition->mapping_description = strdup(mapping_description);
+        }
         assert(product_definition->mapping_description != NULL);
     }
     if (ingestion_option != NULL)
     {
+        assert(product_definition->ingestion_option == NULL);
         product_definition->ingestion_option = strdup(ingestion_option);
         assert(product_definition->ingestion_option != NULL);
     }
@@ -1189,6 +1258,12 @@ int harp_ingestion_init(void)
         return 0;
     }
 
+    if (coda_init() != 0)
+    {
+        harp_set_error(HARP_ERROR_CODA, NULL);
+        return -1;
+    }
+
     module_register = (harp_ingestion_module_register *)malloc(sizeof(harp_ingestion_module_register));
     if (module_register == NULL)
     {
@@ -1198,12 +1273,6 @@ int harp_ingestion_init(void)
     }
     module_register->num_ingestion_modules = 0;
     module_register->ingestion_module = NULL;
-
-    if (coda_init() != 0)
-    {
-        harp_set_error(HARP_ERROR_CODA, NULL);
-        return -1;
-    }
 
     /* Make sure that udunits gets initialized as well */
     if (!harp_unit_is_valid(""))

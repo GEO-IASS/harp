@@ -1,21 +1,32 @@
 /*
- * Copyright (C) 2015-2016 S[&]T, The Netherlands.
+ * Copyright (C) 2015-2017 S[&]T, The Netherlands.
+ * All rights reserved.
  *
- * This file is part of HARP.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * HARP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- * HARP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU General Public License
- * along with HARP; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 /* *INDENT-OFF* */
@@ -210,14 +221,18 @@ int harp_sized_array_add_int32(harp_sized_array *sized_array, int32_t value)
 %token                  FUNC_COLLOCATE_LEFT
 %token                  FUNC_COLLOCATE_RIGHT
 %token                  FUNC_DERIVE
+%token                  FUNC_DERIVE_SMOOTHED_COLUMN
 %token                  FUNC_EXCLUDE
 %token                  FUNC_FLATTEN
 %token                  FUNC_KEEP
 %token                  FUNC_LONGITUDE_RANGE
 %token                  FUNC_POINT_DISTANCE
+%token                  FUNC_POINT_IN_AREA
 %token                  FUNC_REGRID
+%token                  FUNC_RENAME
 %token                  FUNC_SMOOTH
 %token                  FUNC_VALID
+%token                  FUNC_WRAP
 %token                  NAN
 %token                  INF
 %token                  IN
@@ -250,7 +265,6 @@ input:
     | program     { parsed_program = $1; }
     ;
 
-/* note that we only have to include function names here that don't contain a '-' */
 reserved_identifier:
       NAN { $$ = "nan"; }
     | INF { $$ = "inf"; }
@@ -259,12 +273,24 @@ reserved_identifier:
     | DIMENSION { $$ = harp_get_dimension_type_name($1); }
     | ID_A { $$ = "a"; }
     | ID_B { $$ = "b"; }
+    | FUNC_AREA_MASK_COVERS_AREA { $$ = "area_mask_covers_area"; }
+    | FUNC_AREA_MASK_COVERS_POINT { $$ = "area_mask_covers_point"; }
+    | FUNC_AREA_MASK_INTERSECTS_AREA { $$ = "area_mask_intersects_area"; }
+    | FUNC_COLLOCATE_LEFT { $$ = "collocate_left"; }
+    | FUNC_COLLOCATE_RIGHT { $$ = "collocate_right"; }
     | FUNC_DERIVE { $$ = "derive"; }
+    | FUNC_DERIVE_SMOOTHED_COLUMN { $$ = "derive_smoothed_column"; }
     | FUNC_EXCLUDE { $$ = "exclude"; }
     | FUNC_FLATTEN { $$ = "flatten"; }
     | FUNC_KEEP { $$ = "keep"; }
+    | FUNC_LONGITUDE_RANGE { $$ = "longitude_range"; }
+    | FUNC_POINT_DISTANCE { $$ = "point_distance"; }
+    | FUNC_POINT_IN_AREA { $$ = "point_in_area"; }
     | FUNC_REGRID { $$ = "regrid"; }
+    | FUNC_RENAME { $$ = "rename"; }
+    | FUNC_SMOOTH { $$ = "smooth"; }
     | FUNC_VALID { $$ = "valid"; }
+    | FUNC_WRAP { $$ = "wrap"; }
     ;
 
 identifier:
@@ -432,6 +458,14 @@ operation:
     | FUNC_DERIVE '(' identifier dimensionspec UNIT ')' {
             if (harp_derive_variable_new($3, $4->num_elements, $4->array.int32_data, $5, &$$) != 0) YYERROR;
         }
+    | FUNC_DERIVE_SMOOTHED_COLUMN '(' identifier dimensionspec UNIT ',' identifier UNIT ',' STRING_VALUE ',' ID_A ',' STRING_VALUE ')' {
+            if (harp_derive_smoothed_column_collocated_new($3, $4->num_elements, $4->array.int32_data, $5, $7, $8, $10,
+                                                           'a', $14, &$$) != 0) YYERROR;
+        }
+    | FUNC_DERIVE_SMOOTHED_COLUMN '(' identifier dimensionspec UNIT ',' identifier UNIT ',' STRING_VALUE ',' ID_B ',' STRING_VALUE ')' {
+            if (harp_derive_smoothed_column_collocated_new($3, $4->num_elements, $4->array.int32_data, $5, $7, $8, $10,
+                                                           'b', $14, &$$) != 0) YYERROR;
+        }
     | FUNC_EXCLUDE '(' identifier_array ')' {
             if (harp_exclude_variable_new($3->num_elements, (const char **)$3->array.string_data, &$$) != 0) YYERROR;
         }
@@ -477,6 +511,18 @@ operation:
     | FUNC_POINT_DISTANCE '(' double_value UNIT ',' double_value UNIT ',' double_value UNIT ')' {
             if (harp_point_distance_filter_new($3, $4, $6, $7, $9, $10, &$$) != 0) YYERROR;
         }
+    | FUNC_POINT_IN_AREA '(' double_value ',' double_value ')' {
+            if (harp_point_in_area_filter_new($3, NULL, $5, NULL, &$$) != 0) YYERROR;
+        }
+    | FUNC_POINT_IN_AREA '(' double_value ',' double_value UNIT ')' {
+            if (harp_point_in_area_filter_new($3, NULL, $5, $6, &$$) != 0) YYERROR;
+        }
+    | FUNC_POINT_IN_AREA '(' double_value UNIT ',' double_value ')' {
+            if (harp_point_in_area_filter_new($3, $4, $6, NULL, &$$) != 0) YYERROR;
+        }
+    | FUNC_POINT_IN_AREA '(' double_value UNIT ',' double_value UNIT ')' {
+            if (harp_point_in_area_filter_new($3, $4, $6, $7, &$$) != 0) YYERROR;
+        }
     | FUNC_REGRID '(' DIMENSION ',' identifier UNIT ',' '(' double_array ')' ')' {
             if (harp_regrid_new($3, $5, $6, $9->num_elements, $9->array.double_data, &$$) != 0) YYERROR;
         }
@@ -506,6 +552,9 @@ operation:
     | FUNC_REGRID '(' DIMENSION ',' identifier UNIT ',' STRING_VALUE ',' ID_B ',' STRING_VALUE ')' {
             if (harp_regrid_collocated_new($3, $5, $6, $8, 'b', $12, &$$) != 0) YYERROR;
         }
+    | FUNC_RENAME '(' identifier ',' identifier ')' {
+            if (harp_rename_new($3, $5, &$$) != 0) YYERROR;
+        }
     | FUNC_SMOOTH '(' identifier ',' DIMENSION ',' identifier UNIT ',' STRING_VALUE ',' ID_A ',' STRING_VALUE ')' {
             if (harp_smooth_collocated_new(1, (const char **)&$3, $5, $7, $8, $10, 'a', $14, &$$) != 0) YYERROR;
         }
@@ -524,6 +573,14 @@ operation:
         }
     | FUNC_VALID '(' identifier ')' {
             if (harp_valid_range_filter_new($3, &$$) != 0) YYERROR;
+            free($3);
+        }
+    | FUNC_WRAP '(' identifier ',' double_value ',' double_value ')' {
+            if (harp_wrap_new($3, NULL, $5, $7, &$$) != 0) YYERROR;
+            free($3);
+        }
+    | FUNC_WRAP '(' identifier UNIT ',' double_value ',' double_value ')' {
+            if (harp_wrap_new($3, $4, $6, $8, &$$) != 0) YYERROR;
             free($3);
         }
     ;

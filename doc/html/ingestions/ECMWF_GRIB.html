@@ -8,9 +8,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ECMWF_GRIB &mdash; HARP 0.4b documentation</title>
+  <title>ECMWF_GRIB &mdash; HARP 0.5b documentation</title>
   
 
+  
+  
   
   
 
@@ -32,7 +34,9 @@
   
 
   
-    <link rel="top" title="HARP 0.4b documentation" href="../index.html"/> 
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+    <link rel="top" title="HARP 0.5b documentation" href="../index.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -41,6 +45,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -60,7 +65,7 @@
             
             
               <div class="version">
-                0.4
+                0.5
               </div>
             
           
@@ -74,10 +79,13 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../dataformats.html">Data formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../algorithms.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../operations.html">Operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Ingestion definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../libharp.html">C library</a></li>
@@ -95,8 +103,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">HARP</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">HARP</a>
+        
       </nav>
 
 
@@ -105,21 +115,38 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
-    <li>ECMWF_GRIB</li>
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>ECMWF_GRIB</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -130,7 +157,7 @@
 <div class="section" id="variables">
 <h2>Variables</h2>
 <p>The table below lists the variables that are present in the HARP product that results from an ingestion of <code class="docutils literal"><span class="pre">ECMWF_GRIB</span></code> data.</p>
-<table border="1" class="docutils">
+<table border="1" class="colwidths-given docutils">
 <colgroup>
 <col width="25%" />
 <col width="5%" />
@@ -167,7 +194,7 @@
 </tr>
 <tr class="row-odd"><td><strong>wavelength</strong></td>
 <td>double</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>nm</td>
 <td>wavelength of the aerosol property</td>
 </tr>
@@ -189,239 +216,284 @@
 <td>kg/kg</td>
 <td>specific humidity</td>
 </tr>
-<tr class="row-odd"><td><strong>surface_pressure</strong></td>
+<tr class="row-odd"><td><strong>H2O_column_density</strong></td>
+<td>float</td>
+<td>{<em>latitude</em>, <em>longitude</em>}</td>
+<td>kg/m^2</td>
+<td>total column water vapour</td>
+</tr>
+<tr class="row-even"><td><strong>surface_pressure</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>Pa</td>
 <td>pressure at the surface</td>
 </tr>
-<tr class="row-even"><td><strong>pressure</strong></td>
+<tr class="row-odd"><td><strong>pressure</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>}</td>
 <td>Pa</td>
 <td>pressure</td>
 </tr>
-<tr class="row-odd"><td><strong>pressure_bounds</strong></td>
+<tr class="row-even"><td><strong>pressure_bounds</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>, 2}</td>
 <td>Pa</td>
 <td>pressure_bounds</td>
 </tr>
-<tr class="row-even"><td><strong>CH4_mass_mixing_ratio</strong></td>
+<tr class="row-odd"><td><strong>cloud_fraction</strong></td>
+<td>float</td>
+<td>{<em>latitude</em>, <em>longitude</em>}</td>
+<td>&#160;</td>
+<td>cloud fraction</td>
+</tr>
+<tr class="row-even"><td><strong>surface_temperature</strong></td>
+<td>float</td>
+<td>{<em>latitude</em>, <em>longitude</em>}</td>
+<td>K</td>
+<td>2 metre temperature</td>
+</tr>
+<tr class="row-odd"><td><strong>CH4_mass_mixing_ratio</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>}</td>
 <td>kg/kg</td>
 <td>methane mass mixing ratio</td>
 </tr>
-<tr class="row-odd"><td><strong>surface_PM1_density</strong></td>
+<tr class="row-even"><td><strong>surface_PM1_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m3</td>
 <td>surface density of particulate matter with d &lt; 1 um</td>
 </tr>
-<tr class="row-even"><td><strong>surface_PM2p5_density</strong></td>
+<tr class="row-odd"><td><strong>surface_PM2p5_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m3</td>
 <td>surface density of particulate matter with d &lt; 2.5 um</td>
 </tr>
-<tr class="row-odd"><td><strong>surface_PM10_density</strong></td>
+<tr class="row-even"><td><strong>surface_PM10_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m3</td>
 <td>surface density of particulate matter with d &lt; 10 um</td>
 </tr>
-<tr class="row-even"><td><strong>NO2_mass_mixing_ratio</strong></td>
+<tr class="row-odd"><td><strong>NO2_mass_mixing_ratio</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>}</td>
 <td>kg/kg</td>
 <td>nitrogen dioxide mass mixing ratio</td>
 </tr>
-<tr class="row-odd"><td><strong>SO2_mass_mixing_ratio</strong></td>
+<tr class="row-even"><td><strong>SO2_mass_mixing_ratio</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>}</td>
 <td>kg/kg</td>
 <td>sulphur dioxide mass mixing ratio</td>
 </tr>
-<tr class="row-even"><td><strong>CO_mass_mixing_ratio</strong></td>
+<tr class="row-odd"><td><strong>CO_mass_mixing_ratio</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>}</td>
 <td>kg/kg</td>
 <td>carbon monoxide mass mixing ratio</td>
 </tr>
-<tr class="row-odd"><td><strong>HCHO_mass_mixing_ratio</strong></td>
+<tr class="row-even"><td><strong>HCHO_mass_mixing_ratio</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>}</td>
 <td>kg/kg</td>
 <td>formaldehyde mass mixing ratio</td>
 </tr>
-<tr class="row-even"><td><strong>NO2_column_density</strong></td>
+<tr class="row-odd"><td><strong>NO2_column_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m^2</td>
 <td>total column nitrogen dioxide</td>
 </tr>
-<tr class="row-odd"><td><strong>SO2_column_density</strong></td>
+<tr class="row-even"><td><strong>SO2_column_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m^2</td>
 <td>total column sulphur dioxide</td>
 </tr>
-<tr class="row-even"><td><strong>CO_column_density</strong></td>
+<tr class="row-odd"><td><strong>CO_column_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m^2</td>
 <td>total column carbon monoxide</td>
 </tr>
-<tr class="row-odd"><td><strong>HCHO_column_density</strong></td>
+<tr class="row-even"><td><strong>HCHO_column_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m^2</td>
 <td>total column formaldehyde</td>
 </tr>
-<tr class="row-even"><td><strong>O3_mass_mixing_ratio</strong></td>
+<tr class="row-odd"><td><strong>O3_mass_mixing_ratio</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>}</td>
 <td>kg/kg</td>
 <td>ozone mass mixing ratio</td>
 </tr>
-<tr class="row-odd"><td><strong>O3_column_density</strong></td>
+<tr class="row-even"><td><strong>O3_column_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m^2</td>
 <td>total column ozone</td>
 </tr>
-<tr class="row-even"><td><strong>aerosol_optical_depth</strong></td>
+<tr class="row-odd"><td><strong>aerosol_optical_depth</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>total aerosol optical depth</td>
 </tr>
-<tr class="row-odd"><td><strong>sea_salt_aerosol_optical_depth</strong></td>
+<tr class="row-even"><td><strong>sea_salt_aerosol_optical_depth</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>sea salt aerosol optical depth</td>
 </tr>
-<tr class="row-even"><td><strong>dust_aerosol_optical_depth</strong></td>
+<tr class="row-odd"><td><strong>dust_aerosol_optical_depth</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>dust aerosol optical depth</td>
 </tr>
-<tr class="row-odd"><td><strong>organic_matter_aerosol_optical_depth</strong></td>
+<tr class="row-even"><td><strong>organic_matter_aerosol_optical_depth</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>organic matter aerosol optical depth</td>
 </tr>
-<tr class="row-even"><td><strong>black_carbon_aerosol_optical_depth</strong></td>
+<tr class="row-odd"><td><strong>black_carbon_aerosol_optical_depth</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>black carbon aerosol optical depth</td>
 </tr>
-<tr class="row-odd"><td><strong>sulphate_aerosol_optical_depth</strong></td>
+<tr class="row-even"><td><strong>sulphate_aerosol_optical_depth</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>sulphate aerosol optical depth</td>
 </tr>
-<tr class="row-even"><td><strong>HNO3_mass_mixing_ratio</strong></td>
+<tr class="row-odd"><td><strong>HNO3_mass_mixing_ratio</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>}</td>
 <td>kg/kg</td>
 <td>nitric acid mass mixing ratio</td>
 </tr>
-<tr class="row-odd"><td><strong>C2H3NO5_mass_mixing_ratio</strong></td>
+<tr class="row-even"><td><strong>C2H3NO5_mass_mixing_ratio</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>}</td>
 <td>kg/kg</td>
 <td>peroxyacetyl nitrate (PAN) mass mixing ratio</td>
 </tr>
-<tr class="row-even"><td><strong>C5H8_mass_mixing_ratio</strong></td>
+<tr class="row-odd"><td><strong>C5H8_mass_mixing_ratio</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>}</td>
 <td>kg/kg</td>
 <td>isoprene mass mixing ratio</td>
 </tr>
-<tr class="row-odd"><td><strong>NO_mass_mixing_ratio</strong></td>
+<tr class="row-even"><td><strong>NO_mass_mixing_ratio</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>}</td>
 <td>kg/kg</td>
 <td>nitrogen monoxide mass mixing ratio</td>
 </tr>
-<tr class="row-even"><td><strong>OH_mass_mixing_ratio</strong></td>
+<tr class="row-odd"><td><strong>OH_mass_mixing_ratio</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>}</td>
 <td>kg/kg</td>
 <td>hydroxyl radical mass mixing ratio</td>
 </tr>
-<tr class="row-odd"><td><strong>C2H6_mass_mixing_ratio</strong></td>
+<tr class="row-even"><td><strong>C2H6_mass_mixing_ratio</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>}</td>
 <td>kg/kg</td>
 <td>ethane mass mixing ratio</td>
 </tr>
-<tr class="row-even"><td><strong>C3H8_mass_mixing_ratio</strong></td>
+<tr class="row-odd"><td><strong>C3H8_mass_mixing_ratio</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>, <em>vertical</em>}</td>
 <td>kg/kg</td>
 <td>propane mass mixing ratio</td>
 </tr>
-<tr class="row-odd"><td><strong>CH4_column_density</strong></td>
+<tr class="row-even"><td><strong>CH4_column_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m^2</td>
 <td>total column methane</td>
 </tr>
-<tr class="row-even"><td><strong>HNO3_column_density</strong></td>
+<tr class="row-odd"><td><strong>HNO3_column_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m^2</td>
 <td>total column nitric acid</td>
 </tr>
-<tr class="row-odd"><td><strong>C2H3NO5_column_density</strong></td>
+<tr class="row-even"><td><strong>C2H3NO5_column_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m^2</td>
 <td>total colunn peroxyacetyl nitrate</td>
 </tr>
-<tr class="row-even"><td><strong>C5H8_column_density</strong></td>
+<tr class="row-odd"><td><strong>C5H8_column_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m^2</td>
 <td>total column isoprene</td>
 </tr>
-<tr class="row-odd"><td><strong>NO_column_density</strong></td>
+<tr class="row-even"><td><strong>NO_column_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m^2</td>
 <td>total column nitrogen oxide</td>
 </tr>
-<tr class="row-even"><td><strong>OH_column_density</strong></td>
+<tr class="row-odd"><td><strong>OH_column_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m^2</td>
 <td>total column hydroxyl radical</td>
 </tr>
-<tr class="row-odd"><td><strong>C2H6_column_density</strong></td>
+<tr class="row-even"><td><strong>C2H6_column_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m^2</td>
 <td>total column ethane</td>
 </tr>
-<tr class="row-even"><td><strong>C2H8_column_density</strong></td>
+<tr class="row-odd"><td><strong>C2H8_column_density</strong></td>
 <td>float</td>
 <td>{<em>latitude</em>, <em>longitude</em>}</td>
 <td>kg/m^2</td>
 <td>total column propane</td>
 </tr>
-<tr class="row-odd"><td><strong>index</strong></td>
+<tr class="row-even"><td><strong>index</strong></td>
 <td>int32</td>
 <td>{<em>time</em>}</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 <td>zero-based index of the sample within the source product</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="ingestion-options">
+<h2>Ingestion options</h2>
+<p>The table below lists the available ingestion options for <code class="docutils literal"><span class="pre">ECMWF_GRIB</span></code> products.</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="15%" />
+<col width="25%" />
+<col width="60%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">option name</th>
+<th class="head">legal values</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>ignore_time_for_z</td>
+<td>true</td>
+<td>ignore time for the geopotential parameter</td>
+</tr>
+<tr class="row-odd"><td>ignore_duplicates</td>
+<td>true</td>
+<td>ignore duplicate GRIB messages (only first message occurence will be used)</td>
 </tr>
 </tbody>
 </table>
@@ -449,7 +521,7 @@
 <td><strong>/[]/grib1/yearOfCentury, /[]/grib1/month, /[]/grib1/day, /[]/grib1/hour, /[]/grib1/minute, /[]/grib1/centuryOfReferenceTimeOfData</strong></td>
 </tr>
 <tr class="row-even"><td><em>description</em></td>
-<td>the time of the measurement converted from TAI93 to seconds since 2000-01-01T00:00:00</td>
+<td>time of the measurement converted from TAI93 to seconds since 2000-01-01T00:00:00</td>
 </tr>
 <tr class="row-odd"><td><em>condition</em></td>
 <td>GRIB2</td>
@@ -458,7 +530,7 @@
 <td><strong>/[]/grib2/year, /[]/grib2/month, /[]/grib2/day, /[]/grib2/hour, /[]/grib2/minute, /[]/grib2/second</strong></td>
 </tr>
 <tr class="row-odd"><td><em>description</em></td>
-<td>the time of the measurement converted from TAI93 to seconds since 2000-01-01T00:00:00</td>
+<td>time of the measurement converted from TAI93 to seconds since 2000-01-01T00:00:00</td>
 </tr>
 <tr class="row-even"><td rowspan="6"><strong>longitude</strong></td>
 <td><em>condition</em></td>
@@ -574,7 +646,7 @@
 <tr class="row-odd"><td><em>description</em></td>
 <td>(discipline,category,number) = (0,1,0)</td>
 </tr>
-<tr class="row-even"><td rowspan="7"><strong>surface_pressure</strong></td>
+<tr class="row-even"><td rowspan="7"><strong>H2O_column_density</strong></td>
 <td><em>available</em></td>
 <td>optional</td>
 </tr>
@@ -585,7 +657,7 @@
 <td><strong>/[]/data/values[]</strong></td>
 </tr>
 <tr class="row-odd"><td><em>description</em></td>
-<td>(table,indicator) = (128,152) or (190,152); returned value = exp(lnsp)</td>
+<td>(table,indicator) = (128,137) or (180,137)</td>
 </tr>
 <tr class="row-even"><td><em>condition</em></td>
 <td>GRIB2</td>
@@ -594,11 +666,36 @@
 <td><strong>/[]/data[]/values[]</strong></td>
 </tr>
 <tr class="row-even"><td><em>description</em></td>
-<td>(discipline,category,number) = (0,3,25); returned value = exp(lnsp)</td>
+<td>(discipline,category,number) = (192,128,137)</td>
 </tr>
-<tr class="row-odd"><td rowspan="3"><strong>pressure</strong></td>
+<tr class="row-odd"><td rowspan="7"><strong>surface_pressure</strong></td>
 <td><em>available</em></td>
 <td>optional</td>
+</tr>
+<tr class="row-even"><td><em>condition</em></td>
+<td>GRIB1</td>
+</tr>
+<tr class="row-odd"><td><em>path</em></td>
+<td><strong>/[]/data/values[]</strong></td>
+</tr>
+<tr class="row-even"><td><em>description</em></td>
+<td>(table,indicator) = (128,152) or (190,152); returned value = exp(lnsp)</td>
+</tr>
+<tr class="row-odd"><td><em>condition</em></td>
+<td>GRIB2</td>
+</tr>
+<tr class="row-even"><td><em>path</em></td>
+<td><strong>/[]/data[]/values[]</strong></td>
+</tr>
+<tr class="row-odd"><td><em>description</em></td>
+<td>(discipline,category,number) = (0,3,25); returned value = exp(lnsp)</td>
+</tr>
+<tr class="row-even"><td rowspan="4"><strong>pressure</strong></td>
+<td><em>available</em></td>
+<td>optional</td>
+</tr>
+<tr class="row-odd"><td><em>condition</em></td>
+<td>surface_pressure is available and at least one parameter has vertical coordinate values</td>
 </tr>
 <tr class="row-even"><td><em>path</em></td>
 <td><strong>..../coordinateValues[]</strong></td>
@@ -606,15 +703,53 @@
 <tr class="row-odd"><td><em>description</em></td>
 <td>the coordinateValues contain [a(1), ..., a(N+1), b(1), ..., b(N+1)] coefficients for the N+1 vertical layer boundaries; p(N-i) = (a(i) + a(i+1) + (b(i) + b(i+1))lnsp)/2</td>
 </tr>
-<tr class="row-even"><td rowspan="3"><strong>pressure_bounds</strong></td>
+<tr class="row-even"><td rowspan="4"><strong>pressure_bounds</strong></td>
 <td><em>available</em></td>
 <td>optional</td>
 </tr>
-<tr class="row-odd"><td><em>path</em></td>
+<tr class="row-odd"><td><em>condition</em></td>
+<td>surface_pressure is available and at least one parameter has vertical coordinate values</td>
+</tr>
+<tr class="row-even"><td><em>path</em></td>
 <td><strong>..../coordinateValues[]</strong></td>
 </tr>
-<tr class="row-even"><td><em>description</em></td>
+<tr class="row-odd"><td><em>description</em></td>
 <td>the coordinateValues contain [a(1), ..., a(N+1), b(1), ..., b(N+1)] coefficients for the N+1 vertical layer boundaries; p(N-i,1) = a(i) + b(i)lnsp; p(N-i,2) = a(i+1) + b(i+1)lnsp</td>
+</tr>
+<tr class="row-even"><td rowspan="7"><strong>cloud_fraction</strong></td>
+<td><em>available</em></td>
+<td>optional</td>
+</tr>
+<tr class="row-odd"><td><em>condition</em></td>
+<td>GRIB1</td>
+</tr>
+<tr class="row-even"><td><em>path</em></td>
+<td><strong>/[]/data/values[]</strong></td>
+</tr>
+<tr class="row-odd"><td><em>description</em></td>
+<td>(table,indicator) = (128,164), (160,164), (170,164), (180,164), or (190,164)</td>
+</tr>
+<tr class="row-even"><td><em>condition</em></td>
+<td>GRIB2</td>
+</tr>
+<tr class="row-odd"><td><em>path</em></td>
+<td><strong>/[]/data[]/values[]</strong></td>
+</tr>
+<tr class="row-even"><td><em>description</em></td>
+<td>(discipline,category,number) = (192,128,164)</td>
+</tr>
+<tr class="row-odd"><td rowspan="4"><strong>surface_temperature</strong></td>
+<td><em>available</em></td>
+<td>optional</td>
+</tr>
+<tr class="row-even"><td><em>condition</em></td>
+<td>GRIB1</td>
+</tr>
+<tr class="row-odd"><td><em>path</em></td>
+<td><strong>/[]/data/values[]</strong></td>
+</tr>
+<tr class="row-even"><td><em>description</em></td>
+<td>(table,indicator) = (128,167), (160,167), (180,167), or (190,167)</td>
 </tr>
 <tr class="row-odd"><td rowspan="7"><strong>CH4_mass_mixing_ratio</strong></td>
 <td><em>available</em></td>
@@ -1393,6 +1528,9 @@
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
@@ -1401,7 +1539,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2015-2016 S&amp;T, The Netherlands.
+        &copy; Copyright 2015-2017 S&amp;T, The Netherlands.
 
     </p>
   </div> 
@@ -1422,16 +1560,17 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.4b',
+            VERSION:'0.5b',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  false
+            HAS_SOURCE:  false,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
